@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ja-JP">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with Xingzhi</title>
+    <style>
+        /* --- Google Fonts --- */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&family=Pacifico&family=Cubic+11&display=swap');
+
+        /* --- Global Styles & Variables --- */
+        :root {
+            --font-main: 'Cubic 11', 'Noto Sans JP', sans-serif;
+            --font-ui: 'Noto Sans JP', sans-serif;
+            --font-logo: 'Pacifico', cursive;
+            
+            --bg-color: #fcefee;
+            --chat-bg-color: rgba(255, 255, 255, 0.85);
+            --header-bg-color: rgba(255, 255, 255, 0.95);
+            --input-bg-color: #ffffff;
+            --text-color: #5c5c5c;
+            --text-light-color: #a0a0a0;
+            --accent-color: #ff8fab;
+            --accent-dark-color: #f87197;
+            --border-color: #fde2e8;
+            --delete-color: #ff6b6b;
+
+            /* Bubble Themes */
+            --theme1-ai-bg: #ffffff; --theme1-ai-text: #333333;
+            --theme1-user-bg: #333333; --theme1-user-text: #ffffff;
+            --theme2-ai-bg: #333333; --theme2-ai-text: #ffffff;
+            --theme2-user-bg: #ffffff; --theme2-user-text: #333333;
+            --theme3-ai-bg: #f0f0f0; --theme3-ai-text: #555555;
+            --theme3-user-bg: #87ceeb; --theme3-user-text: #ffffff;
+            --theme4-ai-bg: #f0f0f0; --theme4-ai-text: #555555;
+            --theme4-user-bg: #98d8a8; --theme4-user-text: #ffffff;
+            --theme5-ai-bg: #ffffff; --theme5-ai-text: #444444;
+            --theme5-user-bg: #ffe4f1; --theme5-user-text: #c2185b;
+
+            --ai-bubble-bg: var(--theme1-ai-bg);
+            --ai-bubble-text: var(--theme1-ai-text);
+            --user-bubble-bg: var(--theme1-user-bg);
+            --user-bubble-text: var(--theme1-user-text);
+        }
+
+        body {
+            font-family: var(--font-main);
+            margin: 0; padding: 0;
+            background-color: var(--bg-color);
+            background-image: url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23f7d3e1" fill-opacity="0.4"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
+            color: var(--text-color);
+            overflow: hidden;
+            transition: background-color 0.5s ease;
+        }
+
+        #chat-container {
+            display: flex; flex-direction: column; height: 100vh; max-width: 800px; margin: 0 auto;
+            background-color: var(--chat-bg-color); backdrop-filter: blur(10px); box-shadow: 0 0 30px rgba(255, 143, 171, 0.15);
+            transition: background-color 0.5s ease;
+        }
+
+        #chat-header {
+            display: flex; justify-content: space-between; align-items: center; padding: 10px 20px;
+            background-color: var(--header-bg-color); border-bottom: 1px solid var(--border-color); backdrop-filter: blur(5px); z-index: 10;
+        }
+        #character-name { font-size: 1.2em; font-weight: 500; color: var(--accent-dark-color); padding: 5px; border-radius: 5px; transition: background-color 0.2s; }
+        #character-name:focus { outline: 1px solid var(--accent-color); background-color: rgba(255, 143, 171, 0.1); }
+        #settings-btn { background: none; border: none; cursor: pointer; padding: 5px; }
+        #settings-btn svg { width: 24px; height: 24px; fill: var(--accent-color); transition: transform 0.3s ease, fill 0.3s ease; }
+        #settings-btn:hover svg { transform: rotate(45deg); fill: var(--accent-dark-color); }
+        
+        #messages { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        #messages::-webkit-scrollbar { width: 6px; }
+        #messages::-webkit-scrollbar-track { background: transparent; }
+        #messages::-webkit-scrollbar-thumb { background-color: var(--accent-color); border-radius: 10px; }
+
+        .message { display: flex; align-items: flex-end; gap: 10px; max-width: 80%; cursor: pointer; }
+        .message.user { align-self: flex-end; flex-direction: row-reverse; }
+        .message.ai { align-self: flex-start; }
+        .avatar { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 2px solid var(--border-color); flex-shrink: 0; }
+        .message-content { display: flex; flex-direction: column; }
+        .message.user .message-content { align-items: flex-end; }
+        .message.ai .message-content { align-items: flex-start; }
+        .bubble { padding: 10px 15px; border-radius: 18px; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05); word-wrap: break-word; max-width: 100%; transition: transform 0.2s ease, border 0.2s ease, opacity 0.2s ease; }
+        .message.ai .bubble { background-color: var(--ai-bubble-bg); color: var(--ai-bubble-text); border-bottom-left-radius: 4px; }
+        .message.user .bubble { background-color: var(--user-bubble-bg); color: var(--user-bubble-text); border-bottom-right-radius: 4px; }
+        .bubble p { margin: 0; }
+        .timestamp { font-size: 0.7em; color: var(--text-light-color); margin-top: 5px; padding: 0 5px; }
+        
+        .multi-select-mode .message:not(.selected) .bubble { opacity: 0.6; }
+        .multi-select-mode .message.selected .bubble { transform: scale(1.03); border: 2px solid var(--accent-dark-color); }
+
+        .typing-indicator { align-items: center; gap: 8px; font-size: 0.9em; font-style: italic; color: #aaa; }
+        .typing-indicator .dot { width: 6px; height: 6px; background-color: #ccc; border-radius: 50%; animation: typing 1.4s infinite; }
+        .typing-indicator .dot:nth-child(1) { animation-delay: 0.2s; }
+        .typing-indicator .dot:nth-child(2) { animation-delay: 0.4s; }
+
+        @keyframes typing { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-4px); } }
+
+        #bottom-panel { position: relative; }
+        #input-area { display: flex; padding: 15px 20px; border-top: 1px solid var(--border-color); background-color: var(--header-bg-color); transition: opacity 0.3s ease, visibility 0.3s ease; }
+        #message-input { flex-grow: 1; border: 1px solid var(--border-color); border-radius: 20px; padding: 10px 20px; font-size: 1em; font-family: var(--font-main); margin-right: 10px; resize: none; transition: border-color 0.3s ease, box-shadow 0.3s ease; }
+        #message-input:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 5px var(--accent-color); }
+        #send-btn { background-color: var(--accent-color); border: none; border-radius: 50%; width: 44px; height: 44px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: background-color 0.3s ease, transform 0.2s ease; flex-shrink: 0; }
+        #send-btn:hover { background-color: var(--accent-dark-color); transform: scale(1.1); }
+        #send-btn:disabled { background-color: #f8c3d1; cursor: not-allowed; transform: scale(1); }
+        #send-btn svg { width: 20px; height: 20px; fill: white; }
+
+        #delete-toolbar {
+            position: absolute; bottom: 0; left: 0; width: 100%; box-sizing: border-box;
+            background: var(--header-bg-color); padding: 15px 20px; border-top: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center;
+            opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s;
+        }
+        #delete-toolbar.show { opacity: 1; visibility: visible; }
+        #delete-info { font-family: var(--font-ui); color: var(--text-color); }
+        #delete-actions button { font-family: var(--font-ui); font-size: 0.9em; padding: 8px 16px; border: none; border-radius: 10px; cursor: pointer; transition: background-color 0.2s ease; }
+        #confirm-delete-btn { background-color: var(--delete-color); color: white; margin-right: 10px; }
+        #cancel-delete-btn { background-color: #eee; color: #555; }
+        
+        #settings-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        #settings-modal.show { display: flex; }
+        .settings-content { background: #fff; padding: 25px 35px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 90%; max-width: 600px; max-height: 90vh; display: flex; flex-direction: column; font-family: var(--font-ui); }
+        .settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .settings-header h2 { margin: 0; font-family: var(--font-logo); color: var(--accent-dark-color); font-size: 2em; }
+        .close-btn { background: none; border: none; font-size: 2em; color: #ccc; cursor: pointer; transition: color 0.3s ease, transform 0.3s ease; }
+        .close-btn:hover { color: #999; transform: rotate(90deg); }
+        .settings-body { overflow-y: auto; padding-right: 15px; }
+        .settings-body::-webkit-scrollbar { width: 5px; }
+        .settings-body::-webkit-scrollbar-track { background: #f1f1f1; }
+        .settings-body::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
+        .settings-section { margin-bottom: 25px; }
+        .settings-section h3 { margin: 0 0 15px 0; font-weight: 500; color: var(--accent-color); border-left: 3px solid var(--accent-color); padding-left: 10px; }
+        .form-group { margin-bottom: 15px; display: flex; flex-direction: column; }
+        .form-group label { margin-bottom: 5px; font-size: 0.9em; color: #666; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: var(--font-ui); box-sizing: border-box; transition: border-color 0.3s, box-shadow 0.3s; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 5px var(--accent-color); }
+        .form-group textarea { min-height: 120px; resize: vertical; font-family: var(--font-main); }
+        .model-group { display: flex; align-items: center; gap: 10px; }
+        .model-group button { padding: 10px 15px; background: var(--accent-color); color: white; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.3s ease; white-space: nowrap; }
+        .avatar-upload-group { display: flex; align-items: center; gap: 15px; }
+        .avatar-preview { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 2px dashed var(--border-color); }
+        .file-input-label { background: #f7f7f7; border: 1px solid #ddd; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 0.9em; transition: background-color 0.3s ease; }
+        input[type="file"] { display: none; }
+        .theme-selector { display: flex; gap: 10px; flex-wrap: wrap; }
+        .theme-option { flex-grow: 1; padding: 10px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; text-align: center; transition: all 0.3s ease; }
+        .theme-option.active { border-color: var(--accent-dark-color); font-weight: 500; }
+        .theme-option span { display: block; width: 20px; height: 20px; border-radius: 5px; margin: 5px auto 0 auto; background: var(--user-bubble-bg); }
+        #theme1 { background: #f9f9f9; } #theme1 span { background: var(--theme1-user-bg); }
+        #theme2 { background: #f9f9f9; } #theme2 span { background: var(--theme2-user-bg); }
+        #theme3 { background: #f9f9f9; } #theme3 span { background: var(--theme3-user-bg); }
+        #theme4 { background: #f9f9f9; } #theme4 span { background: var(--theme4-user-bg); }
+        #theme5 { background: #f9f9f9; } #theme5 span { background: var(--theme5-user-bg); }
+        .danger-zone button { width: 100%; padding: 10px; background-color: #fff; color: var(--delete-color); border: 1px solid var(--delete-color); border-radius: 8px; cursor: pointer; transition: background-color 0.2s, color 0.2s; }
+        .danger-zone button:hover { background-color: var(--delete-color); color: white; }
+        .settings-footer { margin-top: 20px; text-align: right; border-top: 1px solid #eee; padding-top: 20px; }
+        #save-settings-btn { padding: 12px 25px; font-size: 1em; font-weight: 500; background: var(--accent-dark-color); color: white; border: none; border-radius: 10px; cursor: pointer; transition: background-color 0.3s ease, transform 0.2s ease; }
+        #save-settings-btn:hover { background-color: #e06387; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+
+    <div id="chat-container">
+        <div id="chat-header">
+            <h1 id="character-name" contenteditable="true"></h1>
+            <button id="settings-btn" title="設定">
+                <svg viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17-.59-1.69-.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+            </button>
+        </div>
+
+        <div id="messages"></div>
+
+        <div id="bottom-panel">
+            <div id="input-area">
+                <textarea id="message-input" placeholder="メッセージを入力..." rows="1"></textarea>
+                <button id="send-btn" title="送信">
+                    <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </button>
+            </div>
+            <div id="delete-toolbar">
+                <span id="delete-info"></span>
+                <div id="delete-actions">
+                    <button id="confirm-delete-btn">削除</button>
+                    <button id="cancel-delete-btn">キャンセル</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="settings-modal">
+        <div class="settings-content">
+            <div class="settings-header">
+                <h2>Settings</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="settings-body">
+                <div class="settings-section">
+                    <h3>API & モデル設定</h3>
+                    <div class="form-group"><label for="api-base-url">API エンドポイント (Base URL)</label><input type="text" id="api-base-url" placeholder="例: https://api.openai.com"></div>
+                    <div class="form-group"><label for="api-key">API キー (API Key)</label><input type="password" id="api-key" placeholder="APIキーをここに入力"></div>
+                    <div class="form-group"><label for="model-select">モデルを選択</label><div class="model-group"><select id="model-select"></select><button id="fetch-models-btn">モデルリストを取得</button></div></div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>デザイン設定</h3>
+                    <div class="form-group"><label>チャットバブルのテーマ</label><div class="theme-selector"><div class="theme-option active" data-theme="1">白/黒<span></span></div><div class="theme-option" data-theme="2">黒/白<span></span></div><div class="theme-option" data-theme="3">空色<span></span></div><div class="theme-option" data-theme="4">若草色<span></span></div><div class="theme-option" data-theme="5">桜ピンク<span></span></div></div></div>
+                    <div class="form-group"><label>チャットの背景</label><label class="file-input-label" for="background-upload">背景画像を選択</label><input type="file" id="background-upload" accept="image/*"></div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>彼のプロフィール設定</h3>
+                    <div class="form-group"><label for="character-name-input">彼の名前</label><input type="text" id="character-name-input" placeholder="ヘッダーに表示される名前"></div>
+                    <div class="form-group"><label>彼のアイコン</label><div class="avatar-upload-group"><img id="ai-avatar-preview" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBkPSJNNTAsMi41QzI0LjgsMi41LDIuNSwyNC44LDIuNSw1MHMxOS4zLDQ3LjUsNDcuNSw0Ny41czQ3LjUtMjIuMyw0Ny41LTQ3LjVMNTAsMi41eiBNMzgsNDQuOGMtMi4xLDAtMy44LTEuNy0zLjgtMy44czEuNy0zLjgsMy44LTMuOHMzLjgsMS43LDMuOCwzLjhTNDAuMSw0NC44LDM4LDQ0Ljh6IE02Miw0NC44Yy0yLjEsMC0zLjgtMS43LTMuOC0zLjghYzAtMi4xLDEuNy0zLjgsMy44LTMuOHMzLjgsMS43LDMuOCwzLjhDNTguMiw0My4xLDY0LjEsNDQuOCw2Miw0NC44eiBNNzcuNSw2Ny41YzAsMC0xMC03LjUtMjcuNS03LjVzLTI3LjUsNy41LTI3LjUsNy41cy0yLjUtMTAgMC0yMHMxMi41LTEyLjUsMjcuNS0xMi41czI3LjUsMi41LDI3LjUsMTIuNVM3Ny41LDY3LjUsNzcuNSw2Ny41eiIgZmlsbD0iI2ZlY2VkNiIvPjwvc3ZnPg==" class="avatar-preview"><label class="file-input-label" for="ai-avatar-upload">画像を選択</label><input type="file" id="ai-avatar-upload" accept="image/*"></div></div>
+                    <div class="form-group"><label for="character-prompt">彼の人格設定 (System Prompt)</label><textarea id="character-prompt" placeholder="彼の人格、話し方、背景などをここに設定します。"></textarea></div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>私のプロフィール設定</h3>
+                     <div class="form-group"><label>私のアイコン</label><div class="avatar-upload-group"><img id="user-avatar-preview" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2EwYTBiMyI+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQgMS43OS00IDQgMS43OSA0IDQgNHptMCAyYy0yLjY3IDAtOCAyLjI0LTggNC41VDIwYzAgLjU1IDMuNTggMS41IDggMS41czgtLjk1IDgtMS41di0xLjVjMC0yLjI2LTUuMzMtNC41LTgtNC41eiIvPjwvc3ZnPg==" class="avatar-preview"><label class="file-input-label" for="user-avatar-upload">画像を選択</label><input type="file" id="user-avatar-upload" accept="image/*"></div></div>
+                    <div class="form-group"><label for="user-prompt">私について</label><textarea id="user-prompt" placeholder="あなたの名前や好きなことなどを教え、会話をよりパーソナルにしましょう。"></textarea></div>
+                </div>
+
+                <div class="settings-section danger-zone">
+                    <h3>チャット履歴の管理</h3>
+                    <div class="form-group"><button id="clear-history-btn">全ての会話履歴を消去</button></div>
+                </div>
+
+            </div>
+            <div class="settings-footer"><button id="save-settings-btn">設定を保存</button></div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- DOM Elements ---
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const chatContainer = document.getElementById('chat-container');
+        const characterNameHeader = document.getElementById('character-name');
+        
+        // Settings Elements
+        const settingsBtn = document.getElementById('settings-btn');
+        const settingsModal = document.getElementById('settings-modal');
+        const closeBtn = document.querySelector('.close-btn');
+        const saveSettingsBtn = document.getElementById('save-settings-btn');
+        const apiBaseUrlInput = document.getElementById('api-base-url');
+        const apiKeyInput = document.getElementById('api-key');
+        const modelSelect = document.getElementById('model-select');
+        const fetchModelsBtn = document.getElementById('fetch-models-btn');
+        const characterNameInput = document.getElementById('character-name-input');
+        const characterPromptInput = document.getElementById('character-prompt');
+        const userPromptInput = document.getElementById('user-prompt');
+        const themeSelector = document.querySelector('.theme-selector');
+        const aiAvatarUpload = document.getElementById('ai-avatar-upload');
+        const aiAvatarPreview = document.getElementById('ai-avatar-preview');
+        const userAvatarUpload = document.getElementById('user-avatar-upload');
+        const userAvatarPreview = document.getElementById('user-avatar-preview');
+        const backgroundUpload = document.getElementById('background-upload');
+        const clearHistoryBtn = document.getElementById('clear-history-btn');
+
+        // Multi-select & Delete Elements
+        const inputArea = document.getElementById('input-area');
+        const deleteToolbar = document.getElementById('delete-toolbar');
+        const deleteInfo = document.getElementById('delete-info');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+        const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+
+        // --- State Management ---
+        let chatHistory = [];
+        let config = {};
+        let isMultiSelectMode = false;
+        let selectedMessageIds = [];
+        let isAiResponding = false;
+        let responseTriggerTimer = null;
+        
+        const MULTI_MESSAGE_PROMPT_INSTRUCTION = `\n\n[超最重要命令]: あなたの応答は、**絶対に**、3〜6個の短いメッセージで構成される**純粋なJSON文字列配列**でなければなりません。例：["メッセージ1", "メッセージ2", "メッセージ3"]。このJSON配列以外に、説明文、\`\`\`json、注釈、空白、改行など、**いかなる余分な文字も絶対に追加してはなりません**。あなたの唯一の出力は、[ で始まり、] で終わる有効なJSON配列です。`;
+
+        // --- Utility Functions ---
+        const getTimestamp = () => new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+        const scrollToBottom = () => { messagesContainer.scrollTop = messagesContainer.scrollHeight; };
+        const autoResizeTextarea = () => { messageInput.style.height = 'auto'; messageInput.style.height = (messageInput.scrollHeight) + 'px'; };
+        
+        // --- Settings Management ---
+        const saveSettings = () => {
+            config = {
+                apiBaseUrl: apiBaseUrlInput.value.trim(), apiKey: apiKeyInput.value.trim(), model: modelSelect.value,
+                characterName: characterNameInput.value.trim(), characterPrompt: characterPromptInput.value,
+                userPrompt: userPromptInput.value, theme: document.querySelector('.theme-option.active').dataset.theme,
+                aiAvatar: aiAvatarPreview.src, userAvatar: userAvatarPreview.src, chatBackground: chatContainer.style.backgroundImage
+            };
+            localStorage.setItem('aiBoyfriendConfig', JSON.stringify(config));
+            localStorage.setItem('aiBoyfriendChatHistory', JSON.stringify(chatHistory));
+            applySettings(config); alert('設定が保存されました！'); settingsModal.classList.remove('show');
+        };
+
+        const loadSettings = () => {
+            const savedConfig = localStorage.getItem('aiBoyfriendConfig');
+            if (savedConfig) {
+                config = JSON.parse(savedConfig);
+                apiBaseUrlInput.value = config.apiBaseUrl || ''; apiKeyInput.value = config.apiKey || '';
+                if(config.model) {
+                    if(![...modelSelect.options].some(o => o.value === config.model)) {
+                        const option = new Option(config.model, config.model, true, true); modelSelect.add(option);
+                    }
+                    modelSelect.value = config.model;
+                }
+                characterNameInput.value = config.characterName || '他';
+                characterPromptInput.value = config.characterPrompt || MULTI_MESSAGE_PROMPT_INSTRUCTION;
+                userPromptInput.value = config.userPrompt || '';
+                aiAvatarPreview.src = config.aiAvatar || aiAvatarPreview.src;
+                userAvatarPreview.src = config.userAvatar || userAvatarPreview.src;
+            } else {
+                config = {
+                    characterName: '他', theme: '1', aiAvatar: aiAvatarPreview.src, userAvatar: userAvatarPreview.src,
+                };
+                characterNameInput.value = config.characterName;
+                characterPromptInput.value = MULTI_MESSAGE_PROMPT_INSTRUCTION;
+                userPromptInput.value = '';
+            }
+            applySettings(config);
+        };
+        
+        const applyTheme = (theme) => {
+            const root = document.documentElement;
+            const themes = {
+                '1': ['--theme1-ai-bg', '--theme1-ai-text', '--theme1-user-bg', '--theme1-user-text'], '2': ['--theme2-ai-bg', '--theme2-ai-text', '--theme2-user-bg', '--theme2-user-text'],
+                '3': ['--theme3-ai-bg', '--theme3-ai-text', '--theme3-user-bg', '--theme3-user-text'], '4': ['--theme4-ai-bg', '--theme4-ai-text', '--theme4-user-bg', '--theme4-user-text'],
+                '5': ['--theme5-ai-bg', '--theme5-ai-text', '--theme5-user-bg', '--theme5-user-text'],
+            };
+            const [aiBg, aiText, userBg, userText] = themes[theme];
+            root.style.setProperty('--ai-bubble-bg', `var(${aiBg})`); root.style.setProperty('--ai-bubble-text', `var(${aiText})`);
+            root.style.setProperty('--user-bubble-bg', `var(${userBg})`); root.style.setProperty('--user-bubble-text', `var(${userText})`);
+            document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
+            document.querySelector(`.theme-option[data-theme="${theme}"]`).classList.add('active');
+        };
+
+        const applySettings = (settings) => {
+            characterNameHeader.textContent = settings.characterName || '他';
+            applyTheme(settings.theme || '1');
+            if (settings.chatBackground) { chatContainer.style.backgroundImage = settings.chatBackground; chatContainer.style.backgroundSize = 'cover'; chatContainer.style.backgroundPosition = 'center'; }
+        };
+
+        const handleFileUpload = (file, previewElement, callback) => { if (file) { const reader = new FileReader(); reader.onload = (e) => { const result = e.target.result; previewElement.src = result; if (callback) callback(result); }; reader.readAsDataURL(file); } };
+        const loadChatHistory = () => { const savedHistory = localStorage.getItem('aiBoyfriendChatHistory'); if (savedHistory) { chatHistory = JSON.parse(savedHistory); renderAllMessages(); } };
+        const renderAllMessages = () => { messagesContainer.innerHTML = ''; chatHistory.forEach(msg => addMessageToUI(msg, false)); scrollToBottom(); };
+        const clearChatHistory = () => { if (confirm('本当にすべての会話履歴を消去しますか？この操作は取り消せません。')) { chatHistory = []; localStorage.setItem('aiBoyfriendChatHistory', JSON.stringify(chatHistory)); renderAllMessages(); alert('会話履歴が消去されました。'); settingsModal.classList.remove('show'); } };
+
+        // --- Chat & Message UI Logic ---
+        const addMessageToUI = (msg, isNew = false) => {
+            const { sender, text, id, isLoading } = msg;
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', sender); messageElement.dataset.id = id;
+
+            const avatar = document.createElement('img'); avatar.classList.add('avatar'); avatar.src = sender === 'user' ? config.userAvatar : config.aiAvatar;
+            const contentWrapper = document.createElement('div'); contentWrapper.classList.add('message-content');
+            const bubble = document.createElement('div'); bubble.classList.add('bubble');
+
+            if (isLoading) { messageElement.id = 'typing-indicator'; bubble.classList.add('typing-indicator'); bubble.innerHTML = `彼がメッセージを書いています... <div class="dot"></div><div class="dot"></div>`; } 
+            else { bubble.innerHTML = `<p>${text.replace(/\n/g, '<br>')}</p>`; }
+
+            const timestamp = document.createElement('div'); timestamp.classList.add('timestamp'); timestamp.textContent = getTimestamp();
+            contentWrapper.appendChild(bubble); contentWrapper.appendChild(timestamp);
+            messageElement.appendChild(avatar); messageElement.appendChild(contentWrapper);
+            
+            let pressTimer;
+            const startPress = (e) => { if ((e.button !== 0 && e.type !== 'touchstart') || isAiResponding) return; pressTimer = setTimeout(() => { if (!isMultiSelectMode) { toggleMultiSelectMode(true); } toggleMessageSelection(messageElement); }, 750); };
+            const cancelPress = () => clearTimeout(pressTimer);
+            const clickEvent = (e) => { if (isMultiSelectMode) { e.preventDefault(); toggleMessageSelection(messageElement); }};
+            messageElement.addEventListener('mousedown', startPress); messageElement.addEventListener('mouseup', cancelPress); messageElement.addEventListener('mouseleave', cancelPress);
+            messageElement.addEventListener('touchstart', startPress); messageElement.addEventListener('touchend', cancelPress); messageElement.addEventListener('touchmove', cancelPress);
+            messageElement.addEventListener('click', clickEvent);
+
+            messagesContainer.appendChild(messageElement);
+            if (isNew) scrollToBottom();
+        };
+        
+        // --- Core Logic: Sending and Receiving Messages ---
+        
+        const sendMessage = () => {
+            const userMessageText = messageInput.value.trim();
+            if (!userMessageText || isAiResponding) return;
+            if (!config.apiBaseUrl || !config.apiKey || !config.model) { alert('先に設定でAPI情報（エンドポイント、キー、モデル）を正しく入力してくださいね。'); return; }
+
+            const userMessage = { role: 'user', content: userMessageText, sender: 'user', text: userMessageText, id: Date.now() };
+            chatHistory.push(userMessage); addMessageToUI(userMessage, true);
+            messageInput.value = ''; autoResizeTextarea();
+            localStorage.setItem('aiBoyfriendChatHistory', JSON.stringify(chatHistory));
+
+            if (responseTriggerTimer) clearTimeout(responseTriggerTimer);
+            responseTriggerTimer = setTimeout(triggerAiResponse, 15000); // Wait for 15 seconds of inactivity
+        };
+        
+        const triggerAiResponse = async () => {
+            if (isAiResponding) return;
+            isAiResponding = true; sendBtn.disabled = true;
+            
+            addMessageToUI({ sender: 'ai', isLoading: true }, true);
+
+            const fullCharacterPrompt = `${config.characterPrompt}\n\n[追加指示]：あなたは以下の情報を知った上で会話してください。現在の日時は ${new Date().toLocaleString('ja-JP')} です。私（ユーザー）に関する設定は次の通りです：${config.userPrompt}`;
+            const recentHistory = chatHistory.slice(-60).map(msg => ({ role: msg.role || msg.sender, content: msg.text }));
+            const messagesPayload = [{ role: 'system', content: fullCharacterPrompt }, ...recentHistory];
+
+            try {
+                const response = await fetch(`${config.apiBaseUrl}/v1/chat/completions`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.apiKey}` },
+                    body: JSON.stringify({ model: config.model, messages: messagesPayload, stream: false })
+                });
+                
+                document.getElementById('typing-indicator')?.remove();
+
+                if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.error.message || `API Error: ${response.status}`); }
+
+                const data = await response.json();
+                const aiRawText = data.choices[0].message.content;
+                const messageArray = parseMultiMessageResponse(aiRawText);
+                
+                const sendMessagesSequentially = (messages, index = 0) => {
+                    if (index >= messages.length) { isAiResponding = false; sendBtn.disabled = false; return; }
+                    const text = messages[index];
+                    const aiMessage = { role: 'assistant', content: text, sender: 'ai', text: text, id: Date.now() + index };
+                    addMessageToUI(aiMessage, true); chatHistory.push(aiMessage);
+                    localStorage.setItem('aiBoyfriendChatHistory', JSON.stringify(chatHistory));
+
+                    const nextDelay = Math.random() * (1800 - 700) + 700;
+                    setTimeout(() => sendMessagesSequentially(messages, index + 1), nextDelay);
+                };
+                sendMessagesSequentially(messageArray);
+
+            } catch (error) {
+                console.error('API Error:', error);
+                document.getElementById('typing-indicator')?.remove();
+                addMessageToUI({ sender: 'ai', text: `ごめん、ちょっと調子が悪いみたい…: ${error.message}`, id: Date.now() }, true);
+                isAiResponding = false; sendBtn.disabled = false;
+            }
+        };
+        
+        const parseMultiMessageResponse = (rawText) => {
+            try {
+                const match = rawText.match(/\[.*\]/s);
+                if (match && match[0]) { return JSON.parse(match[0]); }
+                return [rawText];
+            } catch (e) {
+                console.warn("Could not parse AI response as JSON array. Treating as single message.", rawText, e);
+                return [rawText];
+            }
+        };
+        
+        // --- Multi-Select & Deletion Logic ---
+        const toggleMultiSelectMode = (enable) => {
+            isMultiSelectMode = enable;
+            messagesContainer.classList.toggle('multi-select-mode', enable);
+            deleteToolbar.classList.toggle('show', enable);
+            inputArea.style.opacity = enable ? '0' : '1';
+            inputArea.style.visibility = enable ? 'hidden' : 'visible';
+            if (!enable) {
+                selectedMessageIds = [];
+                document.querySelectorAll('.message.selected').forEach(el => el.classList.remove('selected'));
+            } else {
+                deleteInfo.textContent = 'メッセージを長押しして選択';
+            }
+        };
+        const toggleMessageSelection = (messageElement) => {
+            const id = Number(messageElement.dataset.id); messageElement.classList.toggle('selected');
+            if (selectedMessageIds.includes(id)) { selectedMessageIds = selectedMessageIds.filter(sid => sid !== id); } else { selectedMessageIds.push(id); }
+            deleteInfo.textContent = `${selectedMessageIds.length} 件選択中`;
+            if (selectedMessageIds.length === 0) { deleteInfo.textContent = 'メッセージを長押しして選択'; }
+        };
+        const deleteSelectedMessages = () => { if (selectedMessageIds.length === 0) return; chatHistory = chatHistory.filter(msg => !selectedMessageIds.includes(msg.id)); localStorage.setItem('aiBoyfriendChatHistory', JSON.stringify(chatHistory)); renderAllMessages(); toggleMultiSelectMode(false); };
+
+        // --- API Model Fetching ---
+        const fetchModels = async () => {
+            const baseUrl = apiBaseUrlInput.value.trim(); const apiKey = apiKeyInput.value.trim();
+            if (!baseUrl || !apiKey) { alert('APIエンドポイントとAPIキーを入力してください'); return; }
+            fetchModelsBtn.textContent = '取得中...'; fetchModelsBtn.disabled = true;
+            try {
+                const response = await fetch(`${baseUrl}/v1/models`, { headers: { 'Authorization': `Bearer ${apiKey}` } });
+                if (!response.ok) { throw new Error(`モデルリストの取得に失敗しました, Status: ${response.status}`); }
+                const data = await response.json(); modelSelect.innerHTML = ''; 
+                const models = data.data || data;
+                if (Array.isArray(models)) {
+                    models.forEach(model => { if (model.id) { const option = new Option(model.id, model.id); modelSelect.add(option); } });
+                    if (config.model && [...modelSelect.options].some(o => o.value === config.model)) { modelSelect.value = config.model; }
+                } else { throw new Error('APIからのモデルリストのフォーマットが正しくありません'); }
+            } catch (error) { console.error(error); alert(`モデルの取得に失敗: ${error.message}`);
+            } finally { fetchModelsBtn.textContent = 'モデルリストを取得'; fetchModelsBtn.disabled = false; }
+        };
+
+        // --- Event Listeners ---
+        settingsBtn.addEventListener('click', () => settingsModal.classList.add('show'));
+        closeBtn.addEventListener('click', () => settingsModal.classList.remove('show'));
+        saveSettingsBtn.addEventListener('click', saveSettings);
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+        messageInput.addEventListener('input', autoResizeTextarea);
+        fetchModelsBtn.addEventListener('click', fetchModels);
+        themeSelector.addEventListener('click', (e) => { const t = e.target.closest('.theme-option'); if (t) applyTheme(t.dataset.theme); });
+        aiAvatarUpload.addEventListener('change', (e) => handleFileUpload(e.target.files[0], aiAvatarPreview, (d) => { config.aiAvatar = d; }));
+        userAvatarUpload.addEventListener('change', (e) => handleFileUpload(e.target.files[0], userAvatarPreview, (d) => { config.userAvatar = d; }));
+        backgroundUpload.addEventListener('change', (e) => handleFileUpload(e.target.files[0], new Image(), (d) => { const bg = `url(${d})`; chatContainer.style.backgroundImage = bg; config.chatBackground = bg; }));
+        clearHistoryBtn.addEventListener('click', clearChatHistory);
+        confirmDeleteBtn.addEventListener('click', deleteSelectedMessages);
+        cancelDeleteBtn.addEventListener('click', () => toggleMultiSelectMode(false));
+        window.addEventListener('click', (e) => { if (e.target === settingsModal) settingsModal.classList.remove('show'); });
+        characterNameHeader.addEventListener('blur', () => { // Save edited header name
+            const newName = characterNameHeader.textContent.trim();
+            if (newName && newName !== config.characterName) {
+                config.characterName = newName;
+                characterNameInput.value = newName; // Sync with settings input
+            } else {
+                characterNameHeader.textContent = config.characterName; // Revert if empty
+            }
+        });
+
+
+        // --- Initialization ---
+        loadSettings(); loadChatHistory(); autoResizeTextarea();
+    });
+    </script>
+</body>
+</html>
