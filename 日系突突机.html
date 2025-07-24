@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>日系突突机</title>
+    <title>Chat with Xingzhi</title>
     <style>
         /* --- Google Fonts --- */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&family=Pacifico&family=Cubic+11&display=swap');
@@ -1157,7 +1157,7 @@ ${memberProfiles}
                         case 'voice': addMessage({ sender: senderId, text: msgObj.content, type: 'voice', voiceDuration: `0:${Math.max(1, Math.round((msgObj.content||'').length / 5)).toString().padStart(2, '0')}`, llmContent }); break;
                         case 'text-image': addMessage({ sender: senderId, text: msgObj.content, type: 'text-image', llmContent }); break;
                         case 'sticker': if (character?.aiStickers?.length > 0) addMessage({ sender: senderId, type: 'sticker', stickerUrl: character.aiStickers[Math.floor(Math.random() * character.aiStickers.length)], llmContent }); break;
-                        case 'transfer': addMessage({ sender: senderId, type: 'transfer', transferAmount: msgObj.amount, transferMemo: msgObj.memo, transferCoverUrl: `https://source.unsplash.com/400x220/?gift,love`, transferStatus: 'pending', llmContent }); break;
+                        case 'transfer': addMessage({ sender: senderId, type: 'transfer', transferAmount: msgObj.amount, transferMemo: msgObj.memo, transferCoverUrl: `https://files.catbox.moe/qwu221.jpg`, transferStatus: 'pending', llmContent }); break;
                         case 'video-call-request': if(currentChat.type === 'direct') handleIncomingVideoCall(msgObj.content); break;
                         case 'post_moment': if(character) { addMomentByAI(character.id, { content: msgObj.content, imageUrl: `https://source.unsplash.com/500x500/?${encodeURIComponent(msgObj.image_query || 'scenery')}` }); addMessage({sender: 'system', text: `${character.config.characterName}がモーメンツを投稿しました`}); } break;
                         case 'vote': handleAiVote(msgObj); break;
