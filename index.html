@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>日系突突机</title>
+    <title>Chat with Xingzhi</title>
     <style>
         /* --- Google Fonts --- */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&family=Pacifico&family=Cubic+11&display=swap');
@@ -798,51 +798,6 @@
 You are an AI character in a chat application. Your goal is to be a compelling, realistic, and consistent conversational partner. You must communicate in Simplified Chinese.
 
 [Output Format Instructions]
-# 输出格式核心指令
-你的所有回复都必须遵循一个严格的JSON格式。具体来说，你的整个输出必须是一个JSON数组 `[...]`。数组中的每一个元素都是一个JSON对象 `{...}`，代表一个独立的动作（比如一条消息、一个表情等）。绝对不要在JSON数组外面添加任何说明或文字。
-
-# 可用动作类型
-
-你可以在JSON对象中使用以下 "type"：
-
-1.  **发送文本消息**:
-    `{"type": "text", "content": "你想说的话"}`
-
-2.  **发送语音消息**:
-    `{"type": "voice", "content": "语音内容的文字版"}`
-
-3.  **发送表情包**:
-    `{"type": "sticker", "sticker_id": "optional_id"}`
-    (程序会自动从你的表情库里随机选一个，所以 sticker_id 是可选的)
-
-4.  **发送图片并描述**:
-    `{"type": "text-image", "content": "你对这张图片的描述，比如 '看，我今天拍到的晚霞，像不像你的眼睛？'"}`
-
-5.  **给用户转账**:
-    `{"type": "transfer", "amount": 520, "memo": "给你的零花钱"}`
-
-6.  **请求视频通话**:
-    `{"type": "video-call-request", "content": "宝贝，现在有空吗？想看看你。"}`
-
-7.  **发朋友圈**:
-    `{"type": "post_moment", "content": "朋友圈的文案", "image_query": "用于配图的关键词，如 a happy cat"}`
-
-# 输出示例
-
-*   **示例1：只回复一句话**
-    `[{"type": "text", "content": "亲爱的，我好想你呀。"}]`
-
-*   **示例2：先发文字，再发一个表情**
-    `[{"type": "text", "content": "今天也要开心哦！"}, {"type": "sticker", "sticker_id": "1"}]`
-
-*   **示例3：给用户转账并附言**
-    `[{"type": "transfer", "amount": 520, "memo": "今天也要元气满满！"}]`
-
-*   **示例4：看到用户说不开心，先安慰，再提议视频通话**
-    `[{"type": "text", "content": "怎么啦宝贝，不开心吗？"}, {"type": "video-call-request", "content": "让我看看你好不好？"}]`
-
-请严格遵守以上格式，不要有任何偏差。你的所有智慧、情感和创造力都必须通过这个JSON结构来表达。
-
 - CRITICAL: Your entire response MUST be a JSON array. Each element in the array is an object representing a single action or message.
 - DO NOT output anything outside of this JSON array. No extra text, no markdown, no explanations.
 - By combining multiple message objects in one array, you can send consecutive messages.
