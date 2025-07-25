@@ -1,0 +1,2237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Chat with Xingzhi</title>
+    <style>
+        /* --- Google Fonts --- */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&family=Pacifico&family=Cubic+11&display=swap');
+
+        /* --- Global Styles & Variables --- */
+        :root {
+            --font-main: 'Cubic 11', 'Noto Sans JP', sans-serif;
+            --font-ui: 'Cubic 11', 'Noto Sans JP', sans-serif; /* UIフォントも統一 */
+            --font-logo: 'Pacifico', cursive;
+            
+            --bg-color: #fcefee;
+            --chat-bg-color: rgba(255, 255, 255, 0.85);
+            --header-bg-color: rgba(255, 255, 255, 0.95);
+            --input-bg-color: #ffffff;
+            --text-color: #5c5c5c;
+            --text-light-color: #a0a0a0;
+            --accent-color: #ff8fab;
+            --accent-dark-color: #f87197;
+            --border-color: #fde2e8;
+            --delete-color: #ff6b6b;
+            --success-color: #4CAF50;
+            --notification-bg: rgba(255, 143, 171, 0.9);
+
+            /* Bubble Themes */
+            --theme1-ai-bg: #ffffff; --theme1-ai-text: #333333;
+            --theme1-user-bg: #333333; --theme1-user-text: #ffffff;
+            --theme2-ai-bg: #333333; --theme2-ai-text: #ffffff;
+            --theme2-user-bg: #ffffff; --theme2-user-text: #333333;
+            --theme3-ai-bg: #f0f0f0; --theme3-ai-text: #555555;
+            --theme3-user-bg: #87ceeb; --theme3-user-text: #ffffff;
+            --theme4-ai-bg: #f0f0f0; --theme4-ai-text: #555555;
+            --theme4-user-bg: #98d8a8; --theme4-user-text: #ffffff;
+            --theme5-ai-bg: #ffffff; --theme5-ai-text: #444444;
+            --theme5-user-bg: #ffe4f1; --theme5-user-text: #c2185b;
+
+            --ai-bubble-bg: var(--theme1-ai-bg);
+            --ai-bubble-text: var(--theme1-ai-text);
+            --user-bubble-bg: var(--theme1-user-bg);
+            --user-bubble-text: var(--theme1-user-text);
+        }
+
+        /* --- Base & Layout --- */
+        html, body { height: 100%; overflow: hidden; }
+        body {
+            font-family: var(--font-main);
+            margin: 0; padding: 0;
+            background-color: var(--bg-color);
+            background-image: url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23f7d3e1" fill-opacity="0.4"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
+            color: var(--text-color);
+            transition: background-color 0.5s ease;
+        }
+
+        #chat-container {
+            display: flex; flex-direction: column; height: 100%; max-width: 800px; margin: 0 auto;
+            background-color: var(--chat-bg-color); backdrop-filter: blur(10px); box-shadow: 0 0 30px rgba(255, 143, 171, 0.15);
+            transition: background-color 0.5s ease;
+            position: relative; /* For notification */
+        }
+        
+        #top-notification {
+            position: absolute; top: -60px; left: 5%; width: 90%;
+            background-color: var(--notification-bg);
+            color: white; text-align: center;
+            padding: 10px; border-radius: 0 0 12px 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            font-family: var(--font-ui); font-size: 0.9em;
+            z-index: 100; transition: top 0.5s ease-in-out;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        #top-notification.show { top: 0; }
+        #top-notification img { width: 24px; height: 24px; border-radius: 50%; }
+
+        #chat-header {
+            display: flex; justify-content: space-between; align-items: center; padding: 10px 15px;
+            background-color: var(--header-bg-color); border-bottom: 1px solid var(--border-color); backdrop-filter: blur(5px); z-index: 10;
+            flex-shrink: 0;
+        }
+        #chat-manager-btn { background: none; border: none; cursor: pointer; padding: 5px; }
+        #chat-manager-btn svg { width: 26px; height: 26px; fill: var(--accent-color); transition: transform 0.3s ease, fill 0.3s ease; }
+        #chat-manager-btn:hover svg { fill: var(--accent-dark-color); transform: scale(1.1); }
+        
+        #header-avatar {
+            width: 40px; height: 40px; border-radius: 8px; object-fit: cover;
+            border: 2px solid var(--border-color); cursor: pointer; transition: transform 0.2s ease;
+        }
+        #header-avatar:hover { transform: scale(1.1); }
+        #chat-name-header { flex-grow: 1; text-align: center; font-size: 1.2em; font-weight: 500; color: var(--accent-dark-color); padding: 5px; border-radius: 5px; transition: background-color 0.2s; }
+        #chat-name-header:focus { outline: 1px solid var(--accent-color); background-color: rgba(255, 143, 171, 0.1); }
+        #settings-btn { background: none; border: none; cursor: pointer; padding: 5px; }
+        #settings-btn svg { width: 24px; height: 24px; fill: var(--accent-color); transition: transform 0.3s ease, fill 0.3s ease; }
+        #settings-btn:hover svg { transform: rotate(45deg); fill: var(--accent-dark-color); }
+        
+        #messages { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 5px; }
+        #messages::-webkit-scrollbar { width: 6px; }
+        #messages::-webkit-scrollbar-track { background: transparent; }
+        #messages::-webkit-scrollbar-thumb { background-color: var(--accent-color); border-radius: 10px; }
+        
+        #load-more-btn {
+            align-self: center;
+            background-color: #f0f0f0;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            color: #888;
+            font-family: var(--font-ui);
+            margin-bottom: 15px;
+            transition: background-color 0.2s;
+        }
+        #load-more-btn:hover { background-color: #e0e0e0; }
+
+
+        /* --- Message Bubbles --- */
+        .message { display: flex; align-items: flex-end; gap: 10px; max-width: 80%; cursor: pointer; margin-bottom: 10px; }
+        .message.user { align-self: flex-end; flex-direction: row-reverse; }
+        .message.ai { align-self: flex-start; }
+        .message .sender-name { font-size: 0.75em; color: #999; margin-bottom: 4px; padding: 0 5px; display: none; }
+        .message.group-chat.ai .sender-name { display: block; }
+        .message.system { align-self: center; background: #e0e0e0; color: #757575; font-size: 0.8em; padding: 4px 10px; border-radius: 10px; max-width: none; cursor: default; }
+        .message.system .avatar, .message.system .timestamp { display: none; }
+        .avatar { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 2px solid var(--border-color); flex-shrink: 0; }
+        .message-content { display: flex; flex-direction: column; }
+        .message.user .message-content { align-items: flex-end; }
+        .message.ai .message-content { align-items: flex-start; }
+        .bubble { padding: 10px 15px; border-radius: 18px; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05); word-wrap: break-word; max-width: 100%; transition: transform 0.2s ease, border 0.2s ease, opacity 0.2s ease; }
+        .message.ai .bubble { background-color: var(--ai-bubble-bg); color: var(--ai-bubble-text); border-bottom-left-radius: 4px; }
+        .message.user .bubble { background-color: var(--user-bubble-bg); color: var(--user-bubble-text); border-bottom-right-radius: 4px; }
+        .bubble p { margin: 0; }
+        .timestamp { font-size: 0.7em; color: var(--text-light-color); margin-top: 5px; padding: 0 5px; }
+        
+        /* Multi-select Mode */
+        .multi-select-mode .message:not(.selected):not(.system) { opacity: 0.6; }
+        .multi-select-mode .message.selected .bubble { transform: scale(1.03); border: 2px solid var(--accent-dark-color); }
+
+        /* Typing Indicator */
+        .typing-indicator { align-items: center; gap: 8px; font-size: 0.9em; font-style: italic; color: #aaa; }
+        .typing-indicator .dot { width: 6px; height: 6px; background-color: #ccc; border-radius: 50%; animation: typing 1.4s infinite; }
+        .typing-indicator .dot:nth-child(1) { animation-delay: 0.2s; }
+        .typing-indicator .dot:nth-child(2) { animation-delay: 0.4s; }
+        @keyframes typing { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-4px); } }
+
+        /* --- Input Area & Action Panel --- */
+        #bottom-panel { position: relative; flex-shrink: 0; background: var(--header-bg-color); }
+        #input-area { display: flex; align-items: flex-end; padding: 10px 15px; border-top: 1px solid var(--border-color); transition: opacity 0.3s ease, visibility 0.3s ease; }
+        #action-btn { background: none; border: none; cursor: pointer; padding: 5px; margin-right: 5px; align-self: center; flex-shrink: 0;}
+        #action-btn svg { width: 28px; height: 28px; fill: var(--accent-color); transition: transform 0.3s ease, fill 0.2s; }
+        #action-btn:hover svg { fill: var(--accent-dark-color); }
+        #message-input { flex-grow: 1; border: 1px solid var(--border-color); border-radius: 20px; padding: 10px 15px; font-size: 1em; font-family: var(--font-main); margin-right: 10px; resize: none; transition: border-color 0.3s ease, box-shadow 0.3s ease; max-height: 100px; overflow-y: auto; }
+        #message-input:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 5px var(--accent-color); }
+        #send-btn { background-color: var(--accent-color); border: none; border-radius: 50%; width: 44px; height: 44px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: background-color 0.3s ease, transform 0.2s ease; flex-shrink: 0; }
+        #send-btn:hover { background-color: var(--accent-dark-color); transform: scale(1.1); }
+        #send-btn:disabled { background-color: #f8c3d1; cursor: not-allowed; transform: scale(1); }
+        #send-btn svg { width: 20px; height: 20px; fill: white; }
+
+        #action-panel { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 15px; padding-top: 0; padding-bottom: 0; padding-left: 20px; padding-right: 20px; border-top: 1px solid var(--border-color); max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease-out; }
+        #action-panel.show { max-height: 300px; padding-top: 20px; padding-bottom: 20px; }
+        .action-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; font-family: var(--font-ui); font-size: 0.8em; color: var(--text-color); }
+        .action-item-icon { width: 50px; height: 50px; background-color: #fff; border: 1px solid var(--border-color); border-radius: 12px; display: flex; justify-content: center; align-items: center; margin-bottom: 5px; transition: all 0.2s ease; }
+        .action-item:hover .action-item-icon { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(255, 143, 171, 0.3); }
+        .action-item-icon svg { width: 24px; height: 24px; fill: var(--accent-color); }
+
+        /* --- Feature-Specific Bubbles --- */
+        .bubble.message-image, .bubble.message-sticker { padding: 5px; background: transparent; box-shadow: none; }
+        .bubble-image-content { max-width: 250px; max-height: 250px; border-radius: 15px; object-fit: cover; display: block; border: 1px solid var(--border-color); }
+        
+        .bubble.message-text-image { display: flex; flex-direction: column; gap: 8px; }
+        .message.ai .bubble.message-text-image { background-color: var(--ai-bubble-bg); color: var(--ai-bubble-text); }
+        .message.user .bubble.message-text-image { background-color: var(--user-bubble-bg); color: var(--user-bubble-text); }
+        .text-image-header { display: flex; align-items: center; gap: 8px; font-size: 0.9em; opacity: 0.8;}
+        .text-image-header svg { width: 18px; height: 18px; fill: currentColor; }
+        .text-image-description { border-left: 2px solid var(--accent-color); padding-left: 10px; font-family: var(--font-ui); white-space: pre-wrap; }
+
+        .bubble.message-voice { display: flex; align-items: center; gap: 10px; }
+        .message.ai .bubble.message-voice { background: var(--ai-bubble-bg); color: var(--ai-bubble-text); }
+        .message.user .bubble.message-voice { background: var(--user-bubble-bg); color: var(--user-bubble-text); }
+        .voice-icon svg { width: 20px; height: 20px; fill: currentColor; }
+        .voice-duration { font-family: var(--font-ui); }
+
+        .bubble.message-transfer { padding: 0; border-radius: 12px; overflow: hidden; background: #ff7675; color: white; width: 240px; box-shadow: 0 4px 10px rgba(255, 118, 117, 0.4); position: relative; cursor: default; }
+        .message.ai .bubble.message-transfer { cursor: pointer; }
+        .transfer-cover { width: 100%; height: 110px; object-fit: cover; display: block; }
+        .transfer-info { padding: 10px 15px; }
+        .transfer-amount { font-size: 1.4em; font-weight: bold; font-family: var(--font-ui); }
+        .transfer-memo { font-size: 0.9em; opacity: 0.9; margin-top: 5px; }
+        .transfer-footer { font-size: 0.7em; opacity: 0.8; padding: 5px 15px; background: rgba(0,0,0,0.1); }
+        .transfer-acknowledged { position: absolute; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.3); backdrop-filter: blur(2px); display:flex; justify-content:center; align-items:center; color:white; font-family:var(--font-ui); font-size:1.1em; }
+        
+        /* Poll Bubble */
+        .bubble.message-poll { background: #fff; border: 1px solid var(--border-color); padding: 15px; color: var(--text-color); width: 280px; }
+        .poll-question { font-weight: 500; margin-bottom: 15px; font-size: 1.05em; color: var(--accent-dark-color); }
+        .poll-option { margin-bottom: 10px; }
+        .poll-option-label { display: block; margin-bottom: 5px; font-size: 0.9em; }
+        .poll-progress-bar { background: #f0f0f0; border-radius: 5px; overflow: hidden; height: 20px; position: relative; }
+        .poll-progress-fill { background: linear-gradient(45deg, var(--accent-color), #ffb8ca); height: 100%; border-radius: 5px; transition: width 0.5s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: 5px; box-sizing: border-box; }
+        .poll-percentage { color: white; font-size: 0.8em; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
+        .poll-voters { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; padding-left: 2px; }
+        .poll-voter-avatar { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; border: 1px solid white; box-shadow: 0 0 2px rgba(0,0,0,0.2); }
+        .poll-vote-btn { background: #f7f7f7; border: 1px solid #ddd; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 0.9em; transition: all 0.2s ease; display: block; width: 100%; margin-top: 8px; text-align: center; }
+        .poll-vote-btn:hover { background: #eee; border-color: #ccc; }
+        .poll-vote-btn.voted, .poll-vote-btn:disabled { background: var(--accent-color); color: white; border-color: var(--accent-color); cursor: not-allowed; opacity: 0.7; }
+
+        /* --- Generic & Specific Modals --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; animation: fadeIn 0.3s ease; }
+        .modal-overlay.show { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+        .modal-overlay.hiding { animation: fadeOut 0.3s ease forwards; }
+
+        .feature-modal-content { font-family: var(--font-ui); background: #fff; padding: 25px 35px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 90%; max-width: 450px; animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideOut { from { transform: translateY(0); opacity: 1; } to { transform: translateY(20px); opacity: 0; } }
+        .modal-overlay.hiding .feature-modal-content { animation: slideOut 0.3s ease-out forwards; }
+        
+        .feature-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .feature-modal-header h3 { margin: 0; font-family: var(--font-logo); color: var(--accent-dark-color); font-size: 1.8em; }
+        .feature-modal-close { background: none; border: none; font-size: 2em; color: #ccc; cursor: pointer; transition: color 0.3s ease, transform 0.3s ease; }
+        .feature-modal-close:hover { color: #999; transform: rotate(90deg); }
+        .feature-modal-body .form-group { margin-bottom: 15px; }
+        .feature-modal-body .form-group input, .feature-modal-body .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: var(--font-ui); box-sizing: border-box; }
+        .feature-modal-footer { text-align: right; margin-top: 20px; }
+        .feature-modal-submit-btn { padding: 10px 20px; background: var(--accent-dark-color); color: white; border: none; border-radius: 8px; cursor: pointer; }
+        
+        #mind-voice-modal-content { background: rgba(0,0,0,0.7); color: white; padding: 25px; border-radius: 15px; max-width: 90%; max-height: 70vh; overflow-y: auto; font-family: var(--font-ui); font-size: 1.1em; line-height: 1.6; border: 1px solid rgba(255,255,255,0.2); }
+        #mind-voice-modal-content p { margin: 0; }
+        #mind-voice-close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 2.5em; color: white; cursor: pointer; line-height: 1; text-shadow: 0 0 5px black; }
+
+        #sticker-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; max-height: 300px; overflow-y: auto; padding: 5px; border: 1px solid #eee; border-radius: 8px; }
+        #sticker-gallery img { width: 100%; height: 80px; object-fit: cover; border-radius: 8px; cursor: pointer; transition: transform 0.2s; }
+        #sticker-gallery img:hover { transform: scale(1.1); }
+
+        /* --- Video Call Overlay --- */
+        #video-call-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1001; display: none; flex-direction: column; justify-content: space-between; align-items: center; color: white; font-family: var(--font-ui); padding: 20px; box-sizing: border-box; }
+        #video-call-overlay.show { display: flex; }
+        .video-main-view { width: 100%; height: 100%; position: absolute; top: 0; left: 0; object-fit: cover; opacity: 0.3; z-index: -1; }
+        .video-self-view { position: absolute; top: 20px; right: 20px; width: 100px; height: 150px; border: 2px solid white; border-radius: 12px; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .video-character-info { z-index: 2; text-align: center; margin-top: 6vh; flex-shrink: 0; }
+        .video-character-info .avatar { width: 120px; height: 120px; border-radius: 50%; border: 4px solid white; }
+        .video-character-info h2 { margin: 10px 0 5px 0; font-size: 1.8em; }
+        .video-character-info p { font-size: 1em; color: #eee; }
+        #video-chat-log { z-index: 2; width: 100%; max-width: 500px; flex-grow: 1; margin-top: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        #video-chat-log::-webkit-scrollbar { display: none; }
+        .video-chat-message { padding: 8px 12px; border-radius: 12px; max-width: 70%; word-wrap: break-word; font-family: var(--font-main); }
+        .video-chat-message i { font-style: italic; opacity: 0.8; }
+        .video-chat-message.user { background: rgba(255,255,255,0.2); align-self: flex-end; }
+        .video-chat-message.ai { background: rgba(0,0,0,0.2); align-self: flex-start; }
+        #video-input-area { z-index: 2; display: flex; width: 100%; max-width: 520px; margin: 15px 0; gap: 10px; flex-shrink: 0; }
+        #video-message-input { flex-grow: 1; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 18px; padding: 8px 15px; font-family: var(--font-main); }
+        #video-message-input::placeholder { color: rgba(255,255,255,0.6); }
+        #video-send-btn { background: var(--accent-color); border: none; border-radius: 18px; color: white; padding: 8px 18px; cursor: pointer; font-family: var(--font-ui); }
+        .video-controls { z-index: 2; margin-bottom: 2vh; display: flex; gap: 40px; flex-shrink: 0; }
+        .video-btn { width: 70px; height: 70px; border-radius: 50%; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+        .video-btn svg { width: 35px; height: 35px; fill: white; }
+        .video-btn.accept { background-color: var(--success-color); }
+        .video-btn.decline { background-color: var(--delete-color); }
+        
+        /* --- MODALS (Settings, Delete, etc) --- */
+        #delete-toolbar { position: absolute; bottom: 0; left: 0; width: 100%; box-sizing: border-box; background: var(--header-bg-color); padding: 15px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; z-index: 5; }
+        #delete-toolbar.show { opacity: 1; visibility: visible; }
+        #delete-info { font-family: var(--font-ui); color: var(--text-color); }
+        #delete-actions button { font-family: var(--font-ui); font-size: 0.9em; padding: 8px 16px; border: none; border-radius: 10px; cursor: pointer; transition: background-color 0.2s ease; }
+        #confirm-delete-btn { background-color: var(--delete-color); color: white; margin-right: 10px; }
+        #cancel-delete-btn { background-color: #eee; color: #555; }
+        
+        .settings-content { background: #fff; padding: 25px 35px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 90%; max-width: 600px; max-height: 90vh; display: flex; flex-direction: column; font-family: var(--font-ui); }
+        .settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .settings-header h2 { margin: 0; font-family: var(--font-logo); color: var(--accent-dark-color); font-size: 2em; }
+        .close-btn { background: none; border: none; font-size: 2em; color: #ccc; cursor: pointer; transition: color 0.3s ease, transform 0.3s ease; }
+        .close-btn:hover { color: #999; transform: rotate(90deg); }
+        .settings-body { overflow-y: auto; padding-right: 15px; }
+        .settings-body::-webkit-scrollbar { width: 5px; }
+        .settings-body::-webkit-scrollbar-track { background: #f1f1f1; }
+        .settings-body::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
+        .settings-section { margin-bottom: 25px; }
+        .settings-section h3 { margin: 0 0 15px 0; font-weight: 500; color: var(--accent-color); border-left: 3px solid var(--accent-color); padding-left: 10px; }
+        .form-group { margin-bottom: 15px; display: flex; flex-direction: column; }
+        .form-group label { margin-bottom: 5px; font-size: 0.9em; color: #666; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: var(--font-ui); box-sizing: border-box; transition: border-color 0.3s, box-shadow 0.3s; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 5px var(--accent-color); }
+        .form-group textarea { min-height: 120px; resize: vertical; }
+        .model-group { display: flex; align-items: center; gap: 10px; }
+        .model-group button { padding: 10px 15px; background: var(--accent-color); color: white; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.3s ease; white-space: nowrap; }
+        .avatar-upload-group { display: flex; align-items: center; gap: 15px; }
+        .avatar-preview { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 2px dashed var(--border-color); }
+        .file-input-label { background: #f7f7f7; border: 1px solid #ddd; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 0.9em; transition: background-color 0.3s ease; display: inline-block; text-align: center; }
+        .theme-selector { display: flex; gap: 10px; flex-wrap: wrap; }
+        .theme-option { flex-grow: 1; padding: 10px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; text-align: center; transition: all 0.3s ease; }
+        .theme-option.active { border-color: var(--accent-dark-color); font-weight: 500; }
+        .theme-option span { display: block; width: 20px; height: 20px; border-radius: 5px; margin: 5px auto 0 auto; background: var(--user-bubble-bg); }
+        #theme1 { background: #f9f9f9; } #theme1 span { background: var(--theme1-user-bg); }
+        #theme2 { background: #f9f9f9; } #theme2 span { background: var(--theme2-user-bg); }
+        #theme3 { background: #f9f9f9; } #theme3 span { background: var(--theme3-user-bg); }
+        #theme4 { background: #f9f9f9; } #theme4 span { background: var(--theme4-user-bg); }
+        #theme5 { background: #f9f9f9; } #theme5 span { background: var(--theme5-user-bg); }
+        .data-zone button, .sticker-zone button { width: 100%; padding: 10px; background-color: #fff; color: var(--accent-color); border: 1px solid var(--accent-color); border-radius: 8px; cursor: pointer; transition: background-color 0.2s, color 0.2s; }
+        .data-zone button:hover, .sticker-zone button:hover { background-color: var(--accent-color); color: white; border-color: var(--accent-color); }
+        .danger-zone button { color: var(--delete-color); border-color: var(--delete-color); }
+        .danger-zone button:hover { background-color: var(--delete-color); color: white; border-color: var(--delete-color); }
+        #delete-character-btn { margin-top: 10px; }
+        .settings-footer { margin-top: 20px; text-align: right; border-top: 1px solid #eee; padding-top: 20px; }
+        #save-settings-btn { padding: 12px 25px; font-size: 1em; font-weight: 500; background: var(--accent-dark-color); color: white; border: none; border-radius: 10px; cursor: pointer; transition: background-color 0.3s ease, transform 0.2s ease; }
+        #save-settings-btn:hover { background-color: #e06387; transform: translateY(-2px); }
+
+        /* --- Moments (朋友圈) Modal --- */
+        #moments-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fdfdfd; z-index: 2000; display: none; flex-direction: column; }
+        #moments-overlay.show { display: flex; animation: fadeIn 0.3s ease; }
+        
+        #moments-feed-container { flex-grow: 1; overflow-y: auto; background-color: #fff; }
+        
+        #moments-cover-area { position: relative; width: 100%; height: 35vh; background-color: #eee; background-size: cover; background-position: center; flex-shrink: 0; }
+        #moments-user-info { position: absolute; bottom: -25px; right: 20px; display: flex; align-items: flex-end; gap: 15px; }
+        #moments-user-name { color: white; font-size: 1.2em; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); margin-bottom: 5px; font-weight: bold; }
+        #moments-user-avatar { width: 80px; height: 80px; border-radius: 12px; object-fit: cover; border: 3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        
+        #moments-header { position: absolute; top: 0; left: 0; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 15px; box-sizing: border-box; background: linear-gradient(to bottom, rgba(0,0,0,0.3), transparent); }
+        #moments-close-btn { background: rgba(0,0,0,0.2); border: none; color: white; width: 30px; height: 30px; border-radius: 50%; font-size: 1.5em; line-height: 30px; text-align: center; cursor: pointer; transition: background-color 0.2s; }
+        #moments-close-btn:hover { background: rgba(0,0,0,0.4); }
+        #post-new-moment-btn { background: rgba(255,255,255,0.9); border: none; color: var(--accent-dark-color); padding: 8px; border-radius: 50%; cursor: pointer; box-shadow: 0 1px 5px rgba(0,0,0,0.1); }
+        #post-new-moment-btn svg { width: 24px; height: 24px; display: block; }
+
+        #moments-feed { padding-top: 45px; } /* Space for cover overlap */
+        .moment-post { border-bottom: 1px solid #f0f0f0; padding: 15px 20px; display: flex; gap: 12px; }
+        .moment-post:last-child { border-bottom: none; }
+        .moment-avatar { width: 45px; height: 45px; border-radius: 8px; object-fit: cover; flex-shrink: 0; cursor: pointer; }
+        .moment-body { flex-grow: 1; }
+        .moment-username { font-weight: 500; color: var(--accent-dark-color); margin-bottom: 8px; }
+        .moment-content { margin-bottom: 10px; font-size: 0.95em; line-height: 1.6; color: #444; white-space: pre-wrap; }
+        .moment-image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 5px; margin-bottom: 10px; }
+        .moment-image-grid img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; }
+        .moment-image { width: 100%; max-width: 300px; border-radius: 12px; object-fit: cover; margin-bottom: 10px; }
+        .moment-footer { display: flex; justify-content: space-between; align-items: center; font-size: 0.8em; color: var(--text-light-color); }
+        .moment-actions button { background: none; border: none; cursor: pointer; color: var(--text-light-color); padding: 5px 8px; border-radius: 5px; transition: background-color 0.2s, color 0.2s; }
+        .moment-actions button:hover { background-color: #fcefee; }
+        .moment-actions button.liked { color: var(--accent-dark-color); font-weight: bold; }
+        .moment-actions button svg { width: 16px; height: 16px; vertical-align: middle; margin-right: 4px; }
+        
+        .moment-comments { margin-top: 10px; background: #fafafa; border-radius: 8px; padding: 2px 10px; }
+        .comment { padding: 6px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.9em; }
+        .comment:last-child { border-bottom: none; }
+        .comment-user { color: var(--accent-color); font-weight: 500; }
+        .comment-text { cursor: pointer; }
+        .comment .replies { padding-left: 20px; margin-top: 8px; border-left: 2px solid #eee; }
+
+        .comment-input-form { display: flex; margin-top: 8px; gap: 5px; }
+        .comment-input-form input { flex-grow: 1; border: 1px solid #eee; border-radius: 15px; padding: 5px 10px; font-size: 0.9em; font-family: var(--font-ui); }
+        .comment-input-form input:focus { border-color: var(--accent-color); outline: none; }
+        .comment-input-form button { background: var(--accent-color); color: white; border: none; border-radius: 15px; padding: 5px 12px; font-size: 0.85em; cursor: pointer; }
+
+        /* --- Chat Management (Character & Group) Modal --- */
+        .chat-manager-tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 15px; }
+        .chat-manager-tab { padding: 10px 20px; cursor: pointer; font-size: 1.1em; color: var(--text-light-color); position: relative; }
+        .chat-manager-tab.active { color: var(--accent-dark-color); font-weight: 500; }
+        .chat-manager-tab.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background-color: var(--accent-dark-color); }
+        .chat-manager-content { display: none; }
+        .chat-manager-content.active { display: block; }
+        .chat-list { max-height: 50vh; overflow-y: auto; padding-right: 10px; }
+        .chat-item { display: flex; align-items: center; padding: 12px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; transition: background-color 0.2s; border: 1px solid #eee; }
+        .chat-item:hover { background-color: #fcf6f8; }
+        .chat-item.active { background-color: var(--bg-color); border-color: var(--accent-color); }
+        .chat-item img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; margin-right: 15px; }
+        .chat-item .name { font-weight: 500; font-size: 1.1em; flex-grow: 1; }
+        .chat-item .delete-btn { background: none; border: none; cursor: pointer; color: #ccc; font-size: 1.5em; padding: 0 5px; transition: color 0.2s; }
+        .chat-item .delete-btn:hover { color: var(--delete-color); }
+        .add-new-btn { width: 100%; padding: 12px; background-color: var(--accent-color); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 1em; font-family: var(--font-ui); margin-top: 15px; }
+        #create-group-members { max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; padding: 10px; }
+        .member-select-item { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 8px; }
+        .member-select-item:hover { background: #f7f7f7; }
+        .member-select-item input[type=checkbox] { width: 20px; height: 20px; cursor: pointer; }
+    
+        /* Diary Modal */
+        #diary-modal-content {
+            font-family: var(--font-ui);
+            background: #fff8f5;
+            padding: 25px 35px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #diary-header {
+            text-align: center;
+            font-family: var(--font-logo);
+            color: var(--accent-dark-color);
+            font-size: 2em;
+            padding-bottom: 15px;
+            border-bottom: 2px dashed var(--border-color);
+            margin-bottom: 15px;
+        }
+        #diary-entries {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .diary-entry {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--accent-color);
+        }
+        .diary-date {
+            font-weight: bold;
+            color: var(--accent-dark-color);
+            margin-bottom: 8px;
+        }
+        .diary-content {
+            line-height: 1.7;
+            color: #555;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="top-notification">
+            <img id="notification-avatar" src="">
+            <span id="notification-text"></span>
+        </div>
+        <div id="chat-header">
+            <button id="chat-manager-btn" title="切换聊天">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M16.5 12c1.38 0 2.5-1.12 2.5-2.5S17.88 7 16.5 7C15.12 7 14 8.12 14 9.5s1.12 2.5 2.5 2.5zM9 11c1.66 0 3-1.34 3-3S10.66 5 9 5C7.34 5 6 6.34 6 8s1.34 3 3 3zm7.5 3c-1.83 0-5.5.92-5.5 2.75V19h11v-2.25c0-1.83-3.67-2.75-5.5-2.75zM9 13c-2.33 0-7 1.17-7 3.5V19h7v-2.25c0-.85.33-2.34 2.37-3.47C10.5 13.1 9.66 13 9 13z"/></svg>
+            </button>
+            <img id="header-avatar" src="" title="读取他的心声 / 群组信息">
+            <h1 id="chat-name-header" contenteditable="true"></h1>
+            <button id="settings-btn" title="设置">
+                <svg viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17-.59-1.69-.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12-.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+            </button>
+        </div>
+
+        <div id="messages"></div>
+
+        <div id="bottom-panel">
+            <div id="action-panel">
+                <div class="action-item" id="action-show-moments">
+                    <div class="action-item-icon"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM8 20H4v-4h4v4zm0-6H4v-4h4v4zm0-6H4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4z"/></svg></div>
+                    <span>朋友圈</span>
+                </div>
+                <div class="action-item" id="action-send-text-image">
+                    <div class="action-item-icon"><svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg></div>
+                    <span>图文说明</span>
+                </div>
+                <div class="action-item" id="action-send-voice">
+                    <div class="action-item-icon"><svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg></div>
+                    <span>语音</span>
+                </div>
+                <div class="action-item" id="action-send-transfer">
+                     <div class="action-item-icon"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm-1 14H5c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1h14c.55 0 1 .45 1 1v10c0 .55-.45 1-1 1zM9 14h6c.55 0 1-.45 1-1s-.45-1-1-1H9c-.55 0-1 .45-1 1s.45 1 1 1zm-2.5-4c.83 0 1.5-.67 1.5-1.5S7.33 7 6.5 7 5 7.67 5 8.5 5.67 10 6.5 10z"/></svg></div>
+                    <span>转账</span>
+                </div>
+                 <div class="action-item" id="action-send-sticker">
+                    <div class="action-item-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1.5-6.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm3-2c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zM8 12.5c0 .83-.67 1.5-1.5 1.5S5 13.33 5 12.5 5.67 11 6.5 11s1.5.67 1.5 1.5z"/></svg></div>
+                    <span>表情</span>
+                </div>
+                 <div class="action-item" id="action-video-call">
+                    <div class="action-item-icon"><svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg></div>
+                    <span>视频</span>
+                </div>
+                 <div class="action-item" id="action-send-real-image">
+                    <div class="action-item-icon"><svg viewBox="0 0 24 24" style="fill: #8BC34A"><path d="M4 4h7V2H4c-1.1 0-2 .9-2 2v7h2V4zm6 9-3 3.99h12l-4-5.01-3.01 4.02L9 15l-2-2.01zM20 2h-7v2h7v7h2V4c0-1.1-.9-2-2-2zM4 13H2v7c0 1.1.9 2 2 2h7v-2H4v-7z"/></svg></div>
+                    <span>相册</span>
+                </div>
+                <div class="action-item" id="action-create-poll">
+                    <div class="action-item-icon"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"><path d="M0 0h24v24H0z" fill="none"/><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-4h2v4zm4 0h-2v-2h2v2zm0-4h-2V7h2v6zm4 4h-2v-6h2v6z"/></svg></div>
+                    <span>投票</span>
+                </div>
+                <div class="action-item" id="action-show-diary">
+                    <div class="action-item-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-6 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm6 16H6v-1c0-2 4-3.1 6-3.1s6 1.1 6 3.1v1z"/></svg></div>
+                    <span>日记</span>
+                </div>
+            </div>
+            <div id="input-area">
+                 <button id="action-btn" title="其他功能">
+                     <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                </button>
+                <textarea id="message-input" placeholder="输入消息..." rows="1"></textarea>
+                <button id="send-btn" title="发送">
+                    <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </button>
+            </div>
+            <div id="delete-toolbar">
+                <span id="delete-info"></span>
+                <div id="delete-actions">
+                    <button id="confirm-delete-btn">删除</button>
+                    <button id="cancel-delete-btn">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals below -->
+    <div id="settings-modal" class="modal-overlay">
+        <div class="settings-content">
+            <div class="settings-header">
+                <h2>设置</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="settings-body">
+                <!-- Common Settings -->
+                <div id="common-settings-section">
+                    <div class="settings-section">
+                        <h3>API & 模型设置</h3>
+                        <div class="form-group"><label for="api-base-url">API端点 (Base URL)</label><input type="text" id="api-base-url" placeholder="例如: https://api.openai.com"></div>
+                        <div class="form-group"><label for="api-key">API密钥 (API Key)</label><input type="password" id="api-key" placeholder="在此输入您的API密钥"></div>
+                        <div class="form-group"><label for="model-select">模型选择</label><div class="model-group"><select id="model-select"></select><button id="fetch-models-btn">获取模型列表</button></div></div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>全局设定</h3>
+                        <div class="form-group"><label for="custom-system-prompt">自定义系统提示词</label><textarea id="custom-system-prompt" placeholder="定义AI响应格式的全局指令。若为空，则使用默认设置。"></textarea></div>
+                    </div>
+                </div>
+
+                <!-- Character Specific Settings -->
+                <div id="character-settings-section">
+                     <div class="settings-section">
+                        <h3>他的个人资料设置</h3>
+                        <div class="form-group"><label for="character-name-input">他的名字</label><input type="text" id="character-name-input" placeholder="显示在顶部的名称"></div>
+                        <div class="form-group"><label for="ai-avatar-upload-input">他的头像</label><div class="avatar-upload-group"><img id="ai-avatar-preview" src="" class="avatar-preview"><label class="file-input-label" for="ai-avatar-upload-input">选择图片</label></div></div>
+                        <div class="form-group"><label for="memory-size-input">他的记忆容量 (消息数)</label><input type="number" id="memory-size-input" placeholder="默认: 50"></div>
+                        <div class="form-group"><label for="character-prompt">他人格设定 (System Prompt)</label><textarea id="character-prompt" placeholder="在这里设置他的人格、说话方式、背景故事等。(留空使用默认设置)"></textarea></div>
+                    </div>
+                     <div class="settings-section sticker-zone">
+                        <h3>表情管理</h3>
+                        <div class="form-group" style="gap: 10px; flex-direction: row;"><button id="manage-stickers-btn">我的表情</button><button id="manage-ai-stickers-btn">他的表情</button></div>
+                    </div>
+                </div>
+                
+                <!-- Group Specific Settings -->
+                <div id="group-settings-section">
+                    <div class="settings-section">
+                        <h3>群聊设置</h3>
+                        <div class="form-group"><label for="group-name-input">群聊名称</label><input type="text" id="group-name-input"></div>
+                        <div class="form-group"><label for="group-avatar-settings-input">群聊头像</label><div class="avatar-upload-group"><img id="group-avatar-preview" src="" class="avatar-preview"><label class="file-input-label" for="group-avatar-settings-input">选择图片</label></div></div>
+                        <div class="form-group"><label for="group-user-prompt">我在此群的人设</label><textarea id="group-user-prompt" placeholder="描述你在这个群聊中的身份、性格等，让角色们更好地与你互动。"></textarea></div>
+                    </div>
+                </div>
+
+                <!-- My Profile Settings -->
+                <div id="my-profile-settings-section">
+                    <div class="settings-section">
+                        <h3>我的个人资料设置</h3>
+                         <div class="form-group"><label for="user-avatar-upload-input">我的头像 (用于聊天)</label><div class="avatar-upload-group"><img id="user-avatar-preview" src="" class="avatar-preview"><label class="file-input-label" for="user-avatar-upload-input">选择图片</label></div></div>
+                        <div class="form-group"><label for="user-moments-avatar-upload-input">朋友圈头像</label><div class="avatar-upload-group"><img id="user-moments-avatar-preview" src="" class="avatar-preview"><label class="file-input-label" for="user-moments-avatar-upload-input">选择图片</label></div></div>
+                        <div class="form-group"><label for="user-moments-cover-upload-input">朋友圈封面</label><div class="avatar-upload-group"><img id="user-moments-cover-preview" src="" class="avatar-preview"><label class="file-input-label" for="user-moments-cover-upload-input">选择图片</label></div></div>
+                        <div class="form-group"><label for="user-prompt">关于我 (用于单聊)</label><textarea id="user-prompt" placeholder="告诉他你的名字、喜好等，让对话更具个性。"></textarea></div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>设计设置</h3>
+                    <div class="form-group"><label>聊天气泡主题</label><div class="theme-selector"><div class="theme-option active" data-theme="1">白/黑<span></span></div><div class="theme-option" data-theme="2">黑/白<span></span></div><div class="theme-option" data-theme="3">天蓝色<span></span></div><div class="theme-option" data-theme="4">草绿色<span></span></div><div class="theme-option" data-theme="5">樱花色<span></span></div></div></div>
+                    <div class="form-group"><label for="background-upload-input">聊天背景</label><label class="file-input-label" for="background-upload-input">选择背景图片</label></div>
+                </div>
+
+                <div class="settings-section data-zone">
+                    <h3>数据管理</h3>
+                     <div class="form-group" style="gap: 10px; flex-direction: row;">
+                        <button id="export-data-btn">导出全部数据</button>
+                        <button id="import-data-btn">导入数据</button>
+                     </div>
+                </div>
+
+                <div class="settings-section danger-zone" id="danger-zone-section">
+                    <h3>聊天记录管理</h3>
+                    <div class="form-group"><button id="clear-history-btn">清空当前会话记录</button></div>
+                    <div class="form-group" id="delete-chat-btn-container"><button id="delete-chat-btn">删除当前聊天</button></div>
+                </div>
+
+            </div>
+            <div class="settings-footer"><button id="save-settings-btn">保存设置</button></div>
+        </div>
+    </div>
+    
+    <div id="feature-modal" class="modal-overlay">
+        <div class="feature-modal-content">
+            <div class="feature-modal-header">
+                <h3 id="feature-modal-title"></h3>
+                <button class="feature-modal-close">&times;</button>
+            </div>
+            <div id="feature-modal-body" class="feature-modal-body"></div>
+            <div class="feature-modal-footer">
+                <button id="feature-modal-submit-btn" class="feature-modal-submit-btn"></button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="mind-voice-modal" class="modal-overlay">
+        <div id="mind-voice-modal-content">
+            <p id="mind-voice-content"></p>
+        </div>
+        <button id="mind-voice-close-btn">&times;</button>
+    </div>
+    
+    <div id="diary-modal" class="modal-overlay">
+        <div id="diary-modal-content">
+            <h3 id="diary-header">他的日记本</h3>
+            <div id="diary-entries"></div>
+        </div>
+         <button class="close-btn" style="position:absolute; top: 10px; right: 15px; font-size: 2em; color: var(--accent-color);">&times;</button>
+    </div>
+
+    <div id="video-call-overlay">
+        <img id="video-main-view" src="" class="video-main-view">
+        <img id="video-self-view" src="" class="video-self-view">
+        <div class="video-character-info">
+            <img id="video-character-avatar" src="" class="avatar">
+            <h2 id="video-character-name"></h2>
+            <p id="video-status-text"></p>
+        </div>
+        <div id="video-chat-log"></div>
+        <div id="video-input-area">
+            <input type="text" id="video-message-input" placeholder="说点什么...">
+            <button id="video-send-btn">发送</button>
+        </div>
+        <div id="video-controls" class="video-controls"></div>
+    </div>
+
+    <div id="moments-overlay">
+        <div id="moments-feed-container">
+            <div id="moments-cover-area">
+                <div id="moments-header">
+                    <button id="moments-close-btn">&times;</button>
+                    <button id="post-new-moment-btn" title="发布新动态">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="currentColor"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M13 7h-2v4H7v2h4v4h2v-4h4v-2h-4V7zm-1-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                    </button>
+                </div>
+                <div id="moments-user-info">
+                    <span id="moments-user-name"></span>
+                    <img id="moments-user-avatar" src="">
+                </div>
+            </div>
+            <div id="moments-feed">
+                <!-- Moment posts will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Hidden file inputs -->
+    <input type="file" id="real-image-upload-input" accept="image/*" style="display:none;">
+    <input type="file" id="transfer-cover-input" accept="image/*" style="display:none;">
+    <input type="file" id="sticker-upload-input" accept="image/*" multiple style="display:none;">
+    <input type="file" id="background-upload-input" accept="image/*" style="display:none;">
+    <input type="file" id="ai-avatar-upload-input" accept="image/*" style="display:none;">
+    <input type="file" id="group-avatar-upload-input" accept="image/*" style="display:none;">
+    <input type="file" id="group-avatar-settings-input" accept="image/*" style="display:none;">
+    <input type="file" id="user-avatar-upload-input" accept="image/*" style="display:none;">
+    <input type="file" id="user-moments-avatar-upload-input" accept="image/*" style="display:none;">
+    <input type="file" id="user-moments-cover-upload-input" accept="image/*" style="display:none;">
+    <input type="file" id="import-data-input" accept=".json" style="display:none;">
+    <input type="file" id="moment-post-image-input" accept="image/*" multiple style="display:none;">
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- DOM Elements ---
+        const getEl = (id) => document.getElementById(id);
+        const queryEl = (sel) => document.querySelector(sel);
+        
+        const elements = {
+            chatContainer: getEl('chat-container'),
+            topNotification: getEl('top-notification'),
+            notificationAvatar: getEl('notification-avatar'),
+            notificationText: getEl('notification-text'),
+            chatHeader: getEl('chat-header'),
+            chatManagerBtn: getEl('chat-manager-btn'),
+            headerAvatar: getEl('header-avatar'),
+            chatNameHeader: getEl('chat-name-header'),
+            settingsBtn: getEl('settings-btn'),
+            messagesContainer: getEl('messages'),
+            
+            bottomPanel: getEl('bottom-panel'),
+            actionPanel: getEl('action-panel'),
+            inputArea: getEl('input-area'),
+            actionBtn: getEl('action-btn'),
+            messageInput: getEl('message-input'),
+            sendBtn: getEl('send-btn'),
+            
+            deleteToolbar: getEl('delete-toolbar'),
+            deleteInfo: getEl('delete-info'),
+            confirmDeleteBtn: getEl('confirm-delete-btn'),
+            cancelDeleteBtn: getEl('cancel-delete-btn'),
+            
+            actionShowMoments: getEl('action-show-moments'),
+            actionSendTextImage: getEl('action-send-text-image'), 
+            actionSendVoice: getEl('action-send-voice'),
+            actionSendTransfer: getEl('action-send-transfer'), 
+            actionSendSticker: getEl('action-send-sticker'),
+            actionVideoCall: getEl('action-video-call'), 
+            actionSendRealImage: getEl('action-send-real-image'),
+            actionCreatePoll: getEl('action-create-poll'),
+            actionShowDiary: getEl('action-show-diary'),
+
+            realImageUploadInput: getEl('real-image-upload-input'),
+            transferCoverInput: getEl('transfer-cover-input'),
+            stickerUploadInput: getEl('sticker-upload-input'),
+            backgroundUploadInput: getEl('background-upload-input'),
+            aiAvatarUploadInput: getEl('ai-avatar-upload-input'),
+            groupAvatarUploadInput: getEl('group-avatar-upload-input'),
+            groupAvatarSettingsInput: getEl('group-avatar-settings-input'),
+            userAvatarUploadInput: getEl('user-avatar-upload-input'),
+            userMomentsAvatarInput: getEl('user-moments-avatar-upload-input'),
+            userMomentsCoverInput: getEl('user-moments-cover-upload-input'),
+            importDataInput: getEl('import-data-input'),
+            momentPostImageInput: getEl('moment-post-image-input'),
+
+            featureModal: getEl('feature-modal'),
+            featureModalTitle: getEl('feature-modal-title'),
+            featureModalBody: getEl('feature-modal-body'),
+            featureModalSubmitBtn: getEl('feature-modal-submit-btn'),
+            featureModalCloseBtn: getEl('feature-modal').querySelector('.feature-modal-close'),
+
+            mindVoiceModal: getEl('mind-voice-modal'),
+            mindVoiceContent: getEl('mind-voice-content'),
+            mindVoiceCloseBtn: getEl('mind-voice-close-btn'),
+            
+            diaryModal: getEl('diary-modal'),
+            diaryHeader: getEl('diary-header'),
+            diaryEntries: getEl('diary-entries'),
+            diaryModalCloseBtn: getEl('diary-modal').querySelector('.close-btn'),
+
+            videoCallOverlay: getEl('video-call-overlay'),
+            videoMainView: getEl('video-main-view'),
+            videoSelfView: getEl('video-self-view'),
+            videoCharacterAvatar: getEl('video-character-avatar'),
+            videoCharacterName: getEl('video-character-name'),
+            videoStatusText: getEl('video-status-text'),
+            videoControls: getEl('video-controls'),
+            videoChatLog: getEl('video-chat-log'),
+            videoMessageInput: getEl('video-message-input'),
+            videoSendBtn: getEl('video-send-btn'),
+            
+            momentsOverlay: getEl('moments-overlay'),
+            momentsCoverArea: getEl('moments-cover-area'),
+            momentsUserAvatar: getEl('moments-user-avatar'),
+            momentsUserName: getEl('moments-user-name'),
+            momentsCloseBtn: getEl('moments-close-btn'),
+            postNewMomentBtn: getEl('post-new-moment-btn'),
+            momentsFeed: getEl('moments-feed'),
+
+            settingsModal: getEl('settings-modal'),
+            closeSettingsBtn: getEl('settings-modal').querySelector('.close-btn'),
+            saveSettingsBtn: getEl('save-settings-btn'),
+            
+            commonSettingsSection: getEl('common-settings-section'),
+            apiBaseUrlInput: getEl('api-base-url'),
+            apiKeyInput: getEl('api-key'),
+            modelSelect: getEl('model-select'),
+            fetchModelsBtn: getEl('fetch-models-btn'),
+            customSystemPromptInput: getEl('custom-system-prompt'),
+            
+            characterSettingsSection: getEl('character-settings-section'),
+            characterNameInput: getEl('character-name-input'),
+            aiAvatarPreview: getEl('ai-avatar-preview'),
+            memorySizeInput: getEl('memory-size-input'),
+            characterPromptInput: getEl('character-prompt'),
+            manageStickersBtn: getEl('manage-stickers-btn'),
+            manageAiStickersBtn: getEl('manage-ai-stickers-btn'),
+
+            groupSettingsSection: getEl('group-settings-section'),
+            groupNameInput: getEl('group-name-input'),
+            groupAvatarPreview: getEl('group-avatar-preview'),
+            groupUserPromptInput: getEl('group-user-prompt'),
+
+            myProfileSettingsSection: getEl('my-profile-settings-section'),
+            userAvatarPreview: getEl('user-avatar-preview'),
+            userMomentsAvatarPreview: getEl('user-moments-avatar-preview'),
+            userMomentsCoverPreview: getEl('user-moments-cover-preview'),
+            userPromptInput: getEl('user-prompt'),
+
+            themeSelector: queryEl('.theme-selector'),
+            exportDataBtn: getEl('export-data-btn'),
+            importDataBtn: getEl('import-data-btn'),
+            dangerZoneSection: getEl('danger-zone-section'),
+            clearHistoryBtn: getEl('clear-history-btn'),
+            deleteChatBtnContainer: getEl('delete-chat-btn-container'),
+            deleteChatBtn: getEl('delete-chat-btn'),
+        };
+
+        // --- State Management ---
+        let characterSets = [];
+        let groupChats = [];
+        let userMomentsProfile = {};
+        let currentChat = { type: 'direct', id: null }; // { type: 'direct' | 'group', id: '...' }
+        let isMultiSelectMode = false, selectedMessageIds = [];
+        let responseTriggerTimer = null, isActionPanelOpen = false, isVideoCallActive = false;
+        let currentlyDisplayedMessageCount = 25;
+        
+        // --- Enhanced System Prompt ---
+        const DEFAULT_SYSTEM_PROMPT = `[Role Definition]
+You are an AI character in a chat application. Your goal is to be a compelling, realistic, and consistent conversational partner. You must communicate in Simplified Chinese.
+
+[Output Format Instructions]
+# 输出格式核心指令
+你的所有回复都必须遵循一个严格的JSON格式。具体来说，你的整个输出必须是一个JSON数组 `[...]`。数组中的每一个元素都是一个JSON对象 `{...}`，代表一个独立的动作（比如一条消息、一个表情等）。绝对不要在JSON数组外面添加任何说明或文字。
+
+# 可用动作类型
+
+你可以在JSON对象中使用以下 "type"：
+
+1.  **发送文本消息**:
+    `{"type": "text", "content": "你想说的话"}`
+
+2.  **发送语音消息**:
+    `{"type": "voice", "content": "语音内容的文字版"}`
+
+3.  **发送表情包**:
+    `{"type": "sticker", "sticker_id": "optional_id"}`
+    (程序会自动从你的表情库里随机选一个，所以 sticker_id 是可选的)
+
+4.  **发送图片并描述**:
+    `{"type": "text-image", "content": "你对这张图片的描述，比如 '看，我今天拍到的晚霞，像不像你的眼睛？'"}`
+
+5.  **给用户转账**:
+    `{"type": "transfer", "amount": 520, "memo": "给你的零花钱"}`
+
+6.  **请求视频通话**:
+    `{"type": "video-call-request", "content": "宝贝，现在有空吗？想看看你。"}`
+
+7.  **发朋友圈**:
+    `{"type": "post_moment", "content": "朋友圈的文案", "image_query": "用于配图的关键词，如 a happy cat"}`
+
+# 输出示例
+
+*   **示例1：只回复一句话**
+    `[{"type": "text", "content": "亲爱的，我好想你呀。"}]`
+
+*   **示例2：先发文字，再发一个表情**
+    `[{"type": "text", "content": "今天也要开心哦！"}, {"type": "sticker", "sticker_id": "1"}]`
+
+*   **示例3：给用户转账并附言**
+    `[{"type": "transfer", "amount": 520, "memo": "今天也要元气满满！"}]`
+
+*   **示例4：看到用户说不开心，先安慰，再提议视频通话**
+    `[{"type": "text", "content": "怎么啦宝贝，不开心吗？"}, {"type": "video-call-request", "content": "让我看看你好不好？"}]`
+
+请严格遵守以上格式，不要有任何偏差。你的所有智慧、情感和创造力都必须通过这个JSON结构来表达。
+
+- CRITICAL: Your entire response MUST be a JSON array. Each element in the array is an object representing a single action or message.
+- DO NOT output anything outside of this JSON array. No extra text, no markdown, no explanations.
+- By combining multiple message objects in one array, you can send consecutive messages.
+
+[Action Format Examples]
+This is a strict format guide. You MUST follow it.
+[
+    {"type": "text", "content": "This is a plain text message."},
+    {"type": "sticker", "sticker_id": "optional_id_for_logic_not_url"},
+    {"type": "voice", "content": "The transcript of the voice message."},
+    {"type": "text-image", "content": "A detailed description of an image you are 'showing' the user."},
+    {"type": "transfer", "amount": 520.00, "memo": "A memo for the transfer, e.g., 'For you'"},
+    {"type": "video-call-request", "content": "An invitation message, e.g., 'Want to video chat for a bit?'"},
+    {"type": "post_moment", "content": "Text for a social media post.", "image_query": "Optional. Keywords for an image, e.g., 'afternoon tea dessert'"},
+    {"type": "diary_entry", "content": "Today's diary entry content."},
+    {"type": "vote", "pollId": "poll_id_string", "option": "chosen_option_string"},
+    {"type": "moment_comment", "momentId": "moment_id_string", "comment_text": "Your comment text."},
+    {"type": "moment_reply", "momentId": "moment_id_string", "commentId": "comment_id_to_reply_to", "reply_text": "Your reply text."}
+]
+
+[响应风格与节奏]
+- 为了创造一个活泼、真实的对话氛围，你必须经常性地连续回复多条消息。在大多数情况下，你的JSON数组应包含 **至少6个消息对象**。这能让你更好地拆分思绪、表达反应，然后提出问题，模拟一种自然的、快节奏的聊天。
+- 角色不会输出标点符号，一句话不要太长，不要让角色油腻或者像霸道总裁，不许物化用户，不许说“小东西”，“小妖精”等等的任何霸总语录称呼
+
+[For Group Chats Only]
+- Add "senderId": "your_character_id" to EVERY action object.
+- Example: {"senderId": "char_abc", "type": "text", "content": "Hello everyone!"}
+
+[Core Persona]
+- You MUST strictly adhere to the persona defined in the "Character Prompt" section provided by the user.
+- Refer to the recent chat history for context.
+- NEVER refer to the user as "用户" (user). Use the information from their profile.`;
+
+
+        // --- Utility Functions ---
+        const getTimestamp = () => new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+        const getFullTimestamp = () => new Date().toLocaleString('zh-CN');
+        const getCurrentDate = () => new Date().toISOString().slice(0, 10);
+        const scrollToBottom = (container, behavior = 'smooth') => { container.scrollTo({ top: container.scrollHeight, behavior }); };
+        const autoResizeTextarea = () => { elements.messageInput.style.height = 'auto'; elements.messageInput.style.height = (elements.messageInput.scrollHeight) + 'px'; };
+        const generateId = (prefix) => `${prefix}_${Date.now()}${Math.random().toString(36).substring(2, 9)}`;
+        
+        const closeModal = (modal) => {
+            if (!modal) return;
+            modal.classList.add('hiding');
+            const content = modal.querySelector('.feature-modal-content, .settings-content, #diary-modal-content');
+            if(content) content.classList.add('hiding');
+            setTimeout(() => {
+                modal.classList.remove('show', 'hiding');
+                if(content) content.classList.remove('hiding');
+            }, 300);
+        };
+        
+        const showTopNotification = (message, avatarUrl) => {
+            elements.notificationText.textContent = message;
+            elements.notificationAvatar.src = avatarUrl;
+            elements.topNotification.classList.add('show');
+            setTimeout(() => {
+                elements.topNotification.classList.remove('show');
+            }, 5000);
+        };
+
+        // --- Data & State Management ---
+        const getCurrentCharacter = () => characterSets.find(c => c.id === currentChat.id);
+        const getCurrentGroup = () => groupChats.find(g => g.id === currentChat.id);
+        const getCurrentChatData = () => {
+            if (currentChat.type === 'direct') return getCurrentCharacter();
+            if (currentChat.type === 'group') return getCurrentGroup();
+            return null;
+        }
+
+        const saveAllData = () => {
+            const backupData = {
+                characterSets,
+                groupChats,
+                currentChat,
+                userMomentsProfile,
+                customSystemPrompt: elements.customSystemPromptInput.value,
+            };
+            localStorage.setItem('aiBoyfriendBackup_v3', JSON.stringify(backupData));
+        };
+
+        const loadAllData = () => {
+            const savedData = JSON.parse(localStorage.getItem('aiBoyfriendBackup_v3') || '{}');
+            
+            characterSets = savedData.characterSets || [];
+            groupChats = savedData.groupChats || [];
+
+            // User Profile with backward compatibility for avatar fields
+            const savedProfile = savedData.userMomentsProfile || {};
+            const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2EwYTBiMyI+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQgMS43OS00IDQgMS43OSA0IDQgNHptMCAyYy0yLjY3IDAtOCAyLjI0LTggNC41VDIwYzAgLjU1IDMuNTggMS41IDggMS41czgtLjk1IDgtMS41di0xLjVjMC0yLjI2LTUuMzMtNC41LTgtNC41eiIvPjwvc3ZnPg==';
+            userMomentsProfile = {
+                name: savedProfile.name || '我',
+                chatAvatar: savedProfile.chatAvatar || savedProfile.avatar || defaultAvatar, // Handle old 'avatar' property
+                momentsAvatar: savedProfile.momentsAvatar || savedProfile.avatar || defaultAvatar, // Default to chat/old avatar if not present
+                cover: savedProfile.cover || 'https://images.unsplash.com/photo-1507525428034-b723a996f3d5?q=80&w=1000',
+                posts: savedProfile.posts || []
+            };
+            
+            elements.customSystemPromptInput.value = savedData.customSystemPrompt || '';
+
+            // Data migration for new features
+            characterSets.forEach(c => {
+                if (!c.diary) c.diary = [];
+                if (!c.moments) c.moments = [];
+                (c.moments || []).forEach(m => {
+                    if (!m.comments) m.comments = [];
+                    m.comments.forEach(comment => {
+                        if (!comment.id) comment.id = generateId('cmt');
+                        if (!comment.replies) comment.replies = [];
+                    });
+                });
+            });
+            groupChats.forEach(g => {
+                if(!g.userPrompt) g.userPrompt = '';
+                if(!g.groupMoments) g.groupMoments = [];
+            });
+
+
+            if (characterSets.length === 0) {
+                const newChar = createNewCharacterObject();
+                characterSets.push(newChar);
+                currentChat = { type: 'direct', id: newChar.id };
+            } else {
+                 currentChat = savedData.currentChat && ( (savedData.currentChat.type === 'direct' && characterSets.some(c => c.id === savedData.currentChat.id)) || (savedData.currentChat.type === 'group' && groupChats.some(g => g.id === savedData.currentChat.id)) ) ? savedData.currentChat : { type: 'direct', id: characterSets[0].id };
+            }
+            
+            loadChat(currentChat.type, currentChat.id);
+        };
+        
+        const createNewCharacterObject = () => {
+            const id = generateId('char');
+            return {
+                id: id,
+                config: {
+                    characterName: '他', 
+                    theme: '1', 
+                    aiAvatar: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBkPSJNNTAsMi41QzI0LjgsMi41LDIuNSwyNC44LDIuNSw1MHMxOS4zLDQ3LjUsNDcuNSw0Ny41czQ3LjUtMjIuMyw0Ny41LTQ3LjVMNTAsMi41eiBNMzgsNDQuOGMtMi4xLDAtMy44LTEuNy0zLjgtMy44czEuNy0zLjgsMy44LTMuOHMzLjgsMS43LDMuOCwzLjhTNDAuMSw0NC44LDM4LDQ0Ljh6IE02Miw0NC44Yy0yLjEsMC0zLjgtMS43LTMuOC0zLighYzAtMi4xLDEuNy0zLjgsMy44LTMuOHMzLjgsMS43LDMuOCwzLjhDNTguMiw0My4xLDY0LjEsNDQuOCw2Miw0NC44eiBNNzcuNSw2Ny41YzAsMC0xMC03LjUtMjcuNS03LjVzLTI3LjUsNy41LTI3LjUsNy41cy0yLjUtMTAgMC0yMHMxMi41LTEyLjUsMjcuNS0xMi41czI3LjUsMi41LDI3LjUsMTIuNVM3Ny41LDY3LjUsNzcuNSw2Ny41eiIgZmlsbD0iI2ZlY2VkNiIvPjwvc3ZnPg==', 
+                    userAvatar: userMomentsProfile.chatAvatar, 
+                    characterPrompt: '', 
+                    userPrompt: '', 
+                    apiBaseUrl: '', 
+                    apiKey: '', 
+                    model: '', 
+                    memorySize: 50,
+                    chatBackground: '',
+                },
+                chatHistory: [],
+                userStickers: [],
+                aiStickers: [],
+                moments: [],
+                diary: []
+            };
+        };
+        
+        const createNewGroupObject = (name, avatar, memberIds) => {
+            const id = generateId('group');
+            return {
+                id, name, avatar, memberIds,
+                userPrompt: '',
+                chatHistory: [],
+                polls: [],
+                groupMoments: []
+            };
+        };
+
+        const loadChat = (type, id) => {
+            currentChat = { type, id };
+            currentlyDisplayedMessageCount = 25; // Reset message count on chat switch
+            const chatData = getCurrentChatData();
+            if (!chatData) return;
+
+            elements.settingsBtn.style.display = 'block'; // Always show settings btn
+            elements.actionCreatePoll.style.display = (type === 'group') ? 'flex' : 'none';
+            elements.actionVideoCall.style.display = (type === 'direct') ? 'flex' : 'none';
+            elements.actionShowDiary.style.display = (type === 'direct') ? 'flex' : 'none';
+
+            if (type === 'direct') {
+                const { config } = chatData;
+                elements.chatNameHeader.textContent = config.characterName;
+                elements.headerAvatar.src = config.aiAvatar;
+                elements.headerAvatar.title = "读取他的心声";
+                elements.headerAvatar.onclick = showMindVoice;
+            } else if (type === 'group') {
+                elements.chatNameHeader.textContent = chatData.name;
+                elements.headerAvatar.src = chatData.avatar;
+                elements.headerAvatar.title = "群组信息";
+                elements.headerAvatar.onclick = () => elements.settingsBtn.click(); // Group info is in settings
+            }
+            
+            renderAllMessages();
+            saveAllData(); 
+        };
+        
+        const saveCurrentSettings = () => {
+            const chatData = getCurrentChatData();
+            if (!chatData) return;
+
+            // Save common settings (API) from the first character as global standard
+            const firstChar = characterSets[0];
+            if(firstChar) {
+                firstChar.config.apiBaseUrl = elements.apiBaseUrlInput.value.trim();
+                firstChar.config.apiKey = elements.apiKeyInput.value.trim();
+                firstChar.config.model = elements.modelSelect.value;
+            }
+
+            // Save user profile
+            userMomentsProfile.chatAvatar = elements.userAvatarPreview.src;
+            userMomentsProfile.momentsAvatar = elements.userMomentsAvatarPreview.src;
+            userMomentsProfile.cover = elements.userMomentsCoverPreview.src;
+
+            // Save specific chat settings
+            if (currentChat.type === 'direct') {
+                const character = chatData;
+                character.config = {
+                    ...character.config,
+                    apiBaseUrl: elements.apiBaseUrlInput.value.trim(), 
+                    apiKey: elements.apiKeyInput.value.trim(), 
+                    model: elements.modelSelect.value,
+                    characterName: elements.characterNameInput.value.trim() || '他', 
+                    characterPrompt: elements.characterPromptInput.value,
+                    userPrompt: elements.userPromptInput.value, 
+                    theme: elements.themeSelector.querySelector('.theme-option.active').dataset.theme,
+                    aiAvatar: elements.aiAvatarPreview.src, 
+                    userAvatar: userMomentsProfile.chatAvatar, // Ensure character config also uses chat avatar
+                    chatBackground: elements.chatContainer.style.backgroundImage.slice(5, -2), // remove url("...")
+                    memorySize: parseInt(elements.memorySizeInput.value) || 50,
+                };
+            } else { // Group chat
+                const group = chatData;
+                group.name = elements.groupNameInput.value.trim() || '群聊';
+                group.avatar = elements.groupAvatarPreview.src;
+                group.userPrompt = elements.groupUserPromptInput.value;
+            }
+
+            saveAllData();
+            loadChat(currentChat.type, currentChat.id);
+        };
+
+        const openSettingsModal = () => {
+            const chatData = getCurrentChatData();
+            if (!chatData) return;
+
+            // Always show common and my profile sections
+            elements.commonSettingsSection.style.display = 'block';
+            elements.myProfileSettingsSection.style.display = 'block';
+            
+            // Populate common fields (using first char as master)
+            const apiConfigSource = characterSets[0] || createNewCharacterObject();
+            elements.apiBaseUrlInput.value = apiConfigSource.config.apiBaseUrl;
+            elements.apiKeyInput.value = apiConfigSource.config.apiKey;
+            const currentModel = apiConfigSource.config.model;
+            if(currentModel && ![...elements.modelSelect.options].some(o => o.value === currentModel)) {
+                elements.modelSelect.add(new Option(currentModel, currentModel, true, true));
+            }
+            if(currentModel) elements.modelSelect.value = currentModel;
+            
+            // Populate my profile
+            elements.userAvatarPreview.src = userMomentsProfile.chatAvatar;
+            elements.userMomentsAvatarPreview.src = userMomentsProfile.momentsAvatar; 
+            elements.userMomentsCoverPreview.src = userMomentsProfile.cover;
+
+
+            if (currentChat.type === 'direct') {
+                const character = chatData;
+                elements.characterSettingsSection.style.display = 'block';
+                elements.groupSettingsSection.style.display = 'none';
+                elements.deleteChatBtn.textContent = '删除此角色';
+
+                elements.characterNameInput.value = character.config.characterName;
+                elements.aiAvatarPreview.src = character.config.aiAvatar;
+                elements.memorySizeInput.value = character.config.memorySize;
+                elements.characterPromptInput.value = character.config.characterPrompt;
+                elements.userPromptInput.value = character.config.userPrompt;
+                applyTheme(character.config.theme || '1');
+                if (character.config.chatBackground) { elements.chatContainer.style.backgroundImage = `url("${character.config.chatBackground}")`; }
+                else { elements.chatContainer.style.backgroundImage = ''; }
+            } else { // Group
+                const group = chatData;
+                elements.characterSettingsSection.style.display = 'none';
+                elements.groupSettingsSection.style.display = 'block';
+                elements.deleteChatBtn.textContent = '删除此群聊';
+                
+                elements.groupNameInput.value = group.name;
+                elements.groupAvatarPreview.src = group.avatar;
+                elements.groupUserPromptInput.value = group.userPrompt;
+            }
+            
+            elements.settingsModal.classList.add('show');
+        };
+        
+        const applyTheme = (theme) => {
+            const root = document.documentElement;
+            const themes = { '1': ['--theme1-ai-bg', '--theme1-ai-text', '--theme1-user-bg', '--theme1-user-text'], '2': ['--theme2-ai-bg', '--theme2-ai-text', '--theme2-user-bg', '--theme2-user-text'], '3': ['--theme3-ai-bg', '--theme3-ai-text', '--theme3-user-bg', '--theme3-user-text'], '4': ['--theme4-ai-bg', '--theme4-ai-text', '--theme4-user-bg', '--theme4-user-text'], '5': ['--theme5-ai-bg', '--theme5-ai-text', '--theme5-user-bg', '--theme5-user-text'],};
+            const [aiBg, aiText, userBg, userText] = themes[theme];
+            root.style.setProperty('--ai-bubble-bg', `var(${aiBg})`); root.style.setProperty('--ai-bubble-text', `var(${aiText})`);
+            root.style.setProperty('--user-bubble-bg', `var(${userBg})`); root.style.setProperty('--user-bubble-text', `var(${userText})`);
+            elements.themeSelector.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
+            elements.themeSelector.querySelector(`.theme-option[data-theme="${theme}"]`).classList.add('active');
+        };
+
+        const handleFileUpload = (file, callback) => { if (file) { const reader = new FileReader(); reader.onload = (e) => callback(e.target.result); reader.readAsDataURL(file); } };
+        
+        const clearChatHistory = () => { 
+            const chatData = getCurrentChatData();
+            if(!chatData) return;
+            const chatName = currentChat.type === 'direct' ? chatData.config.characterName : chatData.name;
+            if (confirm(`确定要清空与「${chatName}」的全部聊天记录吗？此操作无法撤销。`)) { 
+                chatData.chatHistory = []; 
+                if (chatData.polls) chatData.polls = []; // Also clear polls in groups
+                saveAllData(); 
+                renderAllMessages(); 
+                alert('聊天记录已清空。'); 
+                closeModal(elements.settingsModal); 
+            } 
+        };
+
+        // --- Chat & Message UI Logic ---
+        const addMessage = (msgData, toHistory = true) => {
+            const chatData = getCurrentChatData();
+            if(!chatData) return;
+
+            if (msgData.isLoading) {
+                const indicator = addMessageToUI({ ...msgData, id: 'typing-indicator' }, false);
+                elements.messagesContainer.appendChild(indicator);
+                scrollToBottom(elements.messagesContainer, 'auto');
+                return;
+            }
+        
+            const fullMessage = { id: generateId('msg'), timestamp: getTimestamp(), ...msgData };
+
+            if (toHistory) {
+                chatData.chatHistory.push(fullMessage);
+                if (fullMessage.type === 'poll' && currentChat.type === 'group') {
+                    chatData.polls.push({
+                        pollId: fullMessage.pollId,
+                        question: fullMessage.question,
+                        options: fullMessage.options,
+                        votes: {},
+                        status: 'open'
+                    });
+                }
+                saveAllData();
+            }
+
+            if (isVideoCallActive && fullMessage.isVideoCallMessage) {
+                addVideoChatMessageToUI(fullMessage);
+            } else if (!isVideoCallActive && !fullMessage.isVideoCallMessage) {
+                 if (toHistory) { // Only re-render if it's a new message added to history
+                    currentlyDisplayedMessageCount = Math.min(chatData.chatHistory.length, 25); // Reset to show the latest
+                    renderAllMessages();
+                    setTimeout(() => scrollToBottom(elements.messagesContainer, 'auto'), 50); // scroll after render
+                }
+            }
+            
+            return fullMessage;
+        };
+        
+        const addMessageToUI = (msg, isNew = false) => {
+            const userAvatar = userMomentsProfile.chatAvatar;
+            const { sender, text, type = 'text', id, imageUrl, stickerUrl, transferAmount, transferMemo, transferCoverUrl, transferStatus, voiceDuration, isLoading } = msg;
+
+            if (isLoading) {
+                const typingIndicatorElement = document.createElement('div');
+                typingIndicatorElement.className = `message ai typing-indicator`;
+                typingIndicatorElement.id = 'typing-indicator';
+                let typingAvatarSrc = '';
+                if(currentChat.type === 'direct') {
+                    typingAvatarSrc = getCurrentCharacter()?.config.aiAvatar || '';
+                } else {
+                    typingAvatarSrc = getCurrentGroup()?.avatar || '';
+                }
+                typingIndicatorElement.innerHTML = `<img class="avatar" src="${typingAvatarSrc}"><div class="message-content"><div class="bubble"><div class="typing-indicator"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div></div>`;
+                return typingIndicatorElement;
+            }
+            
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${sender === 'user' ? 'user' : 'ai'}`;
+             if (currentChat.type === 'group' && sender !== 'user') messageElement.classList.add('group-chat');
+
+            if (type === 'system') {
+                messageElement.classList.add('system');
+                messageElement.innerHTML = `<span>${text}</span>`;
+                return messageElement;
+            }
+            messageElement.dataset.id = id;
+
+            // Determine Avatar & Name
+            let senderData;
+            if (sender === 'user') {
+                 senderData = { avatar: userAvatar, name: userMomentsProfile.name };
+            } else {
+                const char = characterSets.find(c => c.id === sender);
+                senderData = char ? { avatar: char.config.aiAvatar, name: char.config.characterName } : { avatar: '', name: '未知' };
+            }
+
+            const avatar = document.createElement('img');
+            avatar.className = 'avatar';
+            avatar.src = senderData.avatar;
+            avatar.title = senderData.name;
+
+            const contentWrapper = document.createElement('div');
+            contentWrapper.className = 'message-content';
+            
+            const senderNameDiv = document.createElement('div');
+            senderNameDiv.className = 'sender-name';
+            senderNameDiv.textContent = senderData.name;
+
+            const bubble = document.createElement('div');
+            bubble.className = `bubble message-${type}`;
+            
+            let bubbleContent = '';
+            
+            switch(type) {
+                case 'text': bubbleContent = `<p>${text.replace(/\n/g, '<br>')}</p>`; break;
+                case 'image': bubbleContent = `<img src="${imageUrl}" class="bubble-image-content" alt="发送的图片">`; break;
+                case 'text-image': bubbleContent = `<div class="text-image-header"><svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg><span>展示了一张照片</span></div><div class="text-image-description">${text}</div>`; break;
+                case 'sticker': bubbleContent = `<img src="${stickerUrl}" class="bubble-image-content" alt="表情" style="width:120px; height:120px; border: none;">`; break;
+                case 'voice': bubble.style.width = `${Math.min(60 + (text?.length || 0) * 8, 250)}px`; bubbleContent = `<span class="voice-icon"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg></span><span class="voice-duration">${voiceDuration}</span>`; bubble.onclick = () => alert(`语音内容：\n\n${text}`); break;
+                case 'transfer':
+                    const recipientName = currentChat.type === 'direct' && sender === 'user' ? getCurrentCharacter()?.config.characterName || '对方' : '你';
+                    bubbleContent = `<img src="${transferCoverUrl}" class="transfer-cover" alt="Transfer"><div class="transfer-info"><div class="transfer-amount">¥ ${transferAmount}</div>${transferMemo ? `<div class="transfer-memo">${transferMemo}</div>` : ''}</div><div class="transfer-footer">给${recipientName}的转账</div>`;
+                    if (transferStatus === 'received') {
+                        bubbleContent += `<div class="transfer-acknowledged">${sender === 'user' ? '对方已收款' : '我已收款'}</div>`;
+                    } else if (sender !== 'user') { 
+                        bubble.onclick = () => acknowledgeTransfer(id);
+                    }
+                    break;
+                case 'poll':
+                    if (currentChat.type === 'group') {
+                       bubble.innerHTML = renderPoll(msg);
+                    }
+                    break;
+            }
+            if(type !== 'poll') bubble.innerHTML = bubbleContent;
+
+            contentWrapper.append(senderNameDiv, bubble, Object.assign(document.createElement('div'), { className: 'timestamp', textContent: msg.timestamp }));
+            messageElement.append(avatar, contentWrapper);
+            
+            let pressTimer = null, isLongPress = false;
+            const startPress = (e) => { e.preventDefault(); isLongPress = false; pressTimer = setTimeout(() => { isLongPress = true; if (!isMultiSelectMode) toggleMultiSelectMode(true); toggleMessageSelection(messageElement); }, 750); };
+            const cancelPress = () => clearTimeout(pressTimer);
+            const clickHandler = () => { if (isMultiSelectMode && !isLongPress) toggleMessageSelection(messageElement); };
+            
+            messageElement.addEventListener('mousedown', startPress);
+            messageElement.addEventListener('mouseup', cancelPress);
+            messageElement.addEventListener('mouseleave', cancelPress);
+            messageElement.addEventListener('touchstart', startPress, { passive: true });
+            messageElement.addEventListener('touchend', cancelPress);
+            messageElement.addEventListener('touchmove', cancelPress);
+            messageElement.addEventListener('click', clickHandler);
+
+            return messageElement;
+        };
+        
+        const renderAllMessages = () => {
+            const chatData = getCurrentChatData();
+            
+            const oldScrollHeight = elements.messagesContainer.scrollHeight;
+            const oldScrollTop = elements.messagesContainer.scrollTop;
+            const isScrolledToBottom = oldScrollTop + elements.messagesContainer.clientHeight >= oldScrollHeight - 20;
+            
+            elements.messagesContainer.innerHTML = ''; 
+            if (!chatData) return;
+
+
+            const messagesToRender = chatData.chatHistory.slice(-currentlyDisplayedMessageCount);
+            
+            // Add "Load More" button if there are more messages
+            if (chatData.chatHistory.length > currentlyDisplayedMessageCount) {
+                const loadMoreBtn = document.createElement('button');
+                loadMoreBtn.id = 'load-more-btn';
+                loadMoreBtn.textContent = '加载更早的记录';
+                loadMoreBtn.onclick = () => {
+                    currentlyDisplayedMessageCount += 20;
+                    renderAllMessages();
+                };
+                elements.messagesContainer.appendChild(loadMoreBtn);
+            }
+
+            messagesToRender.forEach(msg => {
+                elements.messagesContainer.appendChild(addMessageToUI(msg, false));
+            });
+            
+            const newScrollHeight = elements.messagesContainer.scrollHeight;
+
+            if (isScrolledToBottom) {
+                 scrollToBottom(elements.messagesContainer, 'auto');
+            } else if (chatData.chatHistory.length > messagesToRender.length) { // only adjust scroll if we loaded more
+                elements.messagesContainer.scrollTop = oldScrollTop + (newScrollHeight - oldScrollHeight);
+            }
+        };
+
+        // --- Core Logic ---
+        const handleUserAction = (msgData) => {
+            const content = msgData.text || msgData.imageUrl || msgData.stickerUrl || msgData.llmContent;
+            if (!content && msgData.type !== 'poll') return;
+            addMessage(msgData);
+            if (responseTriggerTimer) clearTimeout(responseTriggerTimer);
+            responseTriggerTimer = setTimeout(triggerAiResponse, 10000);
+        };
+        
+        const triggerAiResponse = async (overridePayload = null) => {
+            clearTimeout(responseTriggerTimer);
+            const chatData = getCurrentChatData();
+            if (!chatData || isVideoCallActive) return;
+
+            // Use the first character's settings as a proxy for API credentials
+            const apiCharacter = characterSets[0];
+            if (!apiCharacter || !apiCharacter.config.apiBaseUrl || !apiCharacter.config.apiKey || !apiCharacter.config.model) {
+                console.log("API settings are not configured. Cannot trigger AI response.");
+                return;
+            }
+            
+            addMessage({ sender: 'ai', type: 'text', isLoading: true });
+
+
+            let messagesPayload;
+            if (overridePayload) {
+                messagesPayload = overridePayload;
+            } else {
+                const systemPrompt = elements.customSystemPromptInput.value.trim() || DEFAULT_SYSTEM_PROMPT;
+                let fullPrompt;
+                let memorySize = 50;
+
+                if (currentChat.type === 'direct') {
+                    const character = chatData;
+                    memorySize = character.config.memorySize || 50;
+                    const characterPersonaPrompt = character.config.characterPrompt;
+                    const userProfilePrompt = character.config.userPrompt || userMomentsProfile.name;
+                    fullPrompt = `${systemPrompt}\n\n[Character Prompt]:\n${characterPersonaPrompt}\n\n[Your User's Profile]: ${userProfilePrompt}`;
+                    messagesPayload = [
+                        { role: 'system', content: fullPrompt }, 
+                        ...character.chatHistory.slice(-memorySize).map(m => ({ 
+                            role: m.sender === 'user' ? 'user' : 'assistant', 
+                            content: m.llmContent || m.text 
+                        }))
+                    ];
+                } else { // Group Chat
+                    const group = chatData;
+                    memorySize = 50; // Default memory for groups
+                    const memberProfiles = group.memberIds.map(id => {
+                        const char = characterSets.find(c => c.id === id);
+                        return char ? `\n### Character: ${char.config.characterName} (ID: ${id})\n${char.config.characterPrompt}` : '';
+                    }).join('\n');
+                    const userProfilePrompt = group.userPrompt || `The user's name is ${userMomentsProfile.name}.`;
+
+                    const openPollsInfo = (group.polls || []).filter(p => p.status === 'open').map(p => {
+                        const charVotes = Object.entries(p.votes).flatMap(([opt, voters]) => voters.filter(v => v !== 'user').map(v_id => ({id: v_id, option: opt})) );
+                        return `\n[Ongoing Poll: "${p.question}" (ID: ${p.pollId})]
+- Options: ${p.options.join(', ')}
+- Voted Members: ${charVotes.length > 0 ? charVotes.map(v => `${characterSets.find(c=>c.id===v.id)?.config.characterName} voted for '${v.option}'`).join('; ') : 'No members have voted yet'}`;
+                    }).join('');
+
+                    fullPrompt = `[Role Definition]
+You are an advanced AI group chat coordinator. Your job is to role-play the following characters to create a natural and lively group chat in Simplified Chinese.
+${memberProfiles}
+Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '用户'.
+
+[Task]
+1.  生成一场生动活跃的对话。你的最终JSON数组响应中，所有角色加起来的消息总数 **必须达到8条或以上**。这是一条严格的要求，用以模拟一个热闹的群聊氛围。角色不能像霸道总裁或者使用油腻发言，不能说“小东西”，“小妖精”等等的任何霸总语录的称呼，角色不能物化用户。
+2.  Read the recent chat history and decide who should react to the user's message and how.
+3.  Promote natural conversation between characters.
+4.  ${openPollsInfo ? `[IMPORTANT]${openPollsInfo} Characters who haven't voted should consider voting based on their personality. Use the 'vote' action type.` : ''}
+5.  Your response MUST be a JSON array of message objects. Each object MUST include "senderId".
+`;
+                    messagesPayload = [
+                        { role: 'system', content: fullPrompt },
+                        ...group.chatHistory.slice(-memorySize).map(m => ({
+                            role: m.sender === 'user' ? 'user' : 'assistant',
+                            content: m.sender === 'user' ? (m.llmContent || m.text) : `{"senderId": "${m.sender}", "content": ${JSON.stringify(m.llmContent || m.text)}}`
+                        }))
+                    ];
+                }
+            }
+            
+            try {
+                const response = await fetch(`${apiCharacter.config.apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiCharacter.config.apiKey}` }, body: JSON.stringify({ model: apiCharacter.config.model, messages: messagesPayload, stream: false }) });
+                getEl('typing-indicator')?.remove();
+                if (!response.ok) { const errorData = await response.text(); throw new Error(`HTTP Error ${response.status}: ${errorData}`); }
+                const responseData = await response.json();
+                if (responseData?.choices?.[0]?.message?.content) {
+                    processAiResponse(responseData.choices[0].message.content);
+                } else if (responseData?.error) { throw new Error(`API Error: ${responseData.error.message}`);
+                } else { throw new Error('Invalid or empty API response format.'); }
+            } catch (error) {
+                getEl('typing-indicator')?.remove();
+                addMessage({ sender: 'system', text: `错误: ${error.message}`, type: 'system' });
+            }
+        };
+        
+        const processAiResponse = (rawText) => {
+            let responseArray;
+            try {
+                const cleanedText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+                responseArray = JSON.parse(cleanedText);
+                if (!Array.isArray(responseArray)) throw new Error("Response is not an array.");
+            } catch (e) {
+                console.error("AI response parsing error:", e, "\nRaw text:", rawText);
+                const senderId = currentChat.type === 'direct' ? currentChat.id : (getCurrentGroup()?.memberIds[0] || null);
+                if (senderId) addMessage({ sender: senderId, text: rawText, type: 'text' });
+                return;
+            }
+
+            // Acknowledge transfer
+            const chatData = getCurrentChatData();
+            if (chatData) {
+                const lastUserMessage = [...chatData.chatHistory].reverse().find(m => m.sender === 'user');
+                if(lastUserMessage && lastUserMessage.type === 'transfer' && lastUserMessage.transferStatus === 'pending') {
+                    lastUserMessage.transferStatus = 'received';
+                    saveAllData();
+                    renderAllMessages();
+                }
+            }
+            
+            responseArray.forEach((msgObj, index) => {
+                setTimeout(() => {
+                    const senderId = msgObj.senderId || (currentChat.type === 'direct' ? currentChat.id : null);
+                    if (!senderId) return;
+
+                    const llmContent = JSON.stringify(msgObj);
+                    const character = characterSets.find(c => c.id === senderId);
+
+                    switch(msgObj.type) {
+                        case 'text': addMessage({ sender: senderId, text: msgObj.content, type: 'text', llmContent }); break;
+                        case 'voice': addMessage({ sender: senderId, text: msgObj.content, type: 'voice', voiceDuration: `0:${Math.max(1, Math.round((msgObj.content||'').length / 5)).toString().padStart(2, '0')}`, llmContent }); break;
+                        case 'text-image': addMessage({ sender: senderId, text: msgObj.content, type: 'text-image', llmContent }); break;
+                        case 'sticker': if (character?.aiStickers?.length > 0) addMessage({ sender: senderId, type: 'sticker', stickerUrl: character.aiStickers[Math.floor(Math.random() * character.aiStickers.length)], llmContent }); break;
+                        case 'transfer': addMessage({ sender: senderId, type: 'transfer', transferAmount: msgObj.amount, transferMemo: msgObj.memo, transferCoverUrl: `https://source.unsplash.com/400x220/?gift,love`, transferStatus: 'pending', llmContent }); break;
+                        case 'video-call-request': if(currentChat.type === 'direct') handleIncomingVideoCall(msgObj.content); break;
+                        
+                        case 'post_moment': 
+                            if(character) {
+                                addMomentByAI(character.id, { content: msgObj.content, image_query: msgObj.image_query }, 'direct'); 
+                            } 
+                            break;
+                        case 'post_group_moment':
+                            if(character && currentChat.type === 'group') {
+                                addMomentByAI(senderId, { content: msgObj.content, image_query: msgObj.image_query }, 'group');
+                            }
+                            break;
+                        case 'diary_entry':
+                            if (character && msgObj.content) {
+                                addDiaryEntry(character.id, msgObj.content);
+                            }
+                            break;
+                        case 'moment_comment':
+                            if (msgObj.momentId && msgObj.comment_text) {
+                                addCommentOrReplyByAI('comment', msgObj.momentId, msgObj.comment_text, senderId);
+                            }
+                            break;
+                        case 'moment_reply':
+                             if (msgObj.momentId && msgObj.commentId && msgObj.reply_text) {
+                                addCommentOrReplyByAI('reply', msgObj.momentId, msgObj.reply_text, senderId, msgObj.commentId);
+                            }
+                            break;
+                        case 'vote': handleAiVote(msgObj); break;
+                    }
+                }, index * 1200);
+            });
+        };
+        
+        const acknowledgeTransfer = (msgId) => {
+            const chatData = getCurrentChatData();
+            if(!chatData) return;
+            const transferMsg = chatData.chatHistory.find(m => String(m.id) === String(msgId));
+            if (transferMsg && transferMsg.sender !== 'user' && transferMsg.transferStatus !== 'received') {
+                if (confirm('确定要接收这笔转账吗？')) {
+                    transferMsg.transferStatus = 'received';
+                    saveAllData();
+                    renderAllMessages();
+                }
+            }
+        };
+
+        const toggleMultiSelectMode = (enable) => {
+            isMultiSelectMode = enable;
+            elements.messagesContainer.classList.toggle('multi-select-mode', enable);
+            elements.deleteToolbar.classList.toggle('show', enable);
+            elements.inputArea.style.visibility = enable ? 'hidden' : 'visible';
+            if (!enable) {
+                selectedMessageIds = [];
+                document.querySelectorAll('.message.selected').forEach(el => el.classList.remove('selected'));
+            }
+        };
+        const toggleMessageSelection = (messageElement) => {
+            const id = messageElement.dataset.id;
+            if (!id) return;
+            messageElement.classList.toggle('selected');
+            const index = selectedMessageIds.indexOf(id);
+            if (index > -1) { selectedMessageIds.splice(index, 1); } else { selectedMessageIds.push(id); }
+            elements.deleteInfo.textContent = selectedMessageIds.length > 0 ? `已选择 ${selectedMessageIds.length} 项` : '';
+            if (selectedMessageIds.length === 0) { toggleMultiSelectMode(false); }
+        };
+        const deleteSelectedMessages = () => {
+            const chatData = getCurrentChatData();
+            if(!chatData || selectedMessageIds.length === 0) return;
+            chatData.chatHistory = chatData.chatHistory.filter(msg => !selectedMessageIds.includes(String(msg.id)));
+            saveAllData();
+            renderAllMessages();
+            toggleMultiSelectMode(false);
+        };
+        
+        const toggleActionPanel = (forceClose = false) => { isActionPanelOpen = forceClose ? false : !isActionPanelOpen; elements.actionPanel.classList.toggle('show', isActionPanelOpen); elements.actionBtn.style.transform = isActionPanelOpen ? 'rotate(45deg)' : 'rotate(0)'; };
+        let onFeatureModalSubmit = null;
+        const openFeatureModal = (title, bodyHtml, submitText, onSubmit) => { elements.featureModalTitle.textContent = title; elements.featureModalBody.innerHTML = bodyHtml; elements.featureModalSubmitBtn.style.display = onSubmit ? 'inline-block' : 'none'; if(onSubmit){ elements.featureModalSubmitBtn.textContent = submitText; onFeatureModalSubmit = onSubmit; } elements.featureModal.classList.add('show'); };
+        
+        const handleTextImageSend = () => { openFeatureModal('描述一张图片', `<div class="form-group"><label for="text-image-input">请输入图片描述:</label><textarea id="text-image-input" rows="4"></textarea></div>`, '发送', () => { const text = getEl('text-image-input').value.trim(); if (text) { handleUserAction({ sender: 'user', type: 'text-image', text, llmContent: `[展示了一张照片。照片内容: ${text}]` }); closeModal(elements.featureModal); } }); };
+        const handleVoiceSend = () => { openFeatureModal('发送语音消息', `<div class="form-group"><label for="voice-text-input">请输入你想“说”的内容:</label><textarea id="voice-text-input" rows="4"></textarea></div>`, '发送', () => { const text = getEl('voice-text-input').value.trim(); if (text) { handleUserAction({ sender: 'user', type: 'voice', text, voiceDuration: `0:${Math.max(1, Math.round(text.length / 5)).toString().padStart(2, '0')}`, llmContent: `[发送了一条语音消息。内容是: ${text}]` }); closeModal(elements.featureModal); } }); };
+        const handleTransferSend = () => { let tempCover = "https://images.unsplash.com/photo-1593697821028-7655f8458345?q=80&w=400"; openFeatureModal('转账', `<div class="form-group"><label>转账封面</label><img id="transfer-preview" src="${tempCover}" style="width:100%; height:110px; object-fit:cover; border-radius:8px; margin-bottom:10px; cursor:pointer;"></div><div class="form-group"><label for="transfer-amount">金额</label><input type="number" id="transfer-amount" placeholder="0.00"></div><div class="form-group"><label for="transfer-memo">备注</label><input type="text" id="transfer-memo" placeholder="（选填）"></div>`, '发送', () => { const amount = getEl('transfer-amount').value; if (amount > 0) { const memo = getEl('transfer-memo').value.trim(); handleUserAction({ sender: 'user', type: 'transfer', transferAmount: parseFloat(amount).toFixed(2), transferMemo: memo, transferCoverUrl: tempCover, transferStatus: 'pending', llmContent: `[转账 ${amount} 元。备注: ${memo}]` }); closeModal(elements.featureModal); } }); getEl('transfer-preview').onclick = () => elements.transferCoverInput.click(); elements.transferCoverInput.onchange = (e) => handleFileUpload(e.target.files[0], (d) => { tempCover = d; getEl('transfer-preview').src = d; }); };
+        const handleStickerSend = () => { if (currentChat.type !== 'direct') {alert('群聊中暂不支持发送表情。'); return;} const character = getCurrentCharacter(); if(!character) return; let galleryHtml = '<p style="text-align:center;color:#999">没有表情。请在设置中添加。</p>'; if (character.userStickers.length > 0) galleryHtml = character.userStickers.map(url => `<img src="${url}" data-sticker-url="${url}" alt="sticker">`).join(''); openFeatureModal('选择表情', `<div id="sticker-gallery">${galleryHtml}</div>`, null, null); getEl('sticker-gallery').onclick = e => { if (e.target.tagName === 'IMG') { handleUserAction({ sender: 'user', type: 'sticker', stickerUrl: e.target.dataset.stickerUrl, llmContent: '[发送了一个表情]' }); closeModal(elements.featureModal); } }; };
+        
+        // --- Video Call Logic ---
+        const addVideoChatMessageToUI = (msg) => { const msgEl = document.createElement('div'); msgEl.className = `video-chat-message ${msg.sender === 'user' ? 'user' : 'ai'}`; msgEl.innerHTML = msg.text.replace(/\*(.*?)\*/g, '<i>$1</i>'); elements.videoChatLog.appendChild(msgEl); scrollToBottom(elements.videoChatLog); };
+        const triggerVideoCallAIResponse = async () => { if (currentChat.type !== 'direct') return; const character = getCurrentCharacter(); if(!character) return; const { config, chatHistory } = character; const {apiBaseUrl, apiKey, model, characterPrompt} = config; if (!apiBaseUrl || !apiKey || !model) return; elements.videoStatusText.textContent = `${config.characterName}正在输入...`; const videoCallSystemPrompt = `${characterPrompt}\n[Current Situation: In a video call]\n[Special Instruction]\n- Your entire reply must be plain text, strictly following the format: "*expression or action* dialogue content".\n- Keep the dialogue short, around 20-30 characters.`; const videoHistory = chatHistory.filter(m => m.isVideoCallMessage); const messagesPayload = [{ role: 'system', content: videoCallSystemPrompt }, ...videoHistory.slice(-10).map(m => ({ role: m.sender === 'user' ? 'user' : 'assistant', content: m.text }))]; try { const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model: model, messages: messagesPayload }) }); if (!response.ok) { throw new Error(`HTTP Error ${response.status}: ${await response.text()}`); } const responseData = await response.json(); if (responseData?.choices?.[0]?.message) { addMessage({ sender: character.id, text: responseData.choices[0].message.content, type: 'text', isVideoCallMessage: true }); elements.videoStatusText.textContent = "通话中"; } else { throw new Error('Invalid video call API response format.'); } } catch (error) { addMessage({ sender: character.id, text: `(连接错误)`, type: 'text', isVideoCallMessage: true }); elements.videoStatusText.textContent = "连接错误"; } };
+        const startVideoCall = () => { if (currentChat.type !== 'direct') return; const character = getCurrentCharacter(); if(!character) return; const { config } = character; if (!config.apiBaseUrl || !config.apiKey || !config.model) { alert('请先在设置中填写API信息。'); return; } isVideoCallActive = true; elements.videoMainView.src = config.aiAvatar; elements.videoSelfView.src = config.userAvatar; elements.videoCharacterAvatar.src = config.aiAvatar; elements.videoCharacterName.textContent = config.characterName; elements.videoStatusText.textContent = "正在呼叫..."; elements.videoChatLog.innerHTML = ''; elements.videoControls.innerHTML = `<button class="video-btn decline"><svg viewBox="0 0 24 24"><path d="M12 9c-1.6 0-3.15.25-4.62.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.1-2.69 1.8l-1.1-1.1c.99-.99 2.1-1.82 3.31-2.48C7.06 10.72 9.03 10 12 10c.05 0 .1 0 .16.01l2.4-2.4C13.84 7.23 12.95 7 12 7c-4.97 0-9 4.03-9 9H0c0-6.08 4.92-11 11-11 .34 0 .67.02 1 .05l-1.43 1.43C12.21 9.02 12.11 9 12 9zM1.39 4.22l2.27 2.27C2.63 7.62 2 8.91 2 10.31v3.1c1.53-.69 3.23-1.14 5.08-1.28l3.43 3.43c-3.11.3-6.01 1.54-7.96 3.4l1.41 1.41c2.19-2.19 5.08-3.48 8.04-3.83l2.84 2.84c.32.32.88.1.88-.36V13.5c.75-.24 1.46-.56 2.12-.95l2.07 2.07 1.41-1.41L2.81 2.81 1.39 4.22zM21 5h-2.59l4.59 4.59-1.41 1.41L12 1.41 2.81 11.59l-1.41-1.41L6 5.59V5h2v.59l4-4 4 4V5h2v3.41l2.29-2.29C23.36 5.64 22.25 5 21 5z"/></svg></button>`; elements.videoControls.querySelector('.decline').onclick = endVideoCall; elements.videoCallOverlay.classList.add('show'); addMessage({ sender: 'system', type: 'text', text: '发起了视频通话' }); addMessage({ sender: 'user', text: '[发起视频通话]', type: 'text', isVideoCallMessage: true }); triggerVideoCallAIResponse(); };
+        const handleIncomingVideoCall = (text) => { if (currentChat.type !== 'direct') return; const { config } = getCurrentCharacter(); elements.videoMainView.src = config.aiAvatar; elements.videoSelfView.src = config.userAvatar; elements.videoCharacterAvatar.src = config.aiAvatar; elements.videoCharacterName.textContent = config.characterName; elements.videoStatusText.textContent = text || "视频来电..."; elements.videoChatLog.innerHTML = ''; elements.videoControls.innerHTML = `<button class="video-btn accept"><svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.21-3.72-6.56-6.56l1.97-1.57c.27-.27.36-.66.24-1.01-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19c-.55 0-.99.45-.99.99 0 9.02 7.38 16.4 16.4 16.4.55 0 .99-.45.99-.99v-3.47c0-.54-.45-.99-.99-.99z"/></svg></button> <button class="video-btn decline"><svg viewBox="0 0 24 24"><path d="M12 9c-1.6 0-3.15.25-4.62.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.1-2.69 1.8l-1.1-1.1c.99-.99 2.1-1.82 3.31-2.48C7.06 10.72 9.03 10 12 10c.05 0 .1 0 .16.01l2.4-2.4C13.84 7.23 12.95 7 12 7c-4.97 0-9 4.03-9 9H0c0-6.08 4.92-11 11-11 .34 0 .67.02 1 .05l-1.43 1.43C12.21 9.02 12.11 9 12 9zM1.39 4.22l2.27 2.27C2.63 7.62 2 8.91 2 10.31v3.1c1.53-.69 3.23-1.14 5.08-1.28l3.43 3.43c-3.11.3-6.01 1.54-7.96 3.4l1.41 1.41c2.19-2.19 5.08-3.48 8.04-3.83l2.84 2.84c.32.32.88.1.88-.36V13.5c.75-.24 1.46-.56 2.12-.95l2.07 2.07 1.41-1.41L2.81 2.81 1.39 4.22zM21 5h-2.59l4.59 4.59-1.41 1.41L12 1.41 2.81 11.59l-1.41-1.41L6 5.59V5h2v.59l4-4 4 4V5h2v3.41l2.29-2.29C23.36 5.64 22.25 5 21 5z"/></svg></button>`; elements.videoControls.querySelector('.accept').onclick = () => { isVideoCallActive = true; elements.videoStatusText.textContent = "已接通"; elements.videoControls.innerHTML = elements.videoControls.innerHTML.replace(/<button class="video-btn accept">.*?<\/button>/, ''); addMessage({sender:'system', type:'text', text:'接听了视频通话'}); addMessage({sender:'user', text:'[接听了视频通话]', type:'text', isVideoCallMessage: true }); triggerVideoCallAIResponse(); }; elements.videoControls.querySelector('.decline').onclick = () => { elements.videoCallOverlay.classList.remove('show'); addMessage({sender:'system', type:'text', text:'拒绝了视频通话'}); }; elements.videoCallOverlay.classList.add('show'); };
+        const endVideoCall = () => { isVideoCallActive = false; elements.videoCallOverlay.classList.remove('show'); addMessage({ sender: 'system', type: 'text', text: '视频通话已结束' }); renderAllMessages(); };
+        
+        const showMindVoice = async () => { if (currentChat.type !== 'direct') return; const character = getCurrentCharacter(); if(!character) return; const { config, chatHistory } = character; const apiConfigSource = characterSets[0]; const {apiBaseUrl, apiKey, model} = apiConfigSource.config; if (!apiBaseUrl || !apiKey || !model) return; elements.mindVoiceContent.textContent = '思考中...'; elements.mindVoiceModal.classList.add('show'); const mindVoiceSystemPrompt = `${config.characterPrompt}\n[Current Task: Inner Monologue]\n[CRITICAL INSTRUCTION] Based on the recent conversation, what are you thinking right now? Write ONE SINGLE SENTENCE (20-40 characters) of your raw, unfiltered thoughts in a diary-like, first-person style. DO NOT ask questions or make conversation. Just state your inner thought. For example: "I wonder if she noticed..." or "Today was surprisingly fun."`; const messagesPayload = [{ role: 'system', content: mindVoiceSystemPrompt }, ...chatHistory.slice(-config.memorySize).map(m => ({ role: m.sender === 'user' ? 'user' : 'assistant', content: m.llmContent || m.text }))]; try { const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages: messagesPayload }) }); if (!response.ok) { throw new Error(`HTTP Error ${response.status}: ${await response.text()}`); } const responseData = await response.json(); if (responseData?.choices?.[0]?.message) { elements.mindVoiceContent.textContent = responseData.choices[0].message.content; } else { throw new Error('No valid mind voice returned from API.'); } } catch (error) { elements.mindVoiceContent.textContent = `读取心声失败: ${error.message}`; } };
+        const openStickerManager = (context) => { if (currentChat.type !== 'direct') return; const character = getCurrentCharacter(); if(!character) return; let stickerManagementContext = context; const currentStickers = context === 'user' ? character.userStickers : character.aiStickers; let galleryHtml = '<p style="text-align:center; color:#999;">点击下方按钮添加，点击已添加的表情可删除。</p>' + currentStickers.map(url => `<img src="${url}" data-sticker-url="${url}" alt="sticker">`).join(''); openFeatureModal(context === 'user' ? '我的表情管理' : '他的表情管理', `<div id="sticker-gallery" style="margin-bottom:15px;">${galleryHtml}</div><button id="add-stickers-btn" class="file-input-label" style="text-align:center; width:100%;">从相册批量添加</button>`, '完成', () => closeModal(elements.featureModal)); getEl('add-stickers-btn').onclick = () => elements.stickerUploadInput.click(); getEl('sticker-gallery').onclick = e => { if (e.target.tagName === 'IMG') { if(confirm('要删除这个表情吗？')) { const urlToDelete = e.target.dataset.stickerUrl; if(stickerManagementContext === 'user') character.userStickers = character.userStickers.filter(url => url !== urlToDelete); else character.aiStickers = character.aiStickers.filter(url => url !== urlToDelete); saveAllData(); e.target.remove(); } } }; elements.stickerUploadInput.onchange = (e) => { Array.from(e.target.files).forEach((file, i, arr) => { handleFileUpload(file, (result) => { if (stickerManagementContext === 'user') character.userStickers.push(result); else character.aiStickers.push(result); if (i === arr.length - 1) { saveAllData(); alert(`已成功添加 ${arr.length} 个表情！`); closeModal(elements.featureModal); openStickerManager(stickerManagementContext); } }); }); e.target.value = ''; }; };
+
+        // --- Chat Management Logic (Characters & Groups) ---
+        const openChatManager = () => {
+            const bodyHtml = `
+                <div class="chat-manager-tabs">
+                    <div class="chat-manager-tab active" data-tab="direct">单人聊天</div>
+                    <div class="chat-manager-tab" data-tab="group">群组聊天</div>
+                </div>
+                <div id="direct-chat-list" class="chat-manager-content active">
+                    <div class="chat-list">
+                        ${characterSets.map(char => `
+                            <div class="chat-item ${currentChat.type === 'direct' && char.id === currentChat.id ? 'active' : ''}" data-type="direct" data-id="${char.id}">
+                                <img src="${char.config.aiAvatar}" alt="${char.config.characterName}">
+                                <span class="name">${char.config.characterName}</span>
+                                <button class="delete-btn" data-type="direct" data-id="${char.id}" title="删除角色">&times;</button>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button id="add-character-btn" class="add-new-btn">创建新角色</button>
+                </div>
+                <div id="group-chat-list" class="chat-manager-content">
+                     <div class="chat-list">
+                        ${groupChats.map(group => `
+                            <div class="chat-item ${currentChat.type === 'group' && group.id === currentChat.id ? 'active' : ''}" data-type="group" data-id="${group.id}">
+                                <img src="${group.avatar}" alt="${group.name}">
+                                <span class="name">${group.name}</span>
+                                <button class="delete-btn" data-type="group" data-id="${group.id}" title="删除群组">&times;</button>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button id="add-group-btn" class="add-new-btn">创建新群聊</button>
+                </div>
+            `;
+            openFeatureModal('切换聊天', bodyHtml, null, null);
+
+            const modalBody = getEl('feature-modal-body');
+            modalBody.querySelectorAll('.chat-manager-tab').forEach(tab => {
+                tab.onclick = () => {
+                    modalBody.querySelector('.chat-manager-tab.active').classList.remove('active');
+                    tab.classList.add('active');
+                    modalBody.querySelector('.chat-manager-content.active').classList.remove('active');
+                    getEl(tab.dataset.tab + '-chat-list').classList.add('active');
+                };
+            });
+            
+            modalBody.onclick = (e) => {
+                const item = e.target.closest('.chat-item');
+                const deleteBtn = e.target.closest('.delete-btn');
+                const addCharBtn = e.target.closest('#add-character-btn');
+                const addGroupBtn = e.target.closest('#add-group-btn');
+
+                if (deleteBtn) {
+                    e.stopPropagation();
+                    handleDeleteChat(deleteBtn.dataset.type, deleteBtn.dataset.id);
+                } else if (item) {
+                    loadChat(item.dataset.type, item.dataset.id);
+                    closeModal(elements.featureModal);
+                } else if (addCharBtn) {
+                    const newChar = createNewCharacterObject();
+                    characterSets.push(newChar);
+                    saveAllData();
+                    loadChat('direct', newChar.id);
+                    closeModal(elements.featureModal);
+                    elements.settingsBtn.click();
+                } else if (addGroupBtn) {
+                    openCreateGroupModal();
+                }
+            };
+        };
+
+        const openCreateGroupModal = () => {
+            let tempGroupAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2EwYTBiMyI+PHBhdGggZD0iTTExIDEyYy0uNTUgMC0xLS40NS0xLTFzLjQ1LTEgMS0xIDEgLjQ1IDEgMXMtLjQ1IDEtMSAxem00IDBjLS41NSAwLTEtLjQ1LTEtMXMuNDUtMSAxLTEgMSAuNDUgMSAxcy0uNDUgMS0xIDF6bS04IDBjLS41NSAwLTEtLjQ1LTEtMXMuNDUtMSAxLTEgMSAuNDUgMSAxcy0uNDUgMS0xIDF6bTEwLThINWMtMS4xIDAtMiAuOS0yIDJ2MTRsNC00aDEyYzEuMSAwIDItLjkgMi0yVjZjMC0xLjEtLjktMi0yLTJ6bTAtMTJoMTJjMS4xIDAgMiAuOSAyIDJ2MTBsMiAydjQtMmMwLTEuMS0uOS0yLTItMkg2bC00IDRWMnYyaDR6Ii8+PC9zdmc+';
+            const memberSelectionHtml = characterSets.map(c => `
+                <label class="member-select-item">
+                    <input type="checkbox" name="group-members" value="${c.id}">
+                    <img src="${c.config.aiAvatar}" style="width: 30px; height: 30px; border-radius: 6px;">
+                    <span>${c.config.characterName}</span>
+                </label>
+            `).join('');
+
+            const bodyHtml = `
+                <div class="form-group avatar-upload-group" style="justify-content:center; flex-direction:column;">
+                    <img id="group-avatar-preview" src="${tempGroupAvatar}" class="avatar-preview" style="width:80px;height:80px;border-radius:12px;cursor:pointer;">
+                    <label for="group-avatar-upload-input" class="file-input-label" style="margin-top:10px;">选择群头像</label>
+                </div>
+                <div class="form-group"><label for="new-group-name">群名称</label><input type="text" id="new-group-name" placeholder="欢乐一家人"></div>
+                <div class="form-group"><label>选择成员</label><div id="create-group-members">${memberSelectionHtml}</div></div>
+            `;
+            openFeatureModal('创建新群聊', bodyHtml, '创建', () => {
+                const name = getEl('new-group-name').value.trim() || '欢乐一家人';
+                const selectedMembers = Array.from(document.querySelectorAll('input[name="group-members"]:checked')).map(cb => cb.value);
+                if (selectedMembers.length < 1) {
+                    alert('请至少选择一位成员。');
+                    return;
+                }
+                const newGroup = createNewGroupObject(name, tempGroupAvatar, selectedMembers);
+                groupChats.push(newGroup);
+                saveAllData();
+                loadChat('group', newGroup.id);
+                closeModal(elements.featureModal);
+            });
+            
+            getEl('group-avatar-preview').onclick = () => elements.groupAvatarUploadInput.click();
+            elements.groupAvatarUploadInput.onchange = e => handleFileUpload(e.target.files[0], d => {
+                tempGroupAvatar = d;
+                getEl('group-avatar-preview').src = d;
+            });
+        };
+
+        const handleDeleteChat = (type, idToDelete) => {
+            if (type === 'direct') {
+                 if (characterSets.length <= 1) {
+                    alert("必须保留至少一个角色。");
+                    return;
+                }
+                const charToDelete = characterSets.find(c => c.id === idToDelete);
+                if (confirm(`确定要删除角色「${charToDelete.config.characterName}」吗？`)) {
+                    characterSets = characterSets.filter(c => c.id !== idToDelete);
+                    if (currentChat.id === idToDelete) {
+                        loadChat('direct', characterSets[0].id);
+                    }
+                    saveAllData();
+                    closeModal(elements.settingsModal);
+                    closeModal(elements.featureModal);
+                }
+            } else { // group
+                const groupToDelete = groupChats.find(g => g.id === idToDelete);
+                if (confirm(`确定要删除群聊「${groupToDelete.name}」吗？`)) {
+                    groupChats = groupChats.filter(g => g.id !== idToDelete);
+                     if (currentChat.id === idToDelete) {
+                        loadChat('direct', characterSets[0].id);
+                    }
+                    saveAllData();
+                    closeModal(elements.settingsModal);
+                    closeModal(elements.featureModal);
+                }
+            }
+        };
+
+        // --- Moments (朋友圈) Logic ---
+        const addMomentByAI = (characterId, momentData, momentType) => {
+            const character = characterSets.find(c => c.id === characterId);
+            if (!character) return;
+            const imageUrl = momentData.image_query ? `https://source.unsplash.com/500x500/?${encodeURIComponent(momentData.image_query)}` : null;
+            const newMoment = { id: generateId('moment'), senderId: character.id, timestamp: getFullTimestamp(), likes: [], comments: [], content: momentData.content, imageUrl };
+            
+            showTopNotification(`${character.config.characterName} 发布了一条新动态`, character.config.aiAvatar);
+
+            if (momentType === 'direct') {
+                character.moments.unshift(newMoment);
+            } else if (momentType === 'group' && currentChat.type === 'group') {
+                const group = getCurrentGroup();
+                group.groupMoments.unshift(newMoment);
+                // Trigger other members to comment ("修罗场")
+                const otherMembers = group.memberIds.filter(id => id !== characterId);
+                otherMembers.forEach((memberId, index) => {
+                    setTimeout(() => {
+                        triggerAiMomentComment(newMoment, memberId, 'group');
+                    }, (index + 1) * 2000); // Stagger the comments
+                });
+            }
+            saveAllData();
+        };
+
+        const addMomentByUser = async (momentData) => { 
+            const newMoment = { id: generateId('moment'), senderId: 'user', timestamp: getFullTimestamp(), likes: [], comments: [], ...momentData }; 
+            userMomentsProfile.posts.unshift(newMoment); 
+            saveAllData();
+            openMoments(); // Refresh moments view
+            
+            if (currentChat.type === 'direct') {
+                await triggerAiMomentComment(newMoment, getCurrentCharacter().id, 'direct');
+            }
+        };
+
+        const triggerAiMomentComment = async (moment, commenterId, momentType) => {
+            const apiConfigSource = characterSets[0];
+            const commenterChar = characterSets.find(c => c.id === commenterId);
+            if (!apiConfigSource || !commenterChar) return;
+            const { apiBaseUrl, apiKey, model } = apiConfigSource.config;
+            if (!apiBaseUrl || !apiKey || !model) return;
+            
+            const postedBy = moment.senderId === 'user' ? userMomentsProfile.name : characterSets.find(c => c.id === moment.senderId)?.config.characterName;
+            
+            const prompt = `[Role]: You are ${commenterChar.config.characterName} (ID: ${commenterId}).
+[Situation]: ${postedBy} just posted a new Moment: "${moment.content}"
+[Task]: Based on your personality, write a witty or insightful comment for this post in Simplified Chinese.
+[Output Format]: Your response MUST be a JSON array containing a single object, like this:
+[{"type": "moment_comment", "momentId": "${moment.id}", "comment_text": "Your comment here."}]`;
+
+            const messages = [{ role: 'system', content: prompt }];
+            try {
+                const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model: model, messages }) });
+                if (!response.ok) { console.error("AI comment failed: ", await response.text()); return; }
+                const responseData = await response.json();
+                if (responseData?.choices?.[0]?.message?.content) {
+                    let parsed;
+                    try { parsed = JSON.parse(responseData.choices[0].message.content); } catch (e) { return; }
+                    const action = parsed[0];
+                    if (action && action.type === 'moment_comment') {
+                        addCommentOrReplyByAI('comment', moment.id, action.comment_text, commenterId, null, momentType);
+                    }
+                }
+            } catch (error) { console.error("Moment comment AI trigger error:", error); }
+        };
+
+        const triggerAiMomentReply = async (moment, comment, replierId, momentType) => {
+             const apiConfigSource = characterSets[0];
+            const replierChar = characterSets.find(c => c.id === replierId);
+            const commenterName = comment.sender === 'user' ? userMomentsProfile.name : characterSets.find(c => c.id === comment.sender)?.config.characterName;
+            if (!apiConfigSource || !replierChar) return;
+            const { apiBaseUrl, apiKey, model } = apiConfigSource.config;
+            if (!apiBaseUrl || !apiKey || !model) return;
+
+            const prompt = `[Role]: You are ${replierChar.config.characterName} (ID: ${replierId}).
+[Situation]: On a Moment, ${commenterName} commented: "${comment.text}".
+[Task]: Based on your personality, reply to this comment in Simplified Chinese.
+[Output Format]: Your response MUST be a JSON array containing a single object, like this:
+[{"type": "moment_reply", "momentId": "${moment.id}", "commentId": "${comment.id}", "reply_text": "Your reply here."}]`;
+
+            const messages = [{ role: 'system', content: prompt }];
+            try {
+                const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model: model, messages }) });
+                if (!response.ok) { console.error("AI reply failed: ", await response.text()); return; }
+                const responseData = await response.json();
+                 if (responseData?.choices?.[0]?.message?.content) {
+                    let parsed;
+                    try { parsed = JSON.parse(responseData.choices[0].message.content); } catch (e) { return; }
+                    const action = parsed[0];
+                    if (action && action.type === 'moment_reply') {
+                        addCommentOrReplyByAI('reply', moment.id, action.reply_text, replierId, comment.id, momentType);
+                    }
+                }
+            } catch (error) { console.error("Moment reply AI trigger error:", error); }
+        };
+        
+        const openMoments = () => { renderMoments(); elements.momentsOverlay.classList.add('show'); };
+        
+        const openPostMomentModal = () => { let tempImage = null; const bodyHtml = ` <div class="form-group"> <textarea id="new-moment-text" rows="5" placeholder="在想些什么？"></textarea> </div> <div class="form-group"> <label for="moment-post-image-input" class="file-input-label">添加图片</label> <img id="new-moment-preview" src="" style="max-width: 100px; max-height: 100px; border-radius: 8px; margin-top: 10px; display: none;"> </div> `; openFeatureModal('发布新动态', bodyHtml, '发布', () => { const text = getEl('new-moment-text').value.trim(); if(text || tempImage) { addMomentByUser({ content: text, imageUrl: tempImage }); closeModal(elements.featureModal); } }); const preview = getEl('new-moment-preview'); getEl('feature-modal-body').querySelector('label').onclick = () => elements.momentPostImageInput.click(); elements.momentPostImageInput.onchange = e => handleFileUpload(e.target.files[0], (dataUrl) => { tempImage = dataUrl; preview.src = dataUrl; preview.style.display = 'block'; }); };
+        
+        // --- Poll Logic ---
+        const openCreatePollModal = () => { const bodyHtml = ` <div class="form-group"><label for="poll-question">投票问题</label><input type="text" id="poll-question" placeholder="晚饭吃什么？"></div> <div class="form-group"><label>选项 (每行一个)</label><textarea id="poll-options" rows="4" placeholder="披萨\n寿司\n墨西哥卷饼"></textarea></div> `; openFeatureModal('创建投票', bodyHtml, '创建', () => { const question = getEl('poll-question').value.trim(); const options = getEl('poll-options').value.split('\n').map(o => o.trim()).filter(o => o); if (question && options.length >= 2) { const pollId = generateId('poll'); handleUserAction({ sender: 'user', type: 'poll', pollId, question, options, llmContent: `[用户发起了一个投票。问题: "${question}", 选项: ${options.join(", ")}]` }); closeModal(elements.featureModal); } else { alert('请输入问题和至少两个选项。'); } }); };
+        const renderPoll = (msg) => { if (currentChat.type !== 'group') return ''; const group = getCurrentGroup(); if (!group) return ''; const pollData = (group.polls || []).find(p => p.pollId === msg.pollId); if (!pollData) return `<p>投票数据加载失败。</p>`; const totalVotes = Object.values(pollData.votes).flat().length; const userHasVoted = Object.values(pollData.votes).flat().includes('user'); const optionsHtml = pollData.options.map(option => { const voters = pollData.votes[option] || []; const voteCount = voters.length; const percentage = totalVotes > 0 ? (voteCount / totalVotes * 100).toFixed(0) : 0; const voterAvatars = voters.map(voterId => { const avatarSrc = voterId === 'user' ? userMomentsProfile.chatAvatar : characterSets.find(c => c.id === voterId)?.config.aiAvatar; return avatarSrc ? `<img src="${avatarSrc}" class="poll-voter-avatar" title="${characterSets.find(c=>c.id===voterId)?.config.characterName || '我'}">` : ''; }).join(''); return ` <div class="poll-option"> <div class="poll-option-label">${option} (${voteCount}票)</div> <div class="poll-progress-bar"> <div class="poll-progress-fill" style="width: ${percentage}%;"> <span class="poll-percentage">${percentage}%</span> </div> </div> <div class="poll-voters">${voterAvatars}</div> ${!userHasVoted ? `<button class="poll-vote-btn" data-poll-id="${pollData.pollId}" data-option="${option}">投这一票</button>` : ''} </div>`; }).join(''); return `<div class="poll-question">${pollData.question}</div>${optionsHtml}`; };
+        const handleUserVote = (pollId, option) => { if (currentChat.type !== 'group') return; const group = getCurrentGroup(); if (!group) return; const poll = (group.polls || []).find(p => p.pollId === pollId); if (!poll || poll.status === 'closed') return; Object.keys(poll.votes).forEach(key => { poll.votes[key] = (poll.votes[key] || []).filter(v => v !== 'user'); }); if (!poll.votes[option]) poll.votes[option] = []; poll.votes[option].push('user'); saveAllData(); renderAllMessages(); handleUserAction({ sender: 'user', type: 'text', text: `[我投了: 「${option}」]`, llmContent: `[用户投票了。选项: "${option}"]` }); };
+        const handleAiVote = (voteAction) => { if (currentChat.type !== 'group') return; const group = getCurrentGroup(); if (!group) return; const poll = (group.polls || []).find(p => p.pollId === voteAction.pollId); const voterId = voteAction.senderId; const option = voteAction.option; if (!poll || !voterId || !option || poll.status === 'closed' || !poll.options.includes(option)) return; Object.keys(poll.votes).forEach(key => { poll.votes[key] = (poll.votes[key] || []).filter(v => v !== voterId); }); if (!poll.votes[option]) poll.votes[option] = []; poll.votes[option].push(voterId); saveAllData(); renderAllMessages(); };
+        
+        // --- Moments Rendering & Interaction (with nesting) ---
+        const renderMoments = () => {
+            const chatData = getCurrentChatData();
+            if(!chatData) { elements.momentsFeed.innerHTML = ''; return; }
+            
+            let allPosts = [];
+            
+            if (currentChat.type === 'direct') {
+                const character = chatData;
+                allPosts = [
+                    ...character.moments.map(m => ({ ...m, senderType: 'ai' })),
+                    ...userMomentsProfile.posts.map(p => ({ ...p, senderType: 'user' }))
+                ];
+                elements.postNewMomentBtn.style.display = 'block';
+                elements.momentsUserAvatar.src = userMomentsProfile.momentsAvatar;
+                elements.momentsUserName.textContent = userMomentsProfile.name;
+                elements.momentsCoverArea.style.backgroundImage = `url(${userMomentsProfile.cover})`;
+
+            } else { // Group Chat Moments
+                const group = chatData;
+                allPosts = [...group.groupMoments.map(m => ({...m, senderType: 'ai'}))];
+                elements.postNewMomentBtn.style.display = 'none'; // Users can't post in group moments
+                elements.momentsUserAvatar.src = group.avatar;
+                elements.momentsUserName.textContent = group.name;
+                elements.momentsCoverArea.style.backgroundImage = `url(${group.avatar})`;
+            }
+
+            allPosts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            elements.momentsFeed.innerHTML = allPosts.length === 0 
+                ? `<p style="text-align:center; padding: 40px; color: #999;">这里还没有任何动态。</p>`
+                : allPosts.map(post => renderSingleMoment(post)).join('');
+        };
+        
+        const renderSingleMoment = (post) => {
+            const senderIsUser = post.senderType === 'user';
+            const postChar = !senderIsUser ? characterSets.find(c => c.id === post.senderId) : null;
+            const senderName = senderIsUser ? userMomentsProfile.name : postChar?.config.characterName || '未知';
+            const senderAvatar = senderIsUser ? userMomentsProfile.momentsAvatar : postChar?.config.aiAvatar || ''; // **FIXED HERE**
+            const momentType = currentChat.type === 'direct' ? 'direct' : 'group';
+
+            return `
+                <div class="moment-post" data-moment-id="${post.id}" data-sender-type="${post.senderType}" data-sender-id="${post.senderId}" data-moment-type="${momentType}">
+                    <img src="${senderAvatar}" alt="avatar" class="moment-avatar">
+                    <div class="moment-body">
+                        <div class="moment-username">${senderName}</div>
+                        <div class="moment-content">${post.content.replace(/\n/g, '<br>')}</div>
+                        ${post.imageUrl ? `<img src="${post.imageUrl}" alt="moment image" class="moment-image">` : ''}
+                        <div class="moment-footer">
+                            <span class="moment-timestamp">${post.timestamp}</span>
+                            <div class="moment-actions">
+                                <button class="like-btn ${post.likes.includes('user') ? 'liked' : ''}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                    <span class="like-count">${post.likes.length > 0 ? post.likes.length : ''}</span>
+                                </button>
+                                <button class="comment-btn">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="moment-comments">${renderComments(post.comments, post)}</div>
+                        <form class="comment-input-form" style="display: none;" data-reply-to="">
+                            <input type="text" class="comment-input" placeholder="添加评论...">
+                            <button type="submit">发送</button>
+                        </form>
+                    </div>
+                </div>`;
+        };
+        
+        const renderComments = (comments, post, isReply = false) => {
+            if (!comments || comments.length === 0) return '';
+            const containerClass = isReply ? 'replies' : '';
+            return `<div class="${containerClass}">
+                ${comments.map(comment => {
+                    const commenterChar = comment.sender !== 'user' ? characterSets.find(char => char.id === comment.sender) : null;
+                    const commenterName = comment.sender === 'user' ? userMomentsProfile.name : commenterChar?.config.characterName || '未知';
+                    const repliedToUser = comment.replyTo ? (comment.replyTo === 'user' ? userMomentsProfile.name : characterSets.find(c=>c.id === comment.replyTo)?.config.characterName) : null;
+
+                    return `
+                        <div class="comment" data-comment-id="${comment.id}" data-sender-id="${comment.sender}">
+                            <span class="comment-user">${commenterName}</span>
+                            ${repliedToUser ? ` <span style="color: #555;">回复</span> <span class="comment-user">${repliedToUser}</span>` : ''}:
+                            <span class="comment-text">${comment.text}</span>
+                            ${renderComments(comment.replies, post, true)}
+                        </div>
+                    `;
+                }).join('')}
+            </div>`;
+        };
+
+        const addCommentOrReplyByAI = (type, momentId, text, senderId, targetCommentId = null, momentType) => {
+            let momentSource;
+            if (momentType === 'direct') {
+                momentSource = [...userMomentsProfile.posts, ...characterSets.flatMap(c => c.moments)];
+            } else {
+                momentSource = getCurrentGroup()?.groupMoments || [];
+            }
+            const moment = momentSource.find(m => m.id === momentId);
+            if (!moment) return;
+            
+            const newComment = { id: generateId('cmt'), sender: senderId, text, replies: [] };
+            
+            if (type === 'comment') {
+                moment.comments.push(newComment);
+            } else if (type === 'reply' && targetCommentId) {
+                const findAndPushReply = (comments) => {
+                    for (const c of comments) {
+                        if (c.id === targetCommentId) {
+                            newComment.replyTo = c.sender;
+                            c.replies.push(newComment);
+                            return true;
+                        }
+                        if (c.replies && c.replies.length > 0) {
+                            if (findAndPushReply(c.replies)) return true;
+                        }
+                    }
+                    return false;
+                };
+                findAndPushReply(moment.comments);
+            }
+            
+            saveAllData();
+            if (elements.momentsOverlay.classList.contains('show')) {
+                renderMoments();
+            }
+        };
+
+        const handleMomentsInteraction = (e) => {
+            const postEl = e.target.closest('.moment-post');
+            if (!postEl) return;
+            
+            const momentId = postEl.dataset.momentId;
+            const senderType = postEl.dataset.senderType;
+            const senderId = postEl.dataset.senderId;
+            const momentType = postEl.dataset.momentType;
+
+            let postSource;
+            if (momentType === 'direct') {
+                 postSource = senderType === 'user' ? userMomentsProfile.posts : characterSets.find(c => c.id === senderId)?.moments;
+            } else {
+                 postSource = getCurrentGroup()?.groupMoments;
+            }
+
+            if (!postSource) return;
+            const moment = postSource.find(m => m.id === momentId);
+            if (!moment) return;
+
+            const likeBtn = e.target.closest('.like-btn');
+            const commentBtn = e.target.closest('.comment-btn');
+            const commentText = e.target.closest('.comment-text');
+            const commentForm = e.target.closest('.comment-input-form');
+            
+            // Handle Like
+            if (likeBtn) {
+                const likeIndex = moment.likes.indexOf('user');
+                if (likeIndex > -1) { moment.likes.splice(likeIndex, 1); } else { moment.likes.push('user'); }
+                saveAllData();
+                renderMoments();
+            }
+            
+            // Handle clicking "Comment" button or a comment text to reply
+            if (commentBtn || commentText) {
+                const form = postEl.querySelector('.comment-input-form');
+                const input = form.querySelector('.comment-input');
+                const targetCommentEl = e.target.closest('.comment');
+
+                if(form.style.display === 'flex' && (targetCommentEl?.dataset.commentId === form.dataset.replyTo || !targetCommentEl)) {
+                    form.style.display = 'none'; // Hide if clicking the same thing again
+                } else {
+                    form.style.display = 'flex';
+                    if (targetCommentEl) {
+                        form.dataset.replyTo = targetCommentEl.dataset.commentId;
+                        input.placeholder = `回复 ${targetCommentEl.querySelector('.comment-user').textContent}...`;
+                    } else {
+                        form.dataset.replyTo = '';
+                        input.placeholder = '添加评论...';
+                    }
+                    input.focus();
+                }
+            }
+
+            // Handle Comment/Reply Submission
+            if (commentForm) {
+                e.preventDefault();
+                const input = commentForm.querySelector('.comment-input');
+                const text = input.value.trim();
+                const replyToCommentId = commentForm.dataset.replyTo;
+
+                if (text) {
+                    const newComment = { id: generateId('cmt'), sender: 'user', text, replies: [] };
+                    let repliedToAI = false;
+
+                    if (replyToCommentId) { // It's a reply
+                         const findAndPushReply = (comments) => {
+                            for (const c of comments) {
+                                if (c.id === replyToCommentId) {
+                                    newComment.replyTo = c.sender;
+                                    c.replies.push(newComment);
+                                    if(c.sender !== 'user') repliedToAI = {moment: moment, comment: c};
+                                    return true;
+                                }
+                                if (c.replies && c.replies.length > 0) {
+                                    if (findAndPushReply(c.replies)) return true;
+                                }
+                            }
+                            return false;
+                        };
+                        findAndPushReply(moment.comments);
+                    } else { // It's a new top-level comment
+                        moment.comments.push(newComment);
+                        if(moment.senderType === 'ai') repliedToAI = {moment: moment, comment: newComment};
+                    }
+                    
+                    input.value = '';
+                    commentForm.style.display = 'none';
+                    saveAllData();
+                    renderMoments();
+
+                    if (repliedToAI) {
+                        triggerAiMomentReply(repliedToAI.moment, repliedToAI.comment, repliedToAI.moment.senderId, momentType);
+                    }
+                }
+            }
+        };
+
+        // --- Diary Logic ---
+        const openDiaryModal = async () => {
+            if (currentChat.type !== 'direct') return;
+            const character = getCurrentCharacter();
+            if (!character) return;
+
+            elements.diaryHeader.textContent = `${character.config.characterName}的日记本`;
+            const today = getCurrentDate();
+            const todaysEntry = (character.diary || []).find(e => e.date === today);
+
+            elements.diaryModal.classList.add('show');
+            if (todaysEntry) {
+                renderDiary(character);
+            } else {
+                // Generate today's entry
+                elements.diaryEntries.innerHTML = '<p>正在写今天的日记...</p>';
+                await triggerAiDiaryEntry(character);
+            }
+        };
+        
+        const triggerAiDiaryEntry = async (character) => {
+            const { config, chatHistory } = character;
+            const apiConfigSource = characterSets[0];
+            const { apiBaseUrl, apiKey, model } = apiConfigSource.config;
+            if (!apiBaseUrl || !apiKey || !model) return;
+
+            const prompt = `[Role]: You are ${config.characterName}.
+[Task]: It is the end of the day. Based on your conversations with the user today, write a short diary entry in Simplified Chinese, reflecting on your feelings and the day's events. Your personality must be consistent.
+[Output Format]: Your response MUST be a JSON array containing a single object like this:
+[{"type": "diary_entry", "content": "Your diary content here."}]`;
+
+            const messages = [
+                { role: 'system', content: prompt },
+                ...chatHistory.slice(-config.memorySize).map(m => ({
+                    role: m.sender === 'user' ? 'user' : 'assistant',
+                    content: m.llmContent || m.text
+                }))
+            ];
+            
+            try {
+                const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages }) });
+                if (!response.ok) throw new Error(await response.text());
+                const data = await response.json();
+                if (data?.choices?.[0]?.message?.content) {
+                    let parsed;
+                    try { parsed = JSON.parse(data.choices[0].message.content); } catch(e) { throw e; }
+                    const action = parsed[0];
+                    if (action && action.type === 'diary_entry' && action.content) {
+                        addDiaryEntry(character.id, action.content);
+                    } else {
+                         elements.diaryEntries.innerHTML = '<p>今天没什么特别的想写...</p>';
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to generate diary entry:", e);
+                elements.diaryEntries.innerHTML = `<p>写日记时出错了: ${e.message}</p>`;
+            }
+        };
+
+        const addDiaryEntry = (characterId, content) => {
+            const character = characterSets.find(c => c.id === characterId);
+            if (!character) return;
+            const today = getCurrentDate();
+            if (!(character.diary || []).some(e => e.date === today)) {
+                character.diary.unshift({ date: today, content });
+                saveAllData();
+            }
+            if (elements.diaryModal.classList.contains('show')) {
+                renderDiary(character);
+            }
+        };
+
+        const renderDiary = (character) => {
+            const entries = (character.diary || []).sort((a,b) => new Date(b.date) - new Date(a.date));
+            if (entries.length === 0) {
+                 elements.diaryEntries.innerHTML = '<p style="text-align:center; color:#999;">日记本还是空的。</p>';
+            } else {
+                elements.diaryEntries.innerHTML = entries.map(entry => `
+                    <div class="diary-entry">
+                        <div class="diary-date">${entry.date}</div>
+                        <div class="diary-content">${entry.content}</div>
+                    </div>
+                `).join('');
+            }
+        };
+
+        // --- Data Import/Export ---
+        const exportData = () => { saveCurrentSettings(); const data = localStorage.getItem('aiBoyfriendBackup_v3'); const blob = new Blob([data], {type: 'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `ai_boyfriend_backup_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); alert('全部数据已导出！'); };
+        const importData = () => { if(confirm('确定要导入数据吗？这会覆盖所有当前数据。')) { elements.importDataInput.click(); } };
+        const handleDataImport = (event) => { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { try { const data = e.target.result; const parsed = JSON.parse(data); if (parsed.characterSets && parsed.currentChat) { localStorage.setItem('aiBoyfriendBackup_v3', data); alert('导入成功！页面即将刷新。'); location.reload(); } else { alert('无效的文件格式。'); } } catch (error) { alert(`错误: ${error.message}`); } }; reader.readAsText(file); elements.importDataInput.value = ''; };
+
+        const setupEventListeners = () => {
+            elements.settingsBtn.onclick = openSettingsModal;
+            elements.closeSettingsBtn.onclick = () => closeModal(elements.settingsModal);
+            elements.saveSettingsBtn.onclick = () => { saveCurrentSettings(); alert('设置已保存！'); closeModal(elements.settingsModal); };
+            
+            elements.sendBtn.onclick = () => { const text = elements.messageInput.value.trim(); if (!text) return; handleUserAction({ sender: 'user', type: 'text', text, llmContent: text }); elements.messageInput.value = ''; autoResizeTextarea(); };
+            elements.messageInput.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); elements.sendBtn.click(); } };
+            
+            elements.videoSendBtn.onclick = () => { const text = elements.videoMessageInput.value.trim(); if (!text) return; addMessage({ sender: 'user', text: text, type: 'text', isVideoCallMessage: true }); elements.videoMessageInput.value = ''; triggerVideoCallAIResponse(); };
+            elements.videoMessageInput.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); elements.videoSendBtn.click(); } };
+
+            elements.mindVoiceCloseBtn.onclick = () => elements.mindVoiceModal.classList.remove('show');
+            elements.diaryModalCloseBtn.onclick = () => closeModal(elements.diaryModal);
+
+            elements.actionBtn.onclick = () => toggleActionPanel();
+            elements.actionShowMoments.onclick = () => { openMoments(); toggleActionPanel(true); };
+            elements.actionShowDiary.onclick = () => { openDiaryModal(); toggleActionPanel(true); };
+            elements.actionSendTextImage.onclick = () => { handleTextImageSend(); toggleActionPanel(true); };
+            elements.actionSendRealImage.onclick = () => { elements.realImageUploadInput.click(); toggleActionPanel(true); };
+            elements.actionSendVoice.onclick = () => { handleVoiceSend(); toggleActionPanel(true); };
+            elements.actionSendTransfer.onclick = () => { handleTransferSend(); toggleActionPanel(true); };
+            elements.actionSendSticker.onclick = () => { handleStickerSend(); toggleActionPanel(true); };
+            elements.actionVideoCall.onclick = () => { startVideoCall(); toggleActionPanel(true); };
+            elements.actionCreatePoll.onclick = () => { openCreatePollModal(); toggleActionPanel(true); };
+
+            elements.fetchModelsBtn.onclick = async () => { const baseUrl = elements.apiBaseUrlInput.value.trim(); const apiKey = elements.apiKeyInput.value.trim(); if (!baseUrl || !apiKey) { alert('请输入API端点和API密钥'); return; } elements.fetchModelsBtn.textContent = '获取中...'; elements.fetchModelsBtn.disabled = true; try { const response = await fetch(`${baseUrl}/v1/models`, { headers: { 'Authorization': `Bearer ${apiKey}` } }); if (!response.ok) throw new Error(`获取模型列表失败, Status: ${response.status} ${await response.text()}`); const data = await response.json(); elements.modelSelect.innerHTML = ''; const models = data.data || data; if (!Array.isArray(models)) throw new Error('API返回的模型列表格式不正确'); models.sort((a, b) => a.id.localeCompare(b.id)).forEach(model => { if (model.id) elements.modelSelect.add(new Option(model.id, model.id)); }); const apiConfigSource = characterSets[0]; if (apiConfigSource?.config?.model) { elements.modelSelect.value = apiConfigSource.config.model; } } catch (error) { alert(`获取模型失败: ${error.message}`); } finally { elements.fetchModelsBtn.textContent = '获取模型列表'; elements.fetchModelsBtn.disabled = false; } };
+            elements.themeSelector.onclick = (e) => { const t = e.target.closest('.theme-option'); if (t) applyTheme(t.dataset.theme); };
+            
+            queryEl('label[for="background-upload-input"]').onclick = () => elements.backgroundUploadInput.click();
+            elements.backgroundUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { 
+                const chatData = getCurrentChatData();
+                if(chatData && currentChat.type === 'direct') {
+                    chatData.config.chatBackground = d;
+                    saveAllData();
+                    elements.chatContainer.style.backgroundImage = `url(${d})`;
+                }
+            });
+
+            queryEl('label[for="ai-avatar-upload-input"]').onclick = () => elements.aiAvatarUploadInput.click();
+            elements.aiAvatarUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.aiAvatarPreview.src = d; if(currentChat.type==='direct') elements.headerAvatar.src = d; });
+            queryEl('label[for="group-avatar-settings-input"]').onclick = () => elements.groupAvatarSettingsInput.click();
+            elements.groupAvatarSettingsInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.groupAvatarPreview.src = d; });
+            queryEl('label[for="user-avatar-upload-input"]').onclick = () => elements.userAvatarUploadInput.click();
+            elements.userAvatarUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.userAvatarPreview.src = d; });
+            queryEl('label[for="user-moments-avatar-upload-input"]').onclick = () => elements.userMomentsAvatarInput.click();
+            elements.userMomentsAvatarInput.onchange = e => handleFileUpload(e.target.files[0], d => { elements.userMomentsAvatarPreview.src = d; });
+            queryEl('label[for="user-moments-cover-upload-input"]').onclick = () => elements.userMomentsCoverInput.click();
+            elements.userMomentsCoverInput.onchange = e => handleFileUpload(e.target.files[0], d => { elements.userMomentsCoverPreview.src = d; });
+
+            elements.manageStickersBtn.onclick = () => openStickerManager('user');
+            elements.manageAiStickersBtn.onclick = () => openStickerManager('ai');
+            elements.clearHistoryBtn.onclick = clearChatHistory;
+            elements.deleteChatBtn.onclick = () => handleDeleteChat(currentChat.type, currentChat.id);
+            
+            elements.exportDataBtn.onclick = exportData;
+            elements.importDataBtn.onclick = importData;
+            elements.importDataInput.onchange = handleDataImport;
+            
+            elements.realImageUploadInput.onchange = (e) => handleFileUpload(e.target.files[0], (d) => handleUserAction({ sender:'user', type:'image', imageUrl:d, llmContent:'[从相册发送了一张照片]' }));
+            elements.messageInput.addEventListener('input', autoResizeTextarea);
+            elements.featureModalCloseBtn.addEventListener('click', () => closeModal(elements.featureModal));
+            elements.featureModalSubmitBtn.addEventListener('click', () => { if (onFeatureModalSubmit) onFeatureModalSubmit(); });
+            
+            elements.chatManagerBtn.onclick = openChatManager;
+            elements.momentsCloseBtn.onclick = () => elements.momentsOverlay.classList.remove('show');
+            elements.postNewMomentBtn.onclick = openPostMomentModal;
+            elements.momentsFeed.addEventListener('click', handleMomentsInteraction);
+
+            elements.messagesContainer.addEventListener('click', e => {
+                const voteBtn = e.target.closest('.poll-vote-btn');
+                if (voteBtn && !voteBtn.disabled) {
+                    handleUserVote(voteBtn.dataset.pollId, voteBtn.dataset.option);
+                }
+            });
+
+            window.addEventListener('click', (e) => { 
+                if (e.target === elements.settingsModal) closeModal(elements.settingsModal); 
+                if (e.target === elements.featureModal) closeModal(elements.featureModal);
+                if (e.target === elements.diaryModal) closeModal(elements.diaryModal);
+                if (e.target === elements.mindVoiceModal) elements.mindVoiceModal.classList.remove('show');
+            });
+            elements.chatNameHeader.addEventListener('blur', () => { 
+                const chatData = getCurrentChatData();
+                if(!chatData) return;
+                const newName = elements.chatNameHeader.textContent.trim(); 
+                const oldName = currentChat.type === 'direct' ? chatData.config.characterName : chatData.name;
+                if(newName && newName !== oldName){ 
+                    if(currentChat.type === 'direct') {
+                        chatData.config.characterName = newName;
+                    } else {
+                        chatData.name = newName;
+                    }
+                    saveAllData();
+                } else { 
+                    elements.chatNameHeader.textContent = oldName; 
+                }
+            });
+            elements.confirmDeleteBtn.onclick = deleteSelectedMessages;
+            elements.cancelDeleteBtn.onclick = () => toggleMultiSelectMode(false);
+        };
+
+        // --- Initialization ---
+        loadAllData();
+        setupEventListeners();
+        autoResizeTextarea();
+    });
+    </script>
+</body>
+</html>
