@@ -61,6 +61,10 @@
             background-color: var(--chat-bg-color); backdrop-filter: blur(10px); box-shadow: 0 0 30px rgba(255, 143, 171, 0.15);
             transition: background-color 0.5s ease;
             position: relative; /* For notification */
+            /* --- BUG 2 FIX: Added background properties for proper scaling --- */
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
         }
         
         #top-notification {
@@ -794,15 +798,14 @@
         let currentlyDisplayedMessageCount = 25;
         
         // --- Enhanced System Prompt ---
+        // --- BUG 3 FIX: Strengthened prompt for format stability ---
         const DEFAULT_SYSTEM_PROMPT = `[Role Definition]
 You are an AI character in a chat application. Your goal is to be a compelling, realistic, and consistent conversational partner. You must communicate in Simplified Chinese.
 
-[Output Format Instructions]
-
-
-- CRITICAL: Your entire response MUST be a JSON array. Each element in the array is an object representing a single action or message.
-- DO NOT output anything outside of this JSON array. No extra text, no markdown, no explanations.
-- By combining multiple message objects in one array, you can send consecutive messages.
+[核心输出协议：绝对严格遵守]
+1.  **唯一格式**：你的所有回复 **必须** 是一个JSON数组结构的字符串。这是你与系统交流的唯一方式。
+2.  **纯净输出**：绝对不允许在JSON数组的外部添加任何文本、注释、解释、Markdown标记或其他任何字符。你的回复必须从'['开始，到']'结束，中间是严格合法的JSON内容。
+3.  **结构示例**：每个数组元素都是一个代表独立动作的JSON对象。不遵守此格式的回复将被视为无效。
 
 [Action Format Examples]
 This is a strict format guide. You MUST follow it.
@@ -1591,6 +1594,7 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
             };
         };
 
+        // --- BUG 1 FIX: Changed preview image ID to avoid conflicts ---
         const openCreateGroupModal = () => {
             let tempGroupAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2EwYTBiMyI+PHBhdGggZD0iTTExIDEyYy0uNTUgMC0xLS40NS0xLTFzLjQ1LTEgMS0xIDEgLjQ1IDEgMXMtLjQ1IDEtMSAxem00IDBjLS41NSAwLTEtLjQ1LTEtMXMuNDUtMSAxLTEgMSAuNDUgMSAxcy0uNDUgMS0xIDF6bS04IDBjLS41NSAwLTEtLjQ1LTEtMXMuNDUtMSAxLTEgMSAuNDUgMSAxcy0uNDUgMS0xIDF6bTEwLThINWMtMS4xIDAtMiAuOS0yIDJ2MTRsNC00aDEyYzEuMSAwIDItLjkgMi0yVjZjMC0xLjEtLjktMi0yLTJ6bTAtMTJoMTJjMS4xIDAgMiAuOSAyIDJ2MTBsMiAydjQtMmMwLTEuMS0uOS0yLTItMkg2bC00IDRWMnYyaDR6Ii8+PC9zdmc+';
             const memberSelectionHtml = characterSets.map(c => `
@@ -1603,7 +1607,7 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
 
             const bodyHtml = `
                 <div class="form-group avatar-upload-group" style="justify-content:center; flex-direction:column;">
-                    <img id="group-avatar-preview" src="${tempGroupAvatar}" class="avatar-preview" style="width:80px;height:80px;border-radius:12px;cursor:pointer;">
+                    <img id="new-group-avatar-preview" src="${tempGroupAvatar}" class="avatar-preview" style="width:80px;height:80px;border-radius:12px;cursor:pointer;">
                     <label for="group-avatar-upload-input" class="file-input-label" style="margin-top:10px;">选择群头像</label>
                 </div>
                 <div class="form-group"><label for="new-group-name">群名称</label><input type="text" id="new-group-name" placeholder="欢乐一家人"></div>
@@ -1623,10 +1627,10 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
                 closeModal(elements.featureModal);
             });
             
-            getEl('group-avatar-preview').onclick = () => elements.groupAvatarUploadInput.click();
+            getEl('new-group-avatar-preview').onclick = () => elements.groupAvatarUploadInput.click();
             elements.groupAvatarUploadInput.onchange = e => handleFileUpload(e.target.files[0], d => {
                 tempGroupAvatar = d;
-                getEl('group-avatar-preview').src = d;
+                getEl('new-group-avatar-preview').src = d;
             });
         };
 
