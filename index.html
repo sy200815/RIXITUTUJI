@@ -1431,7 +1431,7 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
                         case 'voice': addMessage({ sender: senderId, text: msgObj.content, type: 'voice', voiceDuration: `0:${Math.max(1, Math.round((msgObj.content||'').length / 5)).toString().padStart(2, '0')}`, llmContent }); break;
                         case 'text-image': addMessage({ sender: senderId, text: msgObj.content, type: 'text-image', llmContent }); break;
                         case 'sticker': if (character?.aiStickers?.length > 0) addMessage({ sender: senderId, type: 'sticker', stickerUrl: character.aiStickers[Math.floor(Math.random() * character.aiStickers.length)], llmContent }); break;
-                        case 'transfer': addMessage({ sender: senderId, type: 'transfer', transferAmount: msgObj.amount, transferMemo: msgObj.memo, transferCoverUrl: `https://source.unsplash.com/400x220/?gift,love`, transferStatus: 'pending', llmContent }); break;
+                        case 'transfer': addMessage({ sender: senderId, type: 'transfer', transferAmount: msgObj.amount, transferMemo: msgObj.memo, transferCoverUrl: `https://files.catbox.moe/qwu221.jpg`, transferStatus: 'pending', llmContent }); break;
                         case 'video-call-request': if(currentChat.type === 'direct') handleIncomingVideoCall(msgObj.content); break;
                         
                         case 'post_moment': 
