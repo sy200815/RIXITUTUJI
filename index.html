@@ -6,45 +6,57 @@
     <title>日系突突机</title>
     <style>
         /* --- Google Fonts --- */
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&family=Pacifico&family=Cubic+11&display=swap');
-
+        @import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Long+Cang&family=LXGW+WenKai+Mono+TC&family=Ma+Shan+Zheng&family=Noto+Sans+JP:wght@300;400;500&family=Noto+Sans+TC:wght@400;500&family=Noto+Serif+TC:wght@400;500&family=Pacifico&family=Press+Start+2P&family=VT323&family=ZCOOL+KuaiLe&family=Zhi+Mang+Xing&display=swap');
         /* --- Global Styles & Variables --- */
         :root {
-            --font-main: 'Cubic 11', 'Noto Sans JP', sans-serif;
-            --font-ui: 'Cubic 11', 'Noto Sans JP', sans-serif; /* UIフォントも統一 */
-            --font-logo: 'Pacifico', cursive;
-            
-            --bg-color: #fcefee;
-            --chat-bg-color: rgba(255, 255, 255, 0.85);
-            --header-bg-color: rgba(255, 255, 255, 0.95);
-            --input-bg-color: #ffffff;
-            --text-color: #5c5c5c;
-            --text-light-color: #a0a0a0;
-            --accent-color: #ff8fab;
-            --accent-dark-color: #f87197;
-            --border-color: #fde2e8;
-            --delete-color: #ff6b6b;
-            --success-color: #4CAF50;
-            --notification-bg: rgba(255, 143, 171, 0.9);
+    --font-main: 'Cubic 11', 'Noto Sans JP', sans-serif;
+    --font-ui: 'Cubic 11', 'Noto Sans JP', sans-serif;
+    --font-logo: 'Pacifico', cursive;
+    
+    --bg-color: #fcefee;
+    --chat-bg-color: rgba(255, 255, 255, 0.85);
+    --header-bg-color: rgba(255, 255, 255, 0.95);
+    --input-bg-color: #ffffff;
+    --text-color: #5c5c5c;
+    --text-light-color: #a0a0a0;
+    --accent-color: #ff8fab;
+    --accent-dark-color: #f87197;
+    --border-color: #fde2e2; /* 稍微调整边框色 */
+    --delete-color: #ff6b6b;
+    --success-color: #4CAF50;
+    --notification-bg: rgba(255, 143, 171, 0.9);
+    --red-packet-color: #e67e22;
 
-            /* Bubble Themes */
-            --theme1-ai-bg: #ffffff; --theme1-ai-text: #333333;
-            --theme1-user-bg: #333333; --theme1-user-text: #ffffff;
-            --theme2-ai-bg: #333333; --theme2-ai-text: #ffffff;
-            --theme2-user-bg: #ffffff; --theme2-user-text: #333333;
-            --theme3-ai-bg: #f0f0f0; --theme3-ai-text: #555555;
-            --theme3-user-bg: #87ceeb; --theme3-user-text: #ffffff;
-            --theme4-ai-bg: #f0f0f0; --theme4-ai-text: #555555;
-            --theme4-user-bg: #98d8a8; --theme4-user-text: #ffffff;
-            --theme5-ai-bg: #ffffff; --theme5-ai-text: #444444;
-            --theme5-user-bg: #ffe4f1; --theme5-user-text: #c2185b;
+    /* Bubble Themes */
+    /* 默认主题 */
+    --theme1-ai-bg: #ffffff; --theme1-ai-text: #333333;
+    --theme1-user-bg: #333333; --theme1-user-text: #ffffff;
+    --theme2-ai-bg: #333333; --theme2-ai-text: #ffffff;
+    --theme2-user-bg: #ffffff; --theme2-user-text: #333333;
+    
+    /* 修复字体色的旧主题 */
+    --theme3-ai-bg: #f0f0f0; --theme3-ai-text: #333333;
+    --theme3-user-bg: #87ceeb; --theme3-user-text: #333333; /* 天蓝色 */
+    --theme4-ai-bg: #f0f0f0; --theme4-ai-text: #333333;
+    --theme4-user-bg: #98d8a8; --theme4-user-text: #333333; /* 草绿色 */
+    --theme5-ai-bg: #ffffff; --theme5-ai-text: #333333;
+    --theme5-user-bg: #ffe4f1; --theme5-user-text: #c2185b; /* 樱花色 */
 
-            --ai-bubble-bg: var(--theme1-ai-bg);
-            --ai-bubble-text: var(--theme1-ai-text);
-            --user-bubble-bg: var(--theme1-user-bg);
-            --user-bubble-text: var(--theme1-user-text);
-        }
+    /* 新增主题 */
+    --theme6-ai-bg: #e9e9eb; --theme6-ai-text: #333333; /* 浅灰 / 深空蓝 */
+    --theme6-user-bg: #007aff; --theme6-user-text: #ffffff;
+    --theme7-ai-bg: #5698d2; --theme7-ai-text: #333333; /* 马龙卡蓝 / 奶油黄 */
+    --theme7-user-bg: #fff2cc; --theme7-user-text: #333333;
+    --theme8-ai-bg: #ffffff; --theme8-ai-text: #333333; /* 微信日间 */
+    --theme8-user-bg: #a9ea7a; --theme8-user-text: #333333;
+    --theme9-ai-bg: #2c2c2c; --theme9-ai-text: #ffffff; /* 微信夜间 */
+    --theme9-user-bg: #73b644; --theme9-user-text: #ffffff;
 
+    --ai-bubble-bg: var(--theme1-ai-bg);
+    --ai-bubble-text: var(--theme1-ai-text);
+    --user-bubble-bg: var(--theme1-user-bg);
+    --user-bubble-text: var(--theme1-user-text);
+}
         /* --- Base & Layout --- */
         html, body { height: 100%; overflow: hidden; }
         body {
@@ -60,8 +72,7 @@
             display: flex; flex-direction: column; height: 100%; max-width: 800px; margin: 0 auto;
             background-color: var(--chat-bg-color); backdrop-filter: blur(10px); box-shadow: 0 0 30px rgba(255, 143, 171, 0.15);
             transition: background-color 0.5s ease;
-            position: relative; /* For notification */
-            /* --- BUG 2 FIX: Added background properties for proper scaling --- */
+            position: relative;
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center center;
@@ -106,19 +117,11 @@
         #messages::-webkit-scrollbar-thumb { background-color: var(--accent-color); border-radius: 10px; }
         
         #load-more-btn {
-            align-self: center;
-            background-color: #f0f0f0;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 15px;
-            cursor: pointer;
-            color: #888;
-            font-family: var(--font-ui);
-            margin-bottom: 15px;
-            transition: background-color 0.2s;
+            align-self: center; background-color: #f0f0f0; border: none; padding: 8px 15px;
+            border-radius: 15px; cursor: pointer; color: #888; font-family: var(--font-ui);
+            margin-bottom: 15px; transition: background-color 0.2s;
         }
         #load-more-btn:hover { background-color: #e0e0e0; }
-
 
         /* --- Message Bubbles --- */
         .message { display: flex; align-items: flex-end; gap: 10px; max-width: 80%; cursor: pointer; margin-bottom: 10px; }
@@ -138,11 +141,9 @@
         .bubble p { margin: 0; }
         .timestamp { font-size: 0.7em; color: var(--text-light-color); margin-top: 5px; padding: 0 5px; }
         
-        /* Multi-select Mode */
         .multi-select-mode .message:not(.selected):not(.system) { opacity: 0.6; }
         .multi-select-mode .message.selected .bubble { transform: scale(1.03); border: 2px solid var(--accent-dark-color); }
 
-        /* Typing Indicator */
         .typing-indicator { align-items: center; gap: 8px; font-size: 0.9em; font-style: italic; color: #aaa; }
         .typing-indicator .dot { width: 6px; height: 6px; background-color: #ccc; border-radius: 50%; animation: typing 1.4s infinite; }
         .typing-indicator .dot:nth-child(1) { animation-delay: 0.2s; }
@@ -162,7 +163,7 @@
         #send-btn:disabled { background-color: #f8c3d1; cursor: not-allowed; transform: scale(1); }
         #send-btn svg { width: 20px; height: 20px; fill: white; }
 
-        #action-panel { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 15px; padding-top: 0; padding-bottom: 0; padding-left: 20px; padding-right: 20px; border-top: 1px solid var(--border-color); max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease-out; }
+        #action-panel { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 15px; padding: 0 20px; border-top: 1px solid var(--border-color); max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease-out; }
         #action-panel.show { max-height: 300px; padding-top: 20px; padding-bottom: 20px; }
         .action-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; font-family: var(--font-ui); font-size: 0.8em; color: var(--text-color); }
         .action-item-icon { width: 50px; height: 50px; background-color: #fff; border: 1px solid var(--border-color); border-radius: 12px; display: flex; justify-content: center; align-items: center; margin-bottom: 5px; transition: all 0.2s ease; }
@@ -194,9 +195,21 @@
         .transfer-memo { font-size: 0.9em; opacity: 0.9; margin-top: 5px; }
         .transfer-footer { font-size: 0.7em; opacity: 0.8; padding: 5px 15px; background: rgba(0,0,0,0.1); }
         .transfer-acknowledged { position: absolute; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.3); backdrop-filter: blur(2px); display:flex; justify-content:center; align-items:center; color:white; font-family:var(--font-ui); font-size:1.1em; }
-        
+
+        /* Red Packet Bubble */
+        .bubble.message-red-packet { width: 250px; padding: 0; background: var(--red-packet-color); border-radius: 12px; color: white; box-shadow: 0 4px 12px rgba(22, 22, 22, 0.2); }
+        .red-packet-body { padding: 15px; }
+        .red-packet-body-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .red-packet-body-header svg { width: 32px; height: 32px; fill: white; }
+        .red-packet-memo { font-size: 1.1em; }
+        .red-packet-grab-btn { background: #f39c12; border: none; color: white; width: 100%; padding: 12px; font-size: 1.1em; cursor: pointer; transition: background-color 0.2s; font-family: var(--font-main); }
+        .red-packet-grab-btn:hover { background: #f1c40f; }
+        .red-packet-footer { font-size: 0.75em; padding: 5px 15px; background: rgba(0,0,0,0.1); }
+        .red-packet-results { padding: 10px; background: white; color: var(--text-color); border-radius: 0 0 12px 12px; }
+        .red-packet-result-item { display: flex; justify-content: space-between; padding: 4px 5px; font-size: 0.85em; }
+
         /* Poll Bubble */
-        .bubble.message-poll { background: #fff; border: 1px solid var(--border-color); padding: 15px; color: var(--text-color); width: 280px; }
+        .bubble.message-poll { background: #fff; border: 1px solid var(--border-color); padding: 15px; color: var(--text-color); max-width: 280px; }
         .poll-question { font-weight: 500; margin-bottom: 15px; font-size: 1.05em; color: var(--accent-dark-color); }
         .poll-option { margin-bottom: 10px; }
         .poll-option-label { display: block; margin-bottom: 5px; font-size: 0.9em; }
@@ -238,7 +251,6 @@
         #sticker-gallery img { width: 100%; height: 80px; object-fit: cover; border-radius: 8px; cursor: pointer; transition: transform 0.2s; }
         #sticker-gallery img:hover { transform: scale(1.1); }
 
-        /* --- Video Call Overlay --- */
         #video-call-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1001; display: none; flex-direction: column; justify-content: space-between; align-items: center; color: white; font-family: var(--font-ui); padding: 20px; box-sizing: border-box; }
         #video-call-overlay.show { display: flex; }
         .video-main-view { width: 100%; height: 100%; position: absolute; top: 0; left: 0; object-fit: cover; opacity: 0.3; z-index: -1; }
@@ -263,7 +275,6 @@
         .video-btn.accept { background-color: var(--success-color); }
         .video-btn.decline { background-color: var(--delete-color); }
         
-        /* --- MODALS (Settings, Delete, etc) --- */
         #delete-toolbar { position: absolute; bottom: 0; left: 0; width: 100%; box-sizing: border-box; background: var(--header-bg-color); padding: 15px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; z-index: 5; }
         #delete-toolbar.show { opacity: 1; visibility: visible; }
         #delete-info { font-family: var(--font-ui); color: var(--text-color); }
@@ -378,49 +389,23 @@
     
         /* Diary Modal */
         #diary-modal-content {
-            font-family: var(--font-ui);
-            background: #fff8f5;
-            padding: 25px 35px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            width: 90%;
-            max-width: 500px;
-            max-height: 80vh;
-            display: flex;
-            flex-direction: column;
+            font-family: var(--font-ui); background: #fff8f5; padding: 25px 35px; border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 90%; max-width: 500px; max-height: 80vh;
+            display: flex; flex-direction: column;
         }
         #diary-header {
-            text-align: center;
-            font-family: var(--font-logo);
-            color: var(--accent-dark-color);
-            font-size: 2em;
-            padding-bottom: 15px;
-            border-bottom: 2px dashed var(--border-color);
-            margin-bottom: 15px;
+            text-align: center; font-family: var(--font-logo); color: var(--accent-dark-color);
+            font-size: 2em; padding-bottom: 15px; border-bottom: 2px dashed var(--border-color); margin-bottom: 15px;
         }
-        #diary-entries {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding-right: 10px;
-        }
+        #diary-entries { flex-grow: 1; overflow-y: auto; padding-right: 10px; }
         .diary-entry {
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-left: 4px solid var(--accent-color);
+            background: rgba(255, 255, 255, 0.7); border-radius: 10px; padding: 15px;
+            margin-bottom: 15px; border-left: 4px solid var(--accent-color);
         }
-        .diary-date {
-            font-weight: bold;
-            color: var(--accent-dark-color);
-            margin-bottom: 8px;
-        }
-        .diary-content {
-            line-height: 1.7;
-            color: #555;
-            white-space: pre-wrap;
-        }
+        .diary-date { font-weight: bold; color: var(--accent-dark-color); margin-bottom: 8px; }
+        .diary-content { line-height: 1.7; color: #555; white-space: pre-wrap; }
     </style>
+  <style id="custom-bubble-style-tag"></style>
 </head>
 <body>
     <div id="chat-container">
@@ -435,7 +420,7 @@
             <img id="header-avatar" src="" title="读取他的心声 / 群组信息">
             <h1 id="chat-name-header" contenteditable="true"></h1>
             <button id="settings-btn" title="设置">
-                <svg viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17-.59-1.69-.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12-.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17-.59-1.69-.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12-.64l2 3.46c.12.22.39.3.61.22l2.49 1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
             </button>
         </div>
 
@@ -458,6 +443,10 @@
                 <div class="action-item" id="action-send-transfer">
                      <div class="action-item-icon"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm-1 14H5c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1h14c.55 0 1 .45 1 1v10c0 .55-.45 1-1 1zM9 14h6c.55 0 1-.45 1-1s-.45-1-1-1H9c-.55 0-1 .45-1 1s.45 1 1 1zm-2.5-4c.83 0 1.5-.67 1.5-1.5S7.33 7 6.5 7 5 7.67 5 8.5 5.67 10 6.5 10z"/></svg></div>
                     <span>转账</span>
+                </div>
+                 <div class="action-item" id="action-send-red-packet">
+                    <div class="action-item-icon"><svg style="fill: var(--red-packet-color);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 4H6C4.9 4 4 4.9 4 6v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-6 11.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 6.5 12 6.5s4.5 2.01 4.5 4.5-2.01 4.5-4.5 4.5z"/><path d="M12 8.5c-1.38 0-2.5 1.12-2.5 2.5s1.12 2.5 2.5 2.5 2.5-1.12 2.5-2.5-1.12-2.5-2.5-2.5z"/></svg></div>
+                    <span>红包</span>
                 </div>
                  <div class="action-item" id="action-send-sticker">
                     <div class="action-item-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1.5-6.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm3-2c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zM8 12.5c0 .83-.67 1.5-1.5 1.5S5 13.33 5 12.5 5.67 11 6.5 11s1.5.67 1.5 1.5z"/></svg></div>
@@ -507,29 +496,26 @@
                 <button class="close-btn">&times;</button>
             </div>
             <div class="settings-body">
-                <!-- Common Settings -->
                 <div id="common-settings-section">
                     <div class="settings-section">
                         <h3>API & 模型设置</h3>
                         <div class="form-group"><label for="api-base-url">API端点 (Base URL)</label><input type="text" id="api-base-url" placeholder="例如: https://api.openai.com"></div>
                         <div class="form-group"><label for="api-key">API密钥 (API Key)</label><input type="password" id="api-key" placeholder="在此输入您的API密钥"></div>
-                        <div class="form-group"><label for="model-select">模型选择</label><div class="model-group"><select id="model-select"></select><button id="fetch-models-btn">获取模型列表</button></div></div>
+                        <div class="form-group"><label for="model-select">模型选择 (提示: 图片识别请用gpt-4o等vision模型)</label><div class="model-group"><select id="model-select"></select><button id="fetch-models-btn">获取模型列表</button></div></div>
                     </div>
-
                     <div class="settings-section">
                         <h3>全局设定</h3>
-                        <div class="form-group"><label for="custom-system-prompt">自定义系统提示词</label><textarea id="custom-system-prompt" placeholder="定义AI响应格式的全局指令。若为空，则使用默认设置。"></textarea></div>
+                        <div class="form-group"><label for="custom-system-prompt">自定义系统提示词 (留空则使用默认)</label><textarea id="custom-system-prompt" placeholder="定义AI响应格式的全局指令。若为空，则使用一个为提升角色扮演效果而优化的默认设置。"></textarea></div>
                     </div>
                 </div>
 
-                <!-- Character Specific Settings -->
                 <div id="character-settings-section">
                      <div class="settings-section">
                         <h3>他的个人资料设置</h3>
                         <div class="form-group"><label for="character-name-input">他的名字</label><input type="text" id="character-name-input" placeholder="显示在顶部的名称"></div>
                         <div class="form-group"><label for="ai-avatar-upload-input">他的头像</label><div class="avatar-upload-group"><img id="ai-avatar-preview" src="" class="avatar-preview"><label class="file-input-label" for="ai-avatar-upload-input">选择图片</label></div></div>
                         <div class="form-group"><label for="memory-size-input">他的记忆容量 (消息数)</label><input type="number" id="memory-size-input" placeholder="默认: 50"></div>
-                        <div class="form-group"><label for="character-prompt">他人格设定 (System Prompt)</label><textarea id="character-prompt" placeholder="在这里设置他的人格、说话方式、背景故事等。(留空使用默认设置)"></textarea></div>
+                        <div class="form-group"><label for="character-prompt">他人格设定 (System Prompt)</label><textarea id="character-prompt" placeholder="在这里设置他的人格、说话方式、背景故事等。"></textarea></div>
                     </div>
                      <div class="settings-section sticker-zone">
                         <h3>表情管理</h3>
@@ -537,7 +523,6 @@
                     </div>
                 </div>
                 
-                <!-- Group Specific Settings -->
                 <div id="group-settings-section">
                     <div class="settings-section">
                         <h3>群聊设置</h3>
@@ -547,7 +532,6 @@
                     </div>
                 </div>
 
-                <!-- My Profile Settings -->
                 <div id="my-profile-settings-section">
                     <div class="settings-section">
                         <h3>我的个人资料设置</h3>
@@ -560,8 +544,56 @@
 
                 <div class="settings-section">
                     <h3>设计设置</h3>
-                    <div class="form-group"><label>聊天气泡主题</label><div class="theme-selector"><div class="theme-option active" data-theme="1">白/黑<span></span></div><div class="theme-option" data-theme="2">黑/白<span></span></div><div class="theme-option" data-theme="3">天蓝色<span></span></div><div class="theme-option" data-theme="4">草绿色<span></span></div><div class="theme-option" data-theme="5">樱花色<span></span></div></div></div>
-                    <div class="form-group"><label for="background-upload-input">聊天背景</label><label class="file-input-label" for="background-upload-input">选择背景图片</label></div>
+                  <div class="form-group">
+    <label for="font-select">聊天字体 (部分像素字体可能缺少某些汉字)</label>
+    <select id="font-select">
+        <option value="'Cubic 11', 'Noto Sans JP', sans-serif">默认字体 (Cubic 11)</option>
+        <optgroup label="台湾繁体风格">
+            <option value="'Noto Sans TC', sans-serif">思源黑体 TC</option>
+            <option value="'ZCOOL KuaiLe', cursive">站酷快乐体</option>
+            <option value="'Long Cang', cursive">龙藏体</option>
+        </optgroup>
+        <optgroup label="可爱手写风格">
+            <option value="'Zhi Mang Xing', cursive">芝麻星体</option>
+            <option value="'Ma Shan Zheng', cursive">马善政体</option>
+            <option value="'LXGW WenKai Mono TC', sans-serif">霞鹜文楷 TC</option>
+        </optgroup>
+        <optgroup label="复古像素风格">
+            <option value="'Press Start 2P', cursive">Press Start 2P</option>
+            <option value="'DotGothic16', sans-serif">点阵哥特体 16</option>
+            <option value="'VT323', monospace">VT323</option>
+        </optgroup>
+        <optgroup label="其他风格">
+            <option value="'Noto Serif TC', serif">思源宋体 TC</option>
+            <option value="'Pacifico', cursive">Pacifico</option>
+            <option value="'ZCOOL QingKe HuangYou', cursive">站酷庆科黄油体</option>
+        </optgroup>
+    </select>
+</div>
+                    <div class="form-group">
+    <label>聊天气泡主题</label>
+    <div class="theme-selector">
+        <div class="theme-option active" data-theme="1">白/黑<span></span></div>
+        <div class="theme-option" data-theme="2">黑/白<span></span></div>
+        <div class="theme-option" data-theme="3">天蓝色<span></span></div>
+        <div class="theme-option" data-theme="4">草绿色<span></span></div>
+        <div class="theme-option" data-theme="5">樱花色<span></span></div>
+        <div class="theme-option" data-theme="6">深空蓝<span></span></div>
+        <div class="theme-option" data-theme="7">奶油黄<span></span></div>
+        <div class="theme-option" data-theme="8">微信(日)<span></span></div>
+        <div class="theme-option" data-theme="9">微信(夜)<span></span></div>
+        <div class="theme-option" data-theme="custom">自定义</div>
+    </div>
+</div>
+<div class="form-group">
+    <label for="custom-bubble-css">自定义气泡CSS (选择“自定义”主题后生效)</label>
+    <textarea id="custom-bubble-css" rows="6" placeholder="在此输入自定义CSS代码。例如：
+--ai-bubble-bg: #f0f0f0;
+--ai-bubble-text: #333;
+--user-bubble-bg: #0084ff;
+--user-bubble-text: #fff;"></textarea>
+</div>
+<div class="form-group"><label>聊天背景</label><label class="file-input-label" for="background-upload-input">选择背景图片</label></div>
                 </div>
 
                 <div class="settings-section data-zone">
@@ -642,7 +674,6 @@
                 </div>
             </div>
             <div id="moments-feed">
-                <!-- Moment posts will be dynamically inserted here -->
             </div>
         </div>
     </div>
@@ -696,6 +727,7 @@
             actionSendTextImage: getEl('action-send-text-image'), 
             actionSendVoice: getEl('action-send-voice'),
             actionSendTransfer: getEl('action-send-transfer'), 
+            actionSendRedPacket: getEl('action-send-red-packet'),
             actionSendSticker: getEl('action-send-sticker'),
             actionVideoCall: getEl('action-video-call'), 
             actionSendRealImage: getEl('action-send-real-image'),
@@ -786,55 +818,73 @@
             clearHistoryBtn: getEl('clear-history-btn'),
             deleteChatBtnContainer: getEl('delete-chat-btn-container'),
             deleteChatBtn: getEl('delete-chat-btn'),
-        };
-
+                  deleteChatBtnContainer: getEl('delete-chat-btn-container'),
+        deleteChatBtn: getEl('delete-chat-btn'),
+        customBubbleCssInput: getEl('custom-bubble-css'), // 新增这一行
+          deleteChatBtn: getEl('delete-chat-btn'),
+customBubbleCssInput: getEl('custom-bubble-css'),
+fontSelect: getEl('font-select'), // 新增这一行
+    };
+const applyFont = (fontFamily) => {
+    const root = document.documentElement;
+    // 更新CSS变量，让整个页面的字体都改变
+    root.style.setProperty('--font-main', fontFamily);
+    root.style.setProperty('--font-ui', fontFamily);
+    // 确保下拉菜单显示的是当前选中的字体
+    if (elements.fontSelect.value !== fontFamily) {
+        elements.fontSelect.value = fontFamily;
+    }
+};
         // --- State Management ---
         let characterSets = [];
         let groupChats = [];
         let userMomentsProfile = {};
-        let currentChat = { type: 'direct', id: null }; // { type: 'direct' | 'group', id: '...' }
+        let currentChat = { type: 'direct', id: null };
         let isMultiSelectMode = false, selectedMessageIds = [];
         let responseTriggerTimer = null, isActionPanelOpen = false, isVideoCallActive = false;
         let currentlyDisplayedMessageCount = 25;
         
-        // --- Enhanced System Prompt ---
-        // --- BUG 3 FIX: Strengthened prompt for format stability ---
         const DEFAULT_SYSTEM_PROMPT = `[Role Definition]
 You are an AI character in a chat application. Your goal is to be a compelling, realistic, and consistent conversational partner. You must communicate in Simplified Chinese.
 
 [核心输出协议：绝对严格遵守]
 1.  **唯一格式**：你的所有回复 **必须** 是一个JSON数组结构的字符串。这是你与系统交流的唯一方式。
 2.  **纯净输出**：绝对不允许在JSON数组的外部添加任何文本、注释、解释、Markdown标记或其他任何字符。你的回复必须从'['开始，到']'结束，中间是严格合法的JSON内容。
-3.  **结构示例**：每个数组元素都是一个代表独立动作的JSON对象。不遵守此格式的回复将被视为无效。
 
 [Action Format Examples]
 This is a strict format guide. You MUST follow it.
 [
     {"type": "text", "content": "This is a plain text message."},
-    {"type": "sticker", "sticker_id": "optional_id_for_logic_not_url"},
+    {"type": "sticker", "sticker_id": "optional_id_for_logic"},
     {"type": "voice", "content": "The transcript of the voice message."},
     {"type": "text-image", "content": "A detailed description of an image you are 'showing' the user."},
-    {"type": "transfer", "amount": 520.00, "memo": "A memo for the transfer, e.g., 'For you'"},
-    {"type": "video-call-request", "content": "An invitation message, e.g., 'Want to video chat for a bit?'"},
-    {"type": "post_moment", "content": "Text for a social media post.", "image_query": "Optional. Keywords for an image, e.g., 'afternoon tea dessert'"},
+    {"type": "transfer", "amount": 520.00, "memo": "A memo for the transfer"},
+    {"type": "video-call-request", "content": "An invitation message"},
+    {"type": "post_moment", "content": "Text for a social media post.", "image_query": "Optional. Keywords for an image"},
     {"type": "diary_entry", "content": "Today's diary entry content."},
+    {"type": "grab_red_packet", "packetId": "packet_id_string"},
     {"type": "vote", "pollId": "poll_id_string", "option": "chosen_option_string"},
     {"type": "moment_comment", "momentId": "moment_id_string", "comment_text": "Your comment text."},
     {"type": "moment_reply", "momentId": "moment_id_string", "commentId": "comment_id_to_reply_to", "reply_text": "Your reply text."}
 ]
 
-[响应风格与节奏]
-- 为了创造一个活泼、真实的对话氛围，你必须经常性地连续回复多条消息。在大多数情况下，你的JSON数组应包含 **至少6个消息对象**。这能让你更好地拆分思绪、表达反应，然后提出问题，模拟一种自然的、快节奏的聊天。
-- 角色不会输出标点符号，一句话不要太长，不要让角色油腻或者像霸道总裁，不许物化用户，不许说“小东西”，“小妖精”等等的任何霸总语录称呼
+[响应风格与节奏 (Response Style & Pacing)]
+- **多消息回复 (CRITICAL!)**: 为了创造一个活泼、真实的对话氛围，你必须经常性地连续回复多条消息。在大多数情况下，你的JSON数组应包含 **至少6个消息对象**。这能让你更好地拆分思绪、表达反应，然后提出问题，模拟一种自然的、快节奏的聊天。
+- **避免机械感**: 严禁询问“你最近在做什么？”或类似无意义的填充式问题。你的对话应该由情景和情感驱动。
+- **人格一致性**: 一定要有活人感，角色具有趣味性，像真实的人，禁止标签化理解角色，需要服务用户的情绪价值。
+- **禁止OOC行为**: 绝对禁止让角色表现得油腻或者像霸道总裁。严禁物化用户，不许说“小东西”，“小妖精”等任何霸总语录称呼。必须严格保持人设。
+- **生活感**: 偶尔使用 'post_moment' 或 'diary_entry' 动作来展示角色在聊天之外的生活，增加真实感。
+
+[Negative Constraint]
+- When acknowledging a transfer from the user, you MUST respond with a simple 'text' message. You MUST NOT respond with another 'transfer' action.
 
 [For Group Chats Only]
-- Add "senderId": "your_character_id" to EVERY action object.
-- Example: {"senderId": "char_abc", "type": "text", "content": "Hello everyone!"}
+- Add "senderId": "your_character_id" to EVERY action object. THIS IS A MANDATORY REQUIREMENT.
 
 [Core Persona]
-- You MUST strictly adhere to the persona defined in the "Character Prompt" section provided by the user.
+- You MUST strictly adhere to the persona defined in the "Character Prompt" section.
 - Refer to the recent chat history for context.
-- NEVER refer to the user as "用户" (user). Use the information from their profile.`;
+- NEVER refer to the user as "用户". Use the information from their profile.`;
 
 
         // --- Utility Functions ---
@@ -844,6 +894,91 @@ This is a strict format guide. You MUST follow it.
         const scrollToBottom = (container, behavior = 'smooth') => { container.scrollTo({ top: container.scrollHeight, behavior }); };
         const autoResizeTextarea = () => { elements.messageInput.style.height = 'auto'; elements.messageInput.style.height = (elements.messageInput.scrollHeight) + 'px'; };
         const generateId = (prefix) => `${prefix}_${Date.now()}${Math.random().toString(36).substring(2, 9)}`;
+
+              // --- IndexedDB (相册) 帮助函数 ---
+        const DB_NAME = 'AI_Boyfriend_ImageStore';
+        const STORE_NAME = 'images';
+
+        const openDb = () => {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, 1);
+                request.onerror = () => reject("打开IndexedDB失败");
+                request.onsuccess = () => resolve(request.result);
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME);
+                    }
+                };
+            });
+        };
+
+        const dbGet = async (key) => {
+            const db = await openDb();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(STORE_NAME, 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.get(key);
+                request.onerror = () => reject("从DB获取数据失败");
+                request.onsuccess = () => resolve(request.result);
+            });
+        };
+
+        const dbSet = async (key, value) => {
+            const db = await openDb();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(STORE_NAME, 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.put(value, key);
+                request.onerror = () => reject("向DB写入数据失败");
+                request.onsuccess = () => resolve(request.result);
+            });
+        };
+        // --- IndexedDB 帮助函数结束 ---
+
+             // --- 全新的图片压缩函数 ---
+        const compressImage = (dataUrl, options = {}) => {
+            return new Promise((resolve, reject) => {
+                const { quality = 0.7, maxWidth = 300, maxHeight = 300 } = options;
+                
+                const img = new Image();
+                img.src = dataUrl;
+
+                img.onload = () => {
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height = Math.round(height * (maxWidth / width));
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width = Math.round(width * (maxHeight / height));
+                            height = maxHeight;
+                        }
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // 对于头像等，使用JPEG格式可以获得更好的压缩率
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                    resolve(compressedDataUrl);
+                };
+
+                img.onerror = (error) => {
+                    console.error("图片加载失败，无法压缩", error);
+                    // 如果压缩失败，就返回原始图片，确保程序不会中断
+                    resolve(dataUrl); 
+                };
+            });
+        };
+        // --- 压缩函数结束 --- 
         
         const closeModal = (modal) => {
             if (!modal) return;
@@ -874,237 +1009,409 @@ This is a strict format guide. You MUST follow it.
             return null;
         }
 
-        const saveAllData = () => {
-            const backupData = {
-                characterSets,
-                groupChats,
-                currentChat,
-                userMomentsProfile,
-                customSystemPrompt: elements.customSystemPromptInput.value,
+                // --- 变化开始：替换这个函数 ---
+        const saveAllData = async () => {
+            const isImage = (value) => typeof value === 'string' && value.startsWith('data:image');
+            const imageKeys = new Set(); // 存储所有图片key，方便清理
+
+            const processObjectForSaving = async (obj) => {
+                if (!obj || typeof obj !== 'object') return obj;
+
+                const newObj = Array.isArray(obj) ? [] : {};
+                for (const key in obj) {
+                    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                        const value = obj[key];
+                        if (isImage(value)) {
+                            const imageKey = `img_${generateId(key)}`;
+                            await dbSet(imageKey, value);
+                            newObj[key] = imageKey;
+                            imageKeys.add(imageKey);
+                        } else if (typeof value === 'object') {
+                            newObj[key] = await processObjectForSaving(value);
+                        } else {
+                            newObj[key] = value;
+                        }
+                    }
+                }
+                return newObj;
             };
-            localStorage.setItem('aiBoyfriendBackup_v3', JSON.stringify(backupData));
-        };
 
-        const loadAllData = () => {
-            const savedData = JSON.parse(localStorage.getItem('aiBoyfriendBackup_v3') || '{}');
-            
-            characterSets = savedData.characterSets || [];
-            groupChats = savedData.groupChats || [];
-
-            // User Profile with backward compatibility for avatar fields
-            const savedProfile = savedData.userMomentsProfile || {};
-            const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2EwYTBiMyI+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQgMS43OS00IDQgMS43OSA0IDQgNHptMCAyYy0yLjY3IDAtOCAyLjI0LTggNC41VDIwYzAgLjU1IDMuNTggMS41IDggMS41czgtLjk1IDgtMS41di0xLjVjMC0yLjI2LTUuMzMtNC41LTgtNC41eiIvPjwvc3ZnPg==';
-            userMomentsProfile = {
-                name: savedProfile.name || '我',
-                chatAvatar: savedProfile.chatAvatar || savedProfile.avatar || defaultAvatar, // Handle old 'avatar' property
-                momentsAvatar: savedProfile.momentsAvatar || savedProfile.avatar || defaultAvatar, // Default to chat/old avatar if not present
-                cover: savedProfile.cover || 'https://images.unsplash.com/photo-1507525428034-b723a996f3d5?q=80&w=1000',
-                posts: savedProfile.posts || []
-            };
-            
-            elements.customSystemPromptInput.value = savedData.customSystemPrompt || '';
-
-            // Data migration for new features
-            characterSets.forEach(c => {
-                if (!c.diary) c.diary = [];
-                if (!c.moments) c.moments = [];
-                (c.moments || []).forEach(m => {
-                    if (!m.comments) m.comments = [];
-                    m.comments.forEach(comment => {
-                        if (!comment.id) comment.id = generateId('cmt');
-                        if (!comment.replies) comment.replies = [];
-                    });
-                });
-            });
-            groupChats.forEach(g => {
-                if(!g.userPrompt) g.userPrompt = '';
-                if(!g.groupMoments) g.groupMoments = [];
-            });
-
-
-            if (characterSets.length === 0) {
-                const newChar = createNewCharacterObject();
-                characterSets.push(newChar);
-                currentChat = { type: 'direct', id: newChar.id };
-            } else {
-                 currentChat = savedData.currentChat && ( (savedData.currentChat.type === 'direct' && characterSets.some(c => c.id === savedData.currentChat.id)) || (savedData.currentChat.type === 'group' && groupChats.some(g => g.id === savedData.currentChat.id)) ) ? savedData.currentChat : { type: 'direct', id: characterSets[0].id };
-            }
-            
-            loadChat(currentChat.type, currentChat.id);
-        };
-        
-        const createNewCharacterObject = () => {
-            const id = generateId('char');
-            return {
-                id: id,
-                config: {
-                    characterName: '他', 
-                    theme: '1', 
-                    aiAvatar: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBkPSJNNTAsMi41QzI0LjgsMi41LDIuNSwyNC44LDIuNSw1MHMxOS4zLDQ3LjUsNDcuNSw0Ny41czQ3LjUtMjIuMyw0Ny41LTQ3LjVMNTAsMi41eiBNMzgsNDQuOGMtMi4xLDAtMy44LTEuNy0zLjgtMy44czEuNy0zLjgsMy44LTMuOHMzLjgsMS43LDMuOCwzLjhTNDAuMSw0NC44LDM4LDQ0Ljh6IE02Miw0NC44Yy0yLjEsMC0zLjgtMS43LTMuOC0zLighYzAtMi4xLDEuNy0zLjgsMy44LTMuOHMzLjgsMS43LDMuOCwzLjhDNTguMiw0My4xLDY0LjEsNDQuOCw2Miw0NC44eiBNNzcuNSw2Ny41YzAsMC0xMC03LjUtMjcuNS03LjVzLTI3LjUsNy41LTI3LjUsNy41cy0yLjUtMTAgMC0yMHMxMi41LTEyLjUsMjcuNS0xMi41czI3LjUsMi41LDI3LjUsMTIuNVM3Ny41LDY3LjUsNzcuNSw2Ny41eiIgZmlsbD0iI2ZlY2VkNiIvPjwvc3ZnPg==', 
-                    userAvatar: userMomentsProfile.chatAvatar, 
-                    characterPrompt: '', 
-                    userPrompt: '', 
-                    apiBaseUrl: '', 
-                    apiKey: '', 
-                    model: '', 
-                    memorySize: 50,
-                    chatBackground: '',
-                },
-                chatHistory: [],
-                userStickers: [],
-                aiStickers: [],
-                moments: [],
-                diary: []
-            };
-        };
-        
-        const createNewGroupObject = (name, avatar, memberIds) => {
-            const id = generateId('group');
-            return {
-                id, name, avatar, memberIds,
-                userPrompt: '',
-                chatHistory: [],
-                polls: [],
-                groupMoments: []
-            };
-        };
-
-        const loadChat = (type, id) => {
-            currentChat = { type, id };
-            currentlyDisplayedMessageCount = 25; // Reset message count on chat switch
-            const chatData = getCurrentChatData();
-            if (!chatData) return;
-
-            elements.settingsBtn.style.display = 'block'; // Always show settings btn
-            elements.actionCreatePoll.style.display = (type === 'group') ? 'flex' : 'none';
-            elements.actionVideoCall.style.display = (type === 'direct') ? 'flex' : 'none';
-            elements.actionShowDiary.style.display = (type === 'direct') ? 'flex' : 'none';
-
-            if (type === 'direct') {
-                const { config } = chatData;
-                elements.chatNameHeader.textContent = config.characterName;
-                elements.headerAvatar.src = config.aiAvatar;
-                elements.headerAvatar.title = "读取他的心声";
-                elements.headerAvatar.onclick = showMindVoice;
-            } else if (type === 'group') {
-                elements.chatNameHeader.textContent = chatData.name;
-                elements.headerAvatar.src = chatData.avatar;
-                elements.headerAvatar.title = "群组信息";
-                elements.headerAvatar.onclick = () => elements.settingsBtn.click(); // Group info is in settings
-            }
-            
-            renderAllMessages();
-            saveAllData(); 
-        };
-        
-        const saveCurrentSettings = () => {
-            const chatData = getCurrentChatData();
-            if (!chatData) return;
-
-            // Save common settings (API) from the first character as global standard
-            const firstChar = characterSets[0];
-            if(firstChar) {
-                firstChar.config.apiBaseUrl = elements.apiBaseUrlInput.value.trim();
-                firstChar.config.apiKey = elements.apiKeyInput.value.trim();
-                firstChar.config.model = elements.modelSelect.value;
-            }
-
-            // Save user profile
-            userMomentsProfile.chatAvatar = elements.userAvatarPreview.src;
-            userMomentsProfile.momentsAvatar = elements.userMomentsAvatarPreview.src;
-            userMomentsProfile.cover = elements.userMomentsCoverPreview.src;
-
-            // Save specific chat settings
-            if (currentChat.type === 'direct') {
-                const character = chatData;
-                character.config = {
-                    ...character.config,
-                    apiBaseUrl: elements.apiBaseUrlInput.value.trim(), 
-                    apiKey: elements.apiKeyInput.value.trim(), 
-                    model: elements.modelSelect.value,
-                    characterName: elements.characterNameInput.value.trim() || '他', 
-                    characterPrompt: elements.characterPromptInput.value,
-                    userPrompt: elements.userPromptInput.value, 
-                    theme: elements.themeSelector.querySelector('.theme-option.active').dataset.theme,
-                    aiAvatar: elements.aiAvatarPreview.src, 
-                    userAvatar: userMomentsProfile.chatAvatar, // Ensure character config also uses chat avatar
-                    chatBackground: elements.chatContainer.style.backgroundImage.slice(5, -2), // remove url("...")
-                    memorySize: parseInt(elements.memorySizeInput.value) || 50,
+            try {
+                const backupData = {
+                    characterSets,
+                    groupChats,
+                    currentChat,
+                    userMomentsProfile,
+                    globalSettings: {
+                        customSystemPrompt: elements.customSystemPromptInput.value,
+                        apiBaseUrl: elements.apiBaseUrlInput.value,
+                        apiKey: elements.apiKeyInput.value,
+                        model: elements.modelSelect.value,
+                        theme: elements.themeSelector.querySelector('.theme-option.active')?.dataset.theme || '1',
+                      customBubbleCss: elements.customBubbleCssInput.value, // 新增这一行
+                      fontFamily: elements.fontSelect.value, // 新增这一行
+                    }
                 };
-            } else { // Group chat
-                const group = chatData;
-                group.name = elements.groupNameInput.value.trim() || '群聊';
-                group.avatar = elements.groupAvatarPreview.src;
-                group.userPrompt = elements.groupUserPromptInput.value;
+                
+                // 将图片存入IndexedDB并获取key
+                const processedData = await processObjectForSaving(backupData);
+
+                // 将处理后的数据（图片被替换为key）存入localStorage
+                localStorage.setItem('aiBoyfriendBackup_v6_meta', JSON.stringify(processedData));
+                
+            } catch (error) {
+                console.error("保存数据时出错:", error);
+                alert("保存数据失败，可能是存储空间不足。错误详情请查看控制台。");
             }
-
-            saveAllData();
-            loadChat(currentChat.type, currentChat.id);
         };
+        // --- 变化结束：替换这个函数 ---
 
-        const openSettingsModal = () => {
-            const chatData = getCurrentChatData();
-            if (!chatData) return;
+                // --- 变化开始：替换这个函数 ---
+        const loadAllData = async () => {
+    const isImageKey = (value) => typeof value === 'string' && value.startsWith('img_');
 
-            // Always show common and my profile sections
-            elements.commonSettingsSection.style.display = 'block';
-            elements.myProfileSettingsSection.style.display = 'block';
-            
-            // Populate common fields (using first char as master)
-            const apiConfigSource = characterSets[0] || createNewCharacterObject();
-            elements.apiBaseUrlInput.value = apiConfigSource.config.apiBaseUrl;
-            elements.apiKeyInput.value = apiConfigSource.config.apiKey;
-            const currentModel = apiConfigSource.config.model;
-            if(currentModel && ![...elements.modelSelect.options].some(o => o.value === currentModel)) {
+    const processObjectForLoading = async (obj) => {
+         if (!obj || typeof obj !== 'object') return obj;
+
+        for (const key in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                const value = obj[key];
+                if (isImageKey(value)) {
+                    const imageData = await dbGet(value);
+                    if (imageData) {
+                        obj[key] = imageData;
+                    } else {
+                        console.warn(`在IndexedDB中未找到图片: ${value}`);
+                    }
+                } else if (typeof value === 'object') {
+                    await processObjectForLoading(value);
+                }
+            }
+        }
+        return obj;
+    };
+    
+    const savedMeta = localStorage.getItem('aiBoyfriendBackup_v6_meta');
+
+    // --- 迁移旧数据 ---
+    const oldData = localStorage.getItem('aiBoyfriendBackup_v6');
+    if (oldData && !savedMeta) {
+        console.log("检测到旧版数据，正在迁移...");
+        try {
+            const dataToMigrate = JSON.parse(oldData);
+            characterSets = dataToMigrate.characterSets || [];
+            // ... (其他旧数据的加载逻辑)
+            await saveAllData(); // 使用新的保存逻辑来迁移数据
+            localStorage.removeItem('aiBoyfriendBackup_v6'); // 删除旧数据
+            console.log("数据迁移完成！");
+            location.reload(); // 重新加载以确保一致性
+            return;
+        } catch (e) {
+             console.error("旧数据迁移失败", e);
+        }
+    }
+    // --- 迁移结束 ---
+
+
+    if (!savedMeta) {
+        // 如果没有任何数据，则创建新角色
+        const newChar = createNewCharacterObject();
+        characterSets.push(newChar);
+        currentChat = { type: 'direct', id: newChar.id };
+        loadChat(currentChat.type, currentChat.id);
+        return;
+    }
+
+    try {
+        let savedData = JSON.parse(savedMeta);
+        savedData = await processObjectForLoading(savedData);
+
+        characterSets = savedData.characterSets || [];
+        groupChats = savedData.groupChats || [];
+
+        const savedProfile = savedData.userMomentsProfile || {};
+        const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2EwYTBiMyI+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQgMS43OS00IDQgMS43OSA0IDQgNHptMCAyYy0yLjY3IDAtOCAyLjI0LTggNC41VDIwYzAgLjU1IDMuNTggMS41IDggMS41czgtLjk1IDgtMS41di0xLjVjMC0yLjI2LTUuMzMtNC41LTgtNC41eiIvPjwvc3ZnPg==';
+        
+        // --- 这里是核心修改 ---
+        userMomentsProfile = {
+            name: savedProfile.name || '我',
+            chatAvatar: savedProfile.chatAvatar || defaultAvatar,
+            momentsAvatar: savedProfile.momentsAvatar || defaultAvatar,
+            cover: savedProfile.cover || 'https://images.unsplash.com/photo-1507525428034-b723a996f3d5?q=80&w=1000',
+            posts: savedProfile.posts || [],
+            // 注意：我们不再从这里加载 userPrompt，因为它已经迁移到每个角色对象中了
+        };
+        
+        const globalSettings = savedData.globalSettings || {};
+        elements.customSystemPromptInput.value = globalSettings.customSystemPrompt || '';
+        elements.apiBaseUrlInput.value = globalSettings.apiBaseUrl || '';
+        elements.apiKeyInput.value = globalSettings.apiKey || '';
+        const currentModel = globalSettings.model || '';
+        if (currentModel) {
+             if(![...elements.modelSelect.options].some(o => o.value === currentModel)) {
                 elements.modelSelect.add(new Option(currentModel, currentModel, true, true));
             }
-            if(currentModel) elements.modelSelect.value = currentModel;
-            
-            // Populate my profile
-            elements.userAvatarPreview.src = userMomentsProfile.chatAvatar;
-            elements.userMomentsAvatarPreview.src = userMomentsProfile.momentsAvatar; 
-            elements.userMomentsCoverPreview.src = userMomentsProfile.cover;
+            elements.modelSelect.value = currentModel;
+        }
+       elements.customBubbleCssInput.value = globalSettings.customBubbleCss || ''; // 新增这一行
+        getEl('custom-bubble-style-tag').textContent = elements.customBubbleCssInput.value; // 新增这一行
+        applyTheme(globalSettings.theme || '1');
+      applyFont(globalSettings.fontFamily || "'Cubic 11', 'Noto Sans JP', sans-serif"); // 新增这一行
 
-
-            if (currentChat.type === 'direct') {
-                const character = chatData;
-                elements.characterSettingsSection.style.display = 'block';
-                elements.groupSettingsSection.style.display = 'none';
-                elements.deleteChatBtn.textContent = '删除此角色';
-
-                elements.characterNameInput.value = character.config.characterName;
-                elements.aiAvatarPreview.src = character.config.aiAvatar;
-                elements.memorySizeInput.value = character.config.memorySize;
-                elements.characterPromptInput.value = character.config.characterPrompt;
-                elements.userPromptInput.value = character.config.userPrompt;
-                applyTheme(character.config.theme || '1');
-                if (character.config.chatBackground) { elements.chatContainer.style.backgroundImage = `url("${character.config.chatBackground}")`; }
-                else { elements.chatContainer.style.backgroundImage = ''; }
-            } else { // Group
-                const group = chatData;
-                elements.characterSettingsSection.style.display = 'none';
-                elements.groupSettingsSection.style.display = 'block';
-                elements.deleteChatBtn.textContent = '删除此群聊';
-                
-                elements.groupNameInput.value = group.name;
-                elements.groupAvatarPreview.src = group.avatar;
-                elements.groupUserPromptInput.value = group.userPrompt;
+        characterSets.forEach(c => {
+            // --- 数据迁移逻辑 ---
+            // 如果角色身上没有userPrompt，但旧的全局设置里有，就把它复制过来
+            if (!c.userPrompt && savedProfile.userPrompt) {
+                c.userPrompt = savedProfile.userPrompt;
             }
-            
-            elements.settingsModal.classList.add('show');
+            // --- 确保其他数据完整 ---
+            if (!c.diary) c.diary = [];
+            if (!c.moments) c.moments = [];
+            (c.moments || []).forEach(m => {
+                if (!m.id) m.id = generateId('moment');
+                if (!m.comments) m.comments = [];
+                m.comments.forEach(comment => {
+                    if (!comment.id) comment.id = generateId('cmt');
+                    if (!comment.replies) comment.replies = [];
+                });
+            });
+        });
+
+        if (characterSets.length === 0) {
+            const newChar = createNewCharacterObject();
+            characterSets.push(newChar);
+            currentChat = { type: 'direct', id: newChar.id };
+        } else {
+             currentChat = savedData.currentChat && ( (savedData.currentChat.type === 'direct' && characterSets.some(c => c.id === savedData.currentChat.id)) || (savedData.currentChat.type === 'group' && groupChats.some(g => g.id === savedData.currentChat.id)) ) ? savedData.currentChat : { type: 'direct', id: characterSets[0].id };
+        }
+        
+        loadChat(currentChat.type, currentChat.id);
+    } catch(error) {
+        console.error("加载数据失败:", error);
+        alert("加载数据失败，可能数据已损坏。将尝试重置。详情请查看控制台。");
+        localStorage.removeItem('aiBoyfriendBackup_v6_meta'); // 清除损坏的数据
+        location.reload();
+    }
+};
+        // --- 变化结束：替换这个函数 ---
+        const createNewCharacterObject = () => {
+    const id = generateId('char');
+    return {
+        id: id,
+        config: {
+            characterName: '他', 
+            aiAvatar: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBkPSJNNTAsMi41QzI0LjgsMi41LDIuNSwyNC44LDIuNSw1MHMxOS4zLDQ3LjUsNDcuNSw0Ny41czQ3LjUtMjIuMyw0Ny41LTQ3LjVMNTAsMi41eiBNMzgsNDQuOGMtMi4xLDAtMy44LTEuNy0zLjgtMy44czEuNy0zLjgsMy44LTMuOHMzLjgsMS43LDMuOCwzLjhTNDAuMSw0NC44LDM4LDQ0Ljh6IE02Miw0NC44Yy0yLjEsMC0zLjgtMS43LTMuOC0zLighYzAtMi4xLDEuNy0zLjgsMy44LTMuOHMzLjgsMS43LDMuOCwzLjhDNTguMiw0My4xLDY0LjEsNDQuOCw2Miw0NC44eiBNNzcuNSw2Ny41YzAsMC0xMC03LjUtMjcuNS03LjVzLTI3LjUsNy41LTI3LjUsNy41cy0yLjUtMTAgMC0yMHMxMi41LTEyLjUsMjcuNS0xMi41czI3LjUsMi41LDI3LjUsMTIuNVM3Ny41LDY3LjUsNzcuNSw2Ny41eiIgZmlsbD0iI2ZlY2VkNiIvPjwvc3ZnPg==', 
+            characterPrompt: '', 
+            memorySize: 50,
+        },
+        userPrompt: '', // 新增：为这个角色单独设置的“我的人设”
+        chatHistory: [],
+        userStickers: [],
+        aiStickers: [],
+        moments: [],
+        diary: []
+    };
+};
+        
+        const createNewGroupObject = (name, avatar, memberIds) => {
+    const id = generateId('group');
+    return {
+        id, name, avatar, memberIds,
+        userPrompt: '',
+        chatHistory: [],
+        polls: [],
+        groupMoments: [],
+        chatBackground: '' // <-- 新增：为群组添加背景属性
+    };
+};
+
+        const loadChat = (type, id) => {
+    currentChat = { type, id };
+    currentlyDisplayedMessageCount = 25;
+    const chatData = getCurrentChatData();
+    if (!chatData) return;
+
+    // Show/hide action buttons based on chat type
+    const isGroup = type === 'group';
+    elements.actionCreatePoll.style.display = isGroup ? 'flex' : 'none';
+    elements.actionSendRedPacket.style.display = isGroup ? 'flex' : 'none';
+    elements.actionSendTransfer.style.display = isGroup ? 'none' : 'flex';
+    elements.actionVideoCall.style.display = isGroup ? 'none' : 'flex';
+    elements.actionShowDiary.style.display = isGroup ? 'none' : 'flex';
+
+    const globalSettings = JSON.parse(localStorage.getItem('aiBoyfriendBackup_v6_meta') || '{}').globalSettings || {};
+    const globalTheme = globalSettings.theme || '1';
+
+    // --- 核心修复在这里 ---
+    // 我们不再区分是单聊还是群聊，统一处理
+    const chatName = type === 'direct' ? chatData.config.characterName : chatData.name;
+    const chatAvatar = type === 'direct' ? chatData.config.aiAvatar : chatData.avatar;
+    const chatBackground = type === 'direct' ? chatData.config.chatBackground : chatData.chatBackground;
+
+    elements.chatNameHeader.textContent = chatName;
+    elements.headerAvatar.src = chatAvatar;
+    
+    // 根据背景是否存在，来决定是显示背景还是清空背景
+    elements.chatContainer.style.backgroundImage = chatBackground ? `url("${chatBackground}")` : '';
+
+    if (type === 'direct') {
+        elements.headerAvatar.title = "读取他的心声";
+        elements.headerAvatar.onclick = showMindVoice;
+    } else if (type === 'group') {
+        elements.headerAvatar.title = "群组信息";
+        elements.headerAvatar.onclick = () => elements.settingsBtn.click();
+    }
+    
+    applyTheme(globalTheme);
+    renderAllMessages();
+};
+               const saveCurrentSettings = async () => { // 添加了 async
+    const chatData = getCurrentChatData();
+    if (!chatData) return;
+
+    // 全局的用户头像等信息保持不变
+    userMomentsProfile.chatAvatar = elements.userAvatarPreview.src;
+    userMomentsProfile.momentsAvatar = elements.userMomentsAvatarPreview.src;
+    userMomentsProfile.cover = elements.userMomentsCoverPreview.src;
+
+    if (currentChat.type === 'direct') {
+        const character = chatData;
+        // --- 核心修改 ---
+        // 将"关于我"的内容保存到角色专属的userPrompt中
+        character.userPrompt = elements.userPromptInput.value;
+
+        character.config = {
+            ...character.config,
+            characterName: elements.characterNameInput.value.trim() || '他', 
+            characterPrompt: elements.characterPromptInput.value,
+            aiAvatar: elements.aiAvatarPreview.src, 
+            chatBackground: elements.chatContainer.style.backgroundImage.slice(5, -2),
+            memorySize: parseInt(elements.memorySizeInput.value) || 50,
         };
+    } else { // 群聊
+    const group = chatData;
+    group.name = elements.groupNameInput.value.trim() || '群聊';
+    group.avatar = elements.groupAvatarPreview.src;
+    group.userPrompt = elements.groupUserPromptInput.value;
+    group.chatBackground = elements.chatContainer.style.backgroundImage.slice(5, -2); // <-- 新增这一行
+}
+    await saveAllData(); // 添加了 await
+    loadChat(currentChat.type, currentChat.id);
+};
+
+        const openSettingsModal = () => {
+    const chatData = getCurrentChatData();
+    if (!chatData) return;
+    
+    elements.myProfileSettingsSection.style.display = 'block';
+    // 全局的用户头像等信息保持不变
+    elements.userAvatarPreview.src = userMomentsProfile.chatAvatar;
+    elements.userMomentsAvatarPreview.src = userMomentsProfile.momentsAvatar; 
+    elements.userMomentsCoverPreview.src = userMomentsProfile.cover;
+
+    if (currentChat.type === 'direct') {
+        const character = chatData;
+        elements.characterSettingsSection.style.display = 'block';
+        elements.groupSettingsSection.style.display = 'none';
+        elements.deleteChatBtn.textContent = '删除此角色';
+        
+        // --- 核心修改 ---
+        // "关于我"的文本框现在读取角色专属的userPrompt
+        elements.userPromptInput.value = character.userPrompt || ''; 
+        // 隐藏群聊专属的"我的人设"输入框
+        getEl('group-user-prompt').closest('.form-group').style.display = 'none';
+        // 显示单聊专属的"我的人设"输入框
+        getEl('user-prompt').closest('.form-group').style.display = 'flex';
+
+        elements.characterNameInput.value = character.config.characterName;
+        elements.aiAvatarPreview.src = character.config.aiAvatar;
+        elements.memorySizeInput.value = character.config.memorySize;
+        elements.characterPromptInput.value = character.config.characterPrompt;
+        
+    } else { // 群聊
+        const group = chatData;
+        elements.characterSettingsSection.style.display = 'none';
+        elements.groupSettingsSection.style.display = 'block';
+        elements.deleteChatBtn.textContent = '删除此群聊';
+
+        // --- 核心修改 ---
+        // "我在此群的人设"文本框现在读取群聊专属的userPrompt
+        elements.groupUserPromptInput.value = group.userPrompt || '';
+        // 显示群聊专属的"我的人设"输入框
+        getEl('group-user-prompt').closest('.form-group').style.display = 'flex';
+        // 隐藏单聊专属的"我的人设"输入框
+        getEl('user-prompt').closest('.form-group').style.display = 'none';
+
+        elements.groupNameInput.value = group.name;
+        elements.groupAvatarPreview.src = group.avatar;
+    }
+    
+    elements.settingsModal.classList.add('show');
+};
         
         const applyTheme = (theme) => {
-            const root = document.documentElement;
-            const themes = { '1': ['--theme1-ai-bg', '--theme1-ai-text', '--theme1-user-bg', '--theme1-user-text'], '2': ['--theme2-ai-bg', '--theme2-ai-text', '--theme2-user-bg', '--theme2-user-text'], '3': ['--theme3-ai-bg', '--theme3-ai-text', '--theme3-user-bg', '--theme3-user-text'], '4': ['--theme4-ai-bg', '--theme4-ai-text', '--theme4-user-bg', '--theme4-user-text'], '5': ['--theme5-ai-bg', '--theme5-ai-text', '--theme5-user-bg', '--theme5-user-text'],};
-            const [aiBg, aiText, userBg, userText] = themes[theme];
-            root.style.setProperty('--ai-bubble-bg', `var(${aiBg})`); root.style.setProperty('--ai-bubble-text', `var(${aiText})`);
-            root.style.setProperty('--user-bubble-bg', `var(${userBg})`); root.style.setProperty('--user-bubble-text', `var(${userText})`);
-            elements.themeSelector.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
-            elements.themeSelector.querySelector(`.theme-option[data-theme="${theme}"]`).classList.add('active');
-        };
+    const root = document.documentElement;
+    const customStyleTag = getEl('custom-bubble-style-tag');
 
-        const handleFileUpload = (file, callback) => { if (file) { const reader = new FileReader(); reader.onload = (e) => callback(e.target.result); reader.readAsDataURL(file); } };
+    // 清理旧样式
+    root.style.removeProperty('--ai-bubble-bg');
+    root.style.removeProperty('--ai-bubble-text');
+    root.style.removeProperty('--user-bubble-bg');
+    root.style.removeProperty('--user-bubble-text');
+    customStyleTag.textContent = '';
+    
+    if (theme === 'custom') {
+        // 应用自定义CSS
+        customStyleTag.textContent = elements.customBubbleCssInput.value;
+    } else {
+        // 应用预设主题
+        const themes = { 
+            '1': ['--theme1-ai-bg', '--theme1-ai-text', '--theme1-user-bg', '--theme1-user-text'], 
+            '2': ['--theme2-ai-bg', '--theme2-ai-text', '--theme2-user-bg', '--theme2-user-text'], 
+            '3': ['--theme3-ai-bg', '--theme3-ai-text', '--theme3-user-bg', '--theme3-user-text'], 
+            '4': ['--theme4-ai-bg', '--theme4-ai-text', '--theme4-user-bg', '--theme4-user-text'], 
+            '5': ['--theme5-ai-bg', '--theme5-ai-text', '--theme5-user-bg', '--theme5-user-text'],
+            '6': ['--theme6-ai-bg', '--theme6-ai-text', '--theme6-user-bg', '--theme6-user-text'],
+            '7': ['--theme7-ai-bg', '--theme7-ai-text', '--theme7-user-bg', '--theme7-user-text'],
+            '8': ['--theme8-ai-bg', '--theme8-ai-text', '--theme8-user-bg', '--theme8-user-text'],
+            '9': ['--theme9-ai-bg', '--theme9-ai-text', '--theme9-user-bg', '--theme9-user-text'],
+        };
+        if (!themes[theme]) theme = '1'; // 默认主题
+        const [aiBg, aiText, userBg, userText] = themes[theme];
+        root.style.setProperty('--ai-bubble-bg', `var(${aiBg})`); 
+        root.style.setProperty('--ai-bubble-text', `var(${aiText})`);
+        root.style.setProperty('--user-bubble-bg', `var(${userBg})`); 
+        root.style.setProperty('--user-bubble-text', `var(${userText})`);
+    }
+
+    // 更新UI上的选中状态
+    elements.themeSelector.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
+    const activeOption = elements.themeSelector.querySelector(`.theme-option[data-theme="${theme}"]`);
+    if (activeOption) {
+        activeOption.classList.add('active');
+    }
+};
+
+                // --- 变化开始：替换这个函数 ---
+        const handleFileUpload = (file, callback, compressionOptions = {}) => { 
+            if (file) { 
+                const reader = new FileReader(); 
+                reader.onload = async (e) => { // 添加了 async
+                    let result = e.target.result;
+                    // 如果传入了压缩选项，就进行压缩
+                    if (compressionOptions.compress) {
+                        try {
+                            result = await compressImage(result, compressionOptions);
+                        } catch (err) {
+                            console.error("压缩图片时出错:", err);
+                        }
+                    }
+                    callback(result); 
+                }; 
+                reader.readAsDataURL(file); 
+            } 
+        };
+        // --- 变化结束：替换这个函数 ---
         
         const clearChatHistory = () => { 
             const chatData = getCurrentChatData();
@@ -1112,7 +1419,7 @@ This is a strict format guide. You MUST follow it.
             const chatName = currentChat.type === 'direct' ? chatData.config.characterName : chatData.name;
             if (confirm(`确定要清空与「${chatName}」的全部聊天记录吗？此操作无法撤销。`)) { 
                 chatData.chatHistory = []; 
-                if (chatData.polls) chatData.polls = []; // Also clear polls in groups
+                if (chatData.polls) chatData.polls = [];
                 saveAllData(); 
                 renderAllMessages(); 
                 alert('聊天记录已清空。'); 
@@ -1126,7 +1433,7 @@ This is a strict format guide. You MUST follow it.
             if(!chatData) return;
 
             if (msgData.isLoading) {
-                const indicator = addMessageToUI({ ...msgData, id: 'typing-indicator' }, false);
+                const indicator = addMessageToUI({ ...msgData, id: 'typing-indicator' });
                 elements.messagesContainer.appendChild(indicator);
                 scrollToBottom(elements.messagesContainer, 'auto');
                 return;
@@ -1137,32 +1444,19 @@ This is a strict format guide. You MUST follow it.
             if (toHistory) {
                 chatData.chatHistory.push(fullMessage);
                 if (fullMessage.type === 'poll' && currentChat.type === 'group') {
-                    chatData.polls.push({
-                        pollId: fullMessage.pollId,
-                        question: fullMessage.question,
-                        options: fullMessage.options,
-                        votes: {},
-                        status: 'open'
-                    });
+                    chatData.polls.push({ pollId: fullMessage.pollId, question: fullMessage.question, options: fullMessage.options, votes: {}, status: 'open' });
                 }
                 saveAllData();
             }
 
-            if (isVideoCallActive && fullMessage.isVideoCallMessage) {
-                addVideoChatMessageToUI(fullMessage);
-            } else if (!isVideoCallActive && !fullMessage.isVideoCallMessage) {
-                 if (toHistory) { // Only re-render if it's a new message added to history
-                    currentlyDisplayedMessageCount = Math.min(chatData.chatHistory.length, 25); // Reset to show the latest
-                    renderAllMessages();
-                    setTimeout(() => scrollToBottom(elements.messagesContainer, 'auto'), 50); // scroll after render
-                }
-            }
+            const shouldScroll = elements.messagesContainer.scrollHeight - elements.messagesContainer.scrollTop <= elements.messagesContainer.clientHeight + 50;
+            elements.messagesContainer.appendChild(addMessageToUI(fullMessage));
+            if(shouldScroll) scrollToBottom(elements.messagesContainer, 'smooth');
             
             return fullMessage;
         };
         
-        const addMessageToUI = (msg, isNew = false) => {
-            const userAvatar = userMomentsProfile.chatAvatar;
+        const addMessageToUI = (msg) => {
             const { sender, text, type = 'text', id, imageUrl, stickerUrl, transferAmount, transferMemo, transferCoverUrl, transferStatus, voiceDuration, isLoading } = msg;
 
             if (isLoading) {
@@ -1170,10 +1464,9 @@ This is a strict format guide. You MUST follow it.
                 typingIndicatorElement.className = `message ai typing-indicator`;
                 typingIndicatorElement.id = 'typing-indicator';
                 let typingAvatarSrc = '';
-                if(currentChat.type === 'direct') {
-                    typingAvatarSrc = getCurrentCharacter()?.config.aiAvatar || '';
-                } else {
-                    typingAvatarSrc = getCurrentGroup()?.avatar || '';
+                const chatData = getCurrentChatData();
+                if(chatData) {
+                    typingAvatarSrc = (currentChat.type === 'direct' ? chatData.config.aiAvatar : chatData.avatar) || '';
                 }
                 typingIndicatorElement.innerHTML = `<img class="avatar" src="${typingAvatarSrc}"><div class="message-content"><div class="bubble"><div class="typing-indicator"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div></div>`;
                 return typingIndicatorElement;
@@ -1190,10 +1483,9 @@ This is a strict format guide. You MUST follow it.
             }
             messageElement.dataset.id = id;
 
-            // Determine Avatar & Name
             let senderData;
             if (sender === 'user') {
-                 senderData = { avatar: userAvatar, name: userMomentsProfile.name };
+                 senderData = { avatar: userMomentsProfile.chatAvatar, name: userMomentsProfile.name };
             } else {
                 const char = characterSets.find(c => c.id === sender);
                 senderData = char ? { avatar: char.config.aiAvatar, name: char.config.characterName } : { avatar: '', name: '未知' };
@@ -1223,7 +1515,7 @@ This is a strict format guide. You MUST follow it.
                 case 'sticker': bubbleContent = `<img src="${stickerUrl}" class="bubble-image-content" alt="表情" style="width:120px; height:120px; border: none;">`; break;
                 case 'voice': bubble.style.width = `${Math.min(60 + (text?.length || 0) * 8, 250)}px`; bubbleContent = `<span class="voice-icon"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg></span><span class="voice-duration">${voiceDuration}</span>`; bubble.onclick = () => alert(`语音内容：\n\n${text}`); break;
                 case 'transfer':
-                    const recipientName = currentChat.type === 'direct' && sender === 'user' ? getCurrentCharacter()?.config.characterName || '对方' : '你';
+                    const recipientName = sender === 'user' ? getCurrentCharacter()?.config.characterName || '对方' : '你';
                     bubbleContent = `<img src="${transferCoverUrl}" class="transfer-cover" alt="Transfer"><div class="transfer-info"><div class="transfer-amount">¥ ${transferAmount}</div>${transferMemo ? `<div class="transfer-memo">${transferMemo}</div>` : ''}</div><div class="transfer-footer">给${recipientName}的转账</div>`;
                     if (transferStatus === 'received') {
                         bubbleContent += `<div class="transfer-acknowledged">${sender === 'user' ? '对方已收款' : '我已收款'}</div>`;
@@ -1231,13 +1523,10 @@ This is a strict format guide. You MUST follow it.
                         bubble.onclick = () => acknowledgeTransfer(id);
                     }
                     break;
-                case 'poll':
-                    if (currentChat.type === 'group') {
-                       bubble.innerHTML = renderPoll(msg);
-                    }
-                    break;
+                case 'red-packet': bubble.innerHTML = renderRedPacket(msg); break;
+                case 'poll': bubble.innerHTML = renderPoll(msg); break;
             }
-            if(type !== 'poll') bubble.innerHTML = bubbleContent;
+            if(type !== 'poll' && type !== 'red-packet') bubble.innerHTML = bubbleContent;
 
             contentWrapper.append(senderNameDiv, bubble, Object.assign(document.createElement('div'), { className: 'timestamp', textContent: msg.timestamp }));
             messageElement.append(avatar, contentWrapper);
@@ -1263,15 +1552,12 @@ This is a strict format guide. You MUST follow it.
             
             const oldScrollHeight = elements.messagesContainer.scrollHeight;
             const oldScrollTop = elements.messagesContainer.scrollTop;
-            const isScrolledToBottom = oldScrollTop + elements.messagesContainer.clientHeight >= oldScrollHeight - 20;
             
             elements.messagesContainer.innerHTML = ''; 
             if (!chatData) return;
 
-
             const messagesToRender = chatData.chatHistory.slice(-currentlyDisplayedMessageCount);
             
-            // Add "Load More" button if there are more messages
             if (chatData.chatHistory.length > currentlyDisplayedMessageCount) {
                 const loadMoreBtn = document.createElement('button');
                 loadMoreBtn.id = 'load-more-btn';
@@ -1284,106 +1570,200 @@ This is a strict format guide. You MUST follow it.
             }
 
             messagesToRender.forEach(msg => {
-                elements.messagesContainer.appendChild(addMessageToUI(msg, false));
+                elements.messagesContainer.appendChild(addMessageToUI(msg));
             });
             
             const newScrollHeight = elements.messagesContainer.scrollHeight;
 
-            if (isScrolledToBottom) {
-                 scrollToBottom(elements.messagesContainer, 'auto');
-            } else if (chatData.chatHistory.length > messagesToRender.length) { // only adjust scroll if we loaded more
+            if (oldScrollHeight > 0 && chatData.chatHistory.length > messagesToRender.length) {
                 elements.messagesContainer.scrollTop = oldScrollTop + (newScrollHeight - oldScrollHeight);
+            } else {
+                 scrollToBottom(elements.messagesContainer, 'auto');
             }
         };
 
         // --- Core Logic ---
         const handleUserAction = (msgData) => {
-            const content = msgData.text || msgData.imageUrl || msgData.stickerUrl || msgData.llmContent;
+            const content = msgData.text || msgData.imageUrl || msgData.stickerUrl || msgData.llmContent || msgData.type === 'red-packet';
             if (!content && msgData.type !== 'poll') return;
-            addMessage(msgData);
+            const msg = addMessage(msgData);
             if (responseTriggerTimer) clearTimeout(responseTriggerTimer);
-            responseTriggerTimer = setTimeout(triggerAiResponse, 10000);
+            // Pass the full message object, which includes the image URL if present
+            responseTriggerTimer = setTimeout(() => triggerAiResponse(null, msg), 8000);
         };
         
-        const triggerAiResponse = async (overridePayload = null) => {
+        const getRecentMomentsContext = (limit = 5) => {
+            let allPosts = [];
+            const chatData = getCurrentChatData();
+            if (!chatData) return '';
+
+            if (currentChat.type === 'direct') {
+                const character = chatData;
+                allPosts = [
+                    ...(character.moments || []).map(m => ({ ...m, senderType: 'ai' })),
+                    ...(userMomentsProfile.posts || []).map(p => ({ ...p, senderType: 'user' }))
+                ];
+            } else if (currentChat.type === 'group') {
+                const group = chatData;
+                allPosts = [...(group.groupMoments || [])];
+            }
+
+            if (allPosts.length === 0) return '';
+
+            allPosts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            const recentPosts = allPosts.slice(0, limit);
+
+            if (recentPosts.length === 0) return '';
+
+            const context = recentPosts.map(post => {
+                let senderName = 'Unknown';
+                if (post.senderId === 'user') {
+                    senderName = userMomentsProfile.name || '我';
+                } else {
+                    const char = characterSets.find(c => c.id === post.senderId);
+                    senderName = char ? char.config.characterName : 'Unknown';
+                }
+                return `[朋友圈动态 by ${senderName}: "${post.content}" (发表于: ${new Date(post.timestamp).toLocaleString()})]`;
+            }).join('\n');
+
+            return `\n\n[Recent Social Media Posts (朋友圈动态) for context]:\n${context}`;
+        };
+
+              const formatMessage = (msg) => {
+            if (msg.type === 'system' || msg.isLoading) {
+                return null;
+            }
+
+            const role = msg.sender === 'user' ? 'user' : 'assistant';
+
+            if (msg.type === 'image' && msg.sender === 'user' && msg.imageUrl) {
+                return {
+                    role: role,
+                    content: [
+                        { type: 'text', text: msg.llmContent || '[用户发送了一张图片]' },
+                        { type: 'image_url', image_url: { url: msg.imageUrl } }
+                    ]
+                };
+            }
+
+            const content = msg.llmContent || msg.text || '';
+            
+            if (!content) {
+                return null;
+            }
+
+            return { role, content };
+        };
+        
+                                const triggerAiResponse = async (overridePayload = null, lastUserMessage = null) => {
             clearTimeout(responseTriggerTimer);
             const chatData = getCurrentChatData();
-            if (!chatData || isVideoCallActive) return;
+            const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
+            const apiKey = elements.apiKeyInput.value.trim();
+            const model = elements.modelSelect.value;
 
-            // Use the first character's settings as a proxy for API credentials
-            const apiCharacter = characterSets[0];
-            if (!apiCharacter || !apiCharacter.config.apiBaseUrl || !apiCharacter.config.apiKey || !apiCharacter.config.model) {
-                console.log("API settings are not configured. Cannot trigger AI response.");
+            if (!chatData || isVideoCallActive || !apiBaseUrl || !apiKey || !model) {
+                console.log("AI response prerequisites not met.");
+                getEl('typing-indicator')?.remove();
                 return;
             }
             
             addMessage({ sender: 'ai', type: 'text', isLoading: true });
 
+            // 这是一个内部辅助函数，用来将我们的聊天记录转换成AI能看懂的格式
+            const formatApiMessage = (msg) => {
+                if (msg.type === 'system' || msg.sender === 'system') return null;
+                const role = msg.sender === 'user' ? 'user' : 'assistant';
+                if (msg.sender === 'user' && msg.type === 'image' && msg.imageUrl) {
+                    return {
+                        role: 'user',
+                        content: [
+                            { type: 'text', text: msg.llmContent || '用户发送了一张图片。' },
+                            { type: 'image_url', image_url: { url: msg.imageUrl } }
+                        ]
+                    };
+                }
+                const content = msg.llmContent || msg.text;
+                if (!content) return null;
+                return { role, content };
+            };
 
             let messagesPayload;
             if (overridePayload) {
                 messagesPayload = overridePayload;
             } else {
                 const systemPrompt = elements.customSystemPromptInput.value.trim() || DEFAULT_SYSTEM_PROMPT;
-                let fullPrompt;
-                let memorySize = 50;
+                
+                const momentsContext = getRecentMomentsContext();
 
-                if (currentChat.type === 'direct') {
-                    const character = chatData;
-                    memorySize = character.config.memorySize || 50;
-                    const characterPersonaPrompt = character.config.characterPrompt;
-                    const userProfilePrompt = character.config.userPrompt || userMomentsProfile.name;
-                    fullPrompt = `${systemPrompt}\n\n[Character Prompt]:\n${characterPersonaPrompt}\n\n[Your User's Profile]: ${userProfilePrompt}`;
-                    messagesPayload = [
-                        { role: 'system', content: fullPrompt }, 
-                        ...character.chatHistory.slice(-memorySize).map(m => ({ 
-                            role: m.sender === 'user' ? 'user' : 'assistant', 
-                            content: m.llmContent || m.text 
-                        }))
-                    ];
-                } else { // Group Chat
+                            if (currentChat.type === 'direct') {
+                const character = chatData;
+                const memorySize = character.config.memorySize || 50;
+                // --- 核心修改 ---
+                // 这里我们告诉AI，您的用户资料是角色专属的 userPrompt
+                const fullPrompt = `${systemPrompt}\n\n[Character Prompt]:\n${character.config.characterPrompt}\n\n[Your User's Profile]: ${character.userPrompt || `The user's name is ${userMomentsProfile.name}`}${momentsContext}`;
+                messagesPayload = [
+                    { role: 'system', content: fullPrompt }, 
+                    ...character.chatHistory.slice(-memorySize).map(formatApiMessage).filter(m => m !== null)
+                ];
+            } else { // Group Chat
                     const group = chatData;
-                    memorySize = 50; // Default memory for groups
+                    const memorySize = 50;
                     const memberProfiles = group.memberIds.map(id => {
                         const char = characterSets.find(c => c.id === id);
                         return char ? `\n### Character: ${char.config.characterName} (ID: ${id})\n${char.config.characterPrompt}` : '';
                     }).join('\n');
-                    const userProfilePrompt = group.userPrompt || `The user's name is ${userMomentsProfile.name}.`;
-
-                    const openPollsInfo = (group.polls || []).filter(p => p.status === 'open').map(p => {
-                        const charVotes = Object.entries(p.votes).flatMap(([opt, voters]) => voters.filter(v => v !== 'user').map(v_id => ({id: v_id, option: opt})) );
-                        return `\n[Ongoing Poll: "${p.question}" (ID: ${p.pollId})]
-- Options: ${p.options.join(', ')}
-- Voted Members: ${charVotes.length > 0 ? charVotes.map(v => `${characterSets.find(c=>c.id===v.id)?.config.characterName} voted for '${v.option}'`).join('; ') : 'No members have voted yet'}`;
-                    }).join('');
-
-                    fullPrompt = `[Role Definition]
-You are an advanced AI group chat coordinator. Your job is to role-play the following characters to create a natural and lively group chat in Simplified Chinese.
+                    
+                    const openPollsInfo = (group.polls || []).filter(p => p.status === 'open').map(p => `\n[Ongoing Poll: "${p.question}" (ID: ${p.pollId})]`).join('');
+                    const openRedPacketsInfo = group.chatHistory.filter(m => m.type === 'red-packet' && m.status === 'open').map(p => `\n[Open Red Packet: "${p.memo}" (ID: ${p.packetId})]`).join('');
+                    
+                    const groupSystemPrompt = `[Role Definition]
+You are an advanced AI group chat coordinator. You MUST role-play the following characters based on their profiles to create a natural conversation in Simplified Chinese.
 ${memberProfiles}
-Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '用户'.
+Your user in this chat has this profile: ${group.userPrompt || `The user's name is ${userMomentsProfile.name}`}. NEVER call them '用户'.
+${momentsContext}
 
-[Task]
-1.  生成一场生动活跃的对话。你的最终JSON数组响应中，所有角色加起来的消息总数 **必须达到8条或以上**。这是一条严格的要求，用以模拟一个热闹的群聊氛围。角色不能像霸道总裁或者使用油腻发言，不能说“小东西”，“小妖精”等等的任何霸总语录的称呼，角色不能物化用户。
-2.  Read the recent chat history and decide who should react to the user's message and how.
-3.  Promote natural conversation between characters.
-4.  ${openPollsInfo ? `[IMPORTANT]${openPollsInfo} Characters who haven't voted should consider voting based on their personality. Use the 'vote' action type.` : ''}
-5.  Your response MUST be a JSON array of message objects. Each object MUST include "senderId".
+[思考与行动指南 (CRITICAL!)]
+1.  **首要目标 - 自然**: 你的核心任务是模拟一场真实的、不可预测的群聊。
+2.  **动态发言频率**: 角色们的发言频率和顺序应该是动态的。某个角色可能会根据对话内容连续发言好几次，而另一个角色可能暂时保持沉默。这完全取决于对话的自然流向，你拥有决定权。
+3.  **执行动作**: 如果情景需要，你必须在生成对话的同时，额外生成独立的JSON对象来代表角色的动作（如投票、抢红包）。
+
+[输出格式与示例 (MANDATORY)]
+1.  **JSON数组格式**: 你的所有回复 **必须** 是一个JSON数组结构的字符串。
+2.  **纯净输出**: 绝对不允许在JSON数组的外部添加任何文本。
+3.  **包含senderId**: 数组中的每一个JSON对象都 **必须** 包含 "senderId" 键。
+4.  **禁止任何描写**: 绝对禁止在回复中使用任何形式的括号或星号来添加动作、表情或旁白。
+5.  **示例**: 假设角色A要投票给“揍”，一个正确的输出片段应该像这样：
+    [
+        { "senderId": "char_A", "message": "我当然投'揍'啊！" },
+        { "senderId": "char_A", "type": "vote", "pollId": "poll_12345", "option": "揍" }
+    ]
+
+[CRITICAL TASK - LIVELY & BALANCED CONVERSATION]
+- **总消息量**: 为了保持群聊的热闹氛围，总消息数最好保持在 **8条以上**。
+- **避免角色固化**: 虽然发言频率是动态的，但长期来看，要避免某个角色永远不说话。尽量让每个角色都有机会参与到对话中，但是发言规律必须是真实的，不能按照顺序控制角色发言，例如有可能这次他说4句，这次他只说1句，另一个角色又说3句，另一个又说2句，没有规律才更有真实性。
+- **制造互动**: 让角色之间互相提问、争论、开玩笑。
+- **积极参与活动**:
+- ${openPollsInfo ? `[重要任务]${openPollsInfo} 看到这个投票了吗？根据角色性格，安排他们用 "vote" 类型的动作去投票！` : ''}
+- ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可以抢！安排角色们用 "grab_red_packet" 类型的动作去抢！` : ''}
 `;
                     messagesPayload = [
-                        { role: 'system', content: fullPrompt },
-                        ...group.chatHistory.slice(-memorySize).map(m => ({
-                            role: m.sender === 'user' ? 'user' : 'assistant',
-                            content: m.sender === 'user' ? (m.llmContent || m.text) : `{"senderId": "${m.sender}", "content": ${JSON.stringify(m.llmContent || m.text)}}`
-                        }))
+                        { role: 'system', content: groupSystemPrompt },
+                        ...group.chatHistory.slice(-memorySize).map(formatApiMessage).filter(m => m !== null)
                     ];
                 }
             }
             
             try {
-                const response = await fetch(`${apiCharacter.config.apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiCharacter.config.apiKey}` }, body: JSON.stringify({ model: apiCharacter.config.model, messages: messagesPayload, stream: false }) });
+                const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages: messagesPayload, stream: false }) });
                 getEl('typing-indicator')?.remove();
                 if (!response.ok) { const errorData = await response.text(); throw new Error(`HTTP Error ${response.status}: ${errorData}`); }
                 const responseData = await response.json();
+
+// --- 这是全新的加强版探针 ---
+console.log("【证据一：完整的原始数据包】（可以点开看详细结构）", responseData);
+console.log("【证据二：AI回复的核心内容（最关键的原始字符串）】", responseData?.choices?.[0]?.message?.content);
+// --- 探针结束 ---
                 if (responseData?.choices?.[0]?.message?.content) {
                     processAiResponse(responseData.choices[0].message.content);
                 } else if (responseData?.error) { throw new Error(`API Error: ${responseData.error.message}`);
@@ -1394,76 +1774,92 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
             }
         };
         
-        const processAiResponse = (rawText) => {
-            let responseArray;
-            try {
-                const cleanedText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
-                responseArray = JSON.parse(cleanedText);
-                if (!Array.isArray(responseArray)) throw new Error("Response is not an array.");
-            } catch (e) {
-                console.error("AI response parsing error:", e, "\nRaw text:", rawText);
-                const senderId = currentChat.type === 'direct' ? currentChat.id : (getCurrentGroup()?.memberIds[0] || null);
-                if (senderId) addMessage({ sender: senderId, text: rawText, type: 'text' });
-                return;
-            }
-
-            // Acknowledge transfer
-            const chatData = getCurrentChatData();
-            if (chatData) {
-                const lastUserMessage = [...chatData.chatHistory].reverse().find(m => m.sender === 'user');
-                if(lastUserMessage && lastUserMessage.type === 'transfer' && lastUserMessage.transferStatus === 'pending') {
-                    lastUserMessage.transferStatus = 'received';
-                    saveAllData();
-                    renderAllMessages();
-                }
-            }
-            
-            responseArray.forEach((msgObj, index) => {
-                setTimeout(() => {
-                    const senderId = msgObj.senderId || (currentChat.type === 'direct' ? currentChat.id : null);
-                    if (!senderId) return;
-
-                    const llmContent = JSON.stringify(msgObj);
-                    const character = characterSets.find(c => c.id === senderId);
-
-                    switch(msgObj.type) {
-                        case 'text': addMessage({ sender: senderId, text: msgObj.content, type: 'text', llmContent }); break;
-                        case 'voice': addMessage({ sender: senderId, text: msgObj.content, type: 'voice', voiceDuration: `0:${Math.max(1, Math.round((msgObj.content||'').length / 5)).toString().padStart(2, '0')}`, llmContent }); break;
-                        case 'text-image': addMessage({ sender: senderId, text: msgObj.content, type: 'text-image', llmContent }); break;
-                        case 'sticker': if (character?.aiStickers?.length > 0) addMessage({ sender: senderId, type: 'sticker', stickerUrl: character.aiStickers[Math.floor(Math.random() * character.aiStickers.length)], llmContent }); break;
-                        case 'transfer': addMessage({ sender: senderId, type: 'transfer', transferAmount: msgObj.amount, transferMemo: msgObj.memo, transferCoverUrl: `https://files.catbox.moe/qwu221.jpg`, transferStatus: 'pending', llmContent }); break;
-                        case 'video-call-request': if(currentChat.type === 'direct') handleIncomingVideoCall(msgObj.content); break;
-                        
-                        case 'post_moment': 
-                            if(character) {
-                                addMomentByAI(character.id, { content: msgObj.content, image_query: msgObj.image_query }, 'direct'); 
-                            } 
-                            break;
-                        case 'post_group_moment':
-                            if(character && currentChat.type === 'group') {
-                                addMomentByAI(senderId, { content: msgObj.content, image_query: msgObj.image_query }, 'group');
-                            }
-                            break;
-                        case 'diary_entry':
-                            if (character && msgObj.content) {
-                                addDiaryEntry(character.id, msgObj.content);
-                            }
-                            break;
-                        case 'moment_comment':
-                            if (msgObj.momentId && msgObj.comment_text) {
-                                addCommentOrReplyByAI('comment', msgObj.momentId, msgObj.comment_text, senderId);
-                            }
-                            break;
-                        case 'moment_reply':
-                             if (msgObj.momentId && msgObj.commentId && msgObj.reply_text) {
-                                addCommentOrReplyByAI('reply', msgObj.momentId, msgObj.reply_text, senderId, msgObj.commentId);
-                            }
-                            break;
-                        case 'vote': handleAiVote(msgObj); break;
-                    }
-                }, index * 1200);
+                        const processAiResponse = (rawText) => {
+    let responseArray = [];
+    try {
+        const parsed = JSON.parse(rawText);
+        if (Array.isArray(parsed)) { responseArray = parsed; }
+    } catch (e) {
+        const jsonObjects = rawText.match(/\{[\s\S]*?\}/g);
+        if (jsonObjects) {
+            jsonObjects.forEach(objStr => {
+                try { responseArray.push(JSON.parse(objStr)); } catch (jsonErr) { console.warn('解析器跳过了一个损坏的JSON片段:', objStr, jsonErr); }
             });
-        };
+        }
+    }
+
+    if (responseArray.length === 0) {
+        console.error("AI响应解析彻底失败。收到的原始文本:", rawText);
+        addMessage({ sender: 'system', text: `AI响应格式错误，无法解析：<pre>${rawText}</pre>`, type: 'system' });
+        return;
+    }
+
+    // --- 全新的两段式处理逻辑 ---
+    
+    // **第一阶段：处理所有数据更新，但不渲染UI**
+    let dataChanged = false;
+    responseArray.forEach(msgObj => {
+        if (!msgObj.type) {
+            if (msgObj.pollId && msgObj.option) { msgObj.type = 'vote'; }
+            else if (msgObj.packetId) { msgObj.type = 'grab_red_packet'; }
+        }
+        if (msgObj.type === 'vote' || msgObj.type === 'grab_red_packet') {
+            const senderId = msgObj.senderId;
+            if (!senderId) return;
+
+            if (msgObj.type === 'vote') {
+                handleAiVote_dataOnly(msgObj);
+            }
+            if (msgObj.type === 'grab_red_packet') {
+                handleAiGrabRedPacket(msgObj.packetId, senderId);
+            }
+            dataChanged = true; // 标记数据已发生变化
+        }
+    });
+    
+    // **如果数据有变，立刻刷新一次UI**
+    if (dataChanged) {
+        renderAllMessages();
+    }
+
+    // **第二阶段：只处理需要延迟显示的UI消息（如文字、语音等）**
+    responseArray.forEach((msgObj, index) => {
+        if (!msgObj.type) {
+            if (msgObj.message || msgObj.content) {
+                msgObj.type = 'text';
+                msgObj.content = msgObj.message || msgObj.content;
+            }
+        }
+        
+        // 跳过已经处理过的数据更新动作
+        if (msgObj.type === 'vote' || msgObj.type === 'grab_red_packet') {
+            return;
+        }
+
+        setTimeout(() => {
+            if (currentChat.type === 'group' && !msgObj.senderId) { return; }
+            const senderId = msgObj.senderId || currentChat.id;
+            const character = characterSets.find(c => c.id === senderId);
+            if (!character) { return; }
+            
+            const llmContentForHistory = (index === 0) ? rawText : null;
+            let messageData = { sender: senderId, llmContent: llmContentForHistory };
+
+            switch(msgObj.type) {
+                case 'text': addMessage({ ...messageData, text: msgObj.content, type: 'text' }); break;
+                case 'voice': addMessage({ ...messageData, text: msgObj.content, type: 'voice', voiceDuration: `0:${Math.max(1, Math.round((msgObj.content||'').length / 5)).toString().padStart(2, '0')}` }); break;
+                case 'text-image': addMessage({ ...messageData, text: msgObj.content, type: 'text-image' }); break;
+                case 'sticker': if (character?.aiStickers?.length > 0) { addMessage({ ...messageData, type: 'sticker', stickerUrl: character.aiStickers[Math.floor(Math.random() * character.aiStickers.length)] }); } break;
+                case 'transfer': addMessage({ ...messageData, type: 'transfer', transferAmount: msgObj.amount, transferMemo: msgObj.memo, transferCoverUrl: `https://files.catbox.moe/qwu221.jpg`, transferStatus: 'pending' }); break;
+                case 'video-call-request': if(currentChat.type === 'direct') handleIncomingVideoCall(msgObj.content); break;
+                case 'post_moment': if(character) { const momentType = currentChat.type === 'group' ? 'group' : 'direct'; addMomentByAI(character.id, { content: msgObj.content, image_query: msgObj.image_query }, momentType); } break;
+                case 'diary_entry': if (character && msgObj.content) addDiaryEntry(character.id, msgObj.content); break;
+                case 'moment_comment': if (msgObj.momentId && msgObj.comment_text) { const momentType = currentChat.type === 'group' ? 'group' : 'direct'; addCommentOrReplyByAI('comment', msgObj.momentId, msgObj.comment_text, senderId, null, momentType); } break;
+                case 'moment_reply': if (msgObj.momentId && msgObj.commentId && msgObj.reply_text) { const momentType = currentChat.type === 'group' ? 'group' : 'direct'; addCommentOrReplyByAI('reply', msgObj.momentId, msgObj.reply_text, senderId, msgObj.commentId, momentType); } break;
+            }
+        }, index * 1200);
+    });
+};
         
         const acknowledgeTransfer = (msgId) => {
             const chatData = getCurrentChatData();
@@ -1515,14 +1911,116 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
         const handleTransferSend = () => { let tempCover = "https://images.unsplash.com/photo-1593697821028-7655f8458345?q=80&w=400"; openFeatureModal('转账', `<div class="form-group"><label>转账封面</label><img id="transfer-preview" src="${tempCover}" style="width:100%; height:110px; object-fit:cover; border-radius:8px; margin-bottom:10px; cursor:pointer;"></div><div class="form-group"><label for="transfer-amount">金额</label><input type="number" id="transfer-amount" placeholder="0.00"></div><div class="form-group"><label for="transfer-memo">备注</label><input type="text" id="transfer-memo" placeholder="（选填）"></div>`, '发送', () => { const amount = getEl('transfer-amount').value; if (amount > 0) { const memo = getEl('transfer-memo').value.trim(); handleUserAction({ sender: 'user', type: 'transfer', transferAmount: parseFloat(amount).toFixed(2), transferMemo: memo, transferCoverUrl: tempCover, transferStatus: 'pending', llmContent: `[转账 ${amount} 元。备注: ${memo}]` }); closeModal(elements.featureModal); } }); getEl('transfer-preview').onclick = () => elements.transferCoverInput.click(); elements.transferCoverInput.onchange = (e) => handleFileUpload(e.target.files[0], (d) => { tempCover = d; getEl('transfer-preview').src = d; }); };
         const handleStickerSend = () => { if (currentChat.type !== 'direct') {alert('群聊中暂不支持发送表情。'); return;} const character = getCurrentCharacter(); if(!character) return; let galleryHtml = '<p style="text-align:center;color:#999">没有表情。请在设置中添加。</p>'; if (character.userStickers.length > 0) galleryHtml = character.userStickers.map(url => `<img src="${url}" data-sticker-url="${url}" alt="sticker">`).join(''); openFeatureModal('选择表情', `<div id="sticker-gallery">${galleryHtml}</div>`, null, null); getEl('sticker-gallery').onclick = e => { if (e.target.tagName === 'IMG') { handleUserAction({ sender: 'user', type: 'sticker', stickerUrl: e.target.dataset.stickerUrl, llmContent: '[发送了一个表情]' }); closeModal(elements.featureModal); } }; };
         
-        // --- Video Call Logic ---
+        // --- Video Call Logic (Fully Isolated) ---
         const addVideoChatMessageToUI = (msg) => { const msgEl = document.createElement('div'); msgEl.className = `video-chat-message ${msg.sender === 'user' ? 'user' : 'ai'}`; msgEl.innerHTML = msg.text.replace(/\*(.*?)\*/g, '<i>$1</i>'); elements.videoChatLog.appendChild(msgEl); scrollToBottom(elements.videoChatLog); };
-        const triggerVideoCallAIResponse = async () => { if (currentChat.type !== 'direct') return; const character = getCurrentCharacter(); if(!character) return; const { config, chatHistory } = character; const {apiBaseUrl, apiKey, model, characterPrompt} = config; if (!apiBaseUrl || !apiKey || !model) return; elements.videoStatusText.textContent = `${config.characterName}正在输入...`; const videoCallSystemPrompt = `${characterPrompt}\n[Current Situation: In a video call]\n[Special Instruction]\n- Your entire reply must be plain text, strictly following the format: "*expression or action* dialogue content".\n- Keep the dialogue short, around 20-30 characters.`; const videoHistory = chatHistory.filter(m => m.isVideoCallMessage); const messagesPayload = [{ role: 'system', content: videoCallSystemPrompt }, ...videoHistory.slice(-10).map(m => ({ role: m.sender === 'user' ? 'user' : 'assistant', content: m.text }))]; try { const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model: model, messages: messagesPayload }) }); if (!response.ok) { throw new Error(`HTTP Error ${response.status}: ${await response.text()}`); } const responseData = await response.json(); if (responseData?.choices?.[0]?.message) { addMessage({ sender: character.id, text: responseData.choices[0].message.content, type: 'text', isVideoCallMessage: true }); elements.videoStatusText.textContent = "通话中"; } else { throw new Error('Invalid video call API response format.'); } } catch (error) { addMessage({ sender: character.id, text: `(连接错误)`, type: 'text', isVideoCallMessage: true }); elements.videoStatusText.textContent = "连接错误"; } };
-        const startVideoCall = () => { if (currentChat.type !== 'direct') return; const character = getCurrentCharacter(); if(!character) return; const { config } = character; if (!config.apiBaseUrl || !config.apiKey || !config.model) { alert('请先在设置中填写API信息。'); return; } isVideoCallActive = true; elements.videoMainView.src = config.aiAvatar; elements.videoSelfView.src = config.userAvatar; elements.videoCharacterAvatar.src = config.aiAvatar; elements.videoCharacterName.textContent = config.characterName; elements.videoStatusText.textContent = "正在呼叫..."; elements.videoChatLog.innerHTML = ''; elements.videoControls.innerHTML = `<button class="video-btn decline"><svg viewBox="0 0 24 24"><path d="M12 9c-1.6 0-3.15.25-4.62.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.1-2.69 1.8l-1.1-1.1c.99-.99 2.1-1.82 3.31-2.48C7.06 10.72 9.03 10 12 10c.05 0 .1 0 .16.01l2.4-2.4C13.84 7.23 12.95 7 12 7c-4.97 0-9 4.03-9 9H0c0-6.08 4.92-11 11-11 .34 0 .67.02 1 .05l-1.43 1.43C12.21 9.02 12.11 9 12 9zM1.39 4.22l2.27 2.27C2.63 7.62 2 8.91 2 10.31v3.1c1.53-.69 3.23-1.14 5.08-1.28l3.43 3.43c-3.11.3-6.01 1.54-7.96 3.4l1.41 1.41c2.19-2.19 5.08-3.48 8.04-3.83l2.84 2.84c.32.32.88.1.88-.36V13.5c.75-.24 1.46-.56 2.12-.95l2.07 2.07 1.41-1.41L2.81 2.81 1.39 4.22zM21 5h-2.59l4.59 4.59-1.41 1.41L12 1.41 2.81 11.59l-1.41-1.41L6 5.59V5h2v.59l4-4 4 4V5h2v3.41l2.29-2.29C23.36 5.64 22.25 5 21 5z"/></svg></button>`; elements.videoControls.querySelector('.decline').onclick = endVideoCall; elements.videoCallOverlay.classList.add('show'); addMessage({ sender: 'system', type: 'text', text: '发起了视频通话' }); addMessage({ sender: 'user', text: '[发起视频通话]', type: 'text', isVideoCallMessage: true }); triggerVideoCallAIResponse(); };
-        const handleIncomingVideoCall = (text) => { if (currentChat.type !== 'direct') return; const { config } = getCurrentCharacter(); elements.videoMainView.src = config.aiAvatar; elements.videoSelfView.src = config.userAvatar; elements.videoCharacterAvatar.src = config.aiAvatar; elements.videoCharacterName.textContent = config.characterName; elements.videoStatusText.textContent = text || "视频来电..."; elements.videoChatLog.innerHTML = ''; elements.videoControls.innerHTML = `<button class="video-btn accept"><svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.21-3.72-6.56-6.56l1.97-1.57c.27-.27.36-.66.24-1.01-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19c-.55 0-.99.45-.99.99 0 9.02 7.38 16.4 16.4 16.4.55 0 .99-.45.99-.99v-3.47c0-.54-.45-.99-.99-.99z"/></svg></button> <button class="video-btn decline"><svg viewBox="0 0 24 24"><path d="M12 9c-1.6 0-3.15.25-4.62.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.1-2.69 1.8l-1.1-1.1c.99-.99 2.1-1.82 3.31-2.48C7.06 10.72 9.03 10 12 10c.05 0 .1 0 .16.01l2.4-2.4C13.84 7.23 12.95 7 12 7c-4.97 0-9 4.03-9 9H0c0-6.08 4.92-11 11-11 .34 0 .67.02 1 .05l-1.43 1.43C12.21 9.02 12.11 9 12 9zM1.39 4.22l2.27 2.27C2.63 7.62 2 8.91 2 10.31v3.1c1.53-.69 3.23-1.14 5.08-1.28l3.43 3.43c-3.11.3-6.01 1.54-7.96 3.4l1.41 1.41c2.19-2.19 5.08-3.48 8.04-3.83l2.84 2.84c.32.32.88.1.88-.36V13.5c.75-.24 1.46-.56 2.12-.95l2.07 2.07 1.41-1.41L2.81 2.81 1.39 4.22zM21 5h-2.59l4.59 4.59-1.41 1.41L12 1.41 2.81 11.59l-1.41-1.41L6 5.59V5h2v.59l4-4 4 4V5h2v3.41l2.29-2.29C23.36 5.64 22.25 5 21 5z"/></svg></button>`; elements.videoControls.querySelector('.accept').onclick = () => { isVideoCallActive = true; elements.videoStatusText.textContent = "已接通"; elements.videoControls.innerHTML = elements.videoControls.innerHTML.replace(/<button class="video-btn accept">.*?<\/button>/, ''); addMessage({sender:'system', type:'text', text:'接听了视频通话'}); addMessage({sender:'user', text:'[接听了视频通话]', type:'text', isVideoCallMessage: true }); triggerVideoCallAIResponse(); }; elements.videoControls.querySelector('.decline').onclick = () => { elements.videoCallOverlay.classList.remove('show'); addMessage({sender:'system', type:'text', text:'拒绝了视频通话'}); }; elements.videoCallOverlay.classList.add('show'); };
-        const endVideoCall = () => { isVideoCallActive = false; elements.videoCallOverlay.classList.remove('show'); addMessage({ sender: 'system', type: 'text', text: '视频通话已结束' }); renderAllMessages(); };
+        const triggerVideoCallAIResponse = async () => { if (currentChat.type !== 'direct') return; const character = getCurrentCharacter(); if(!character) return; const { config } = character; const apiBaseUrl = elements.apiBaseUrlInput.value.trim(); const apiKey = elements.apiKeyInput.value.trim(); const model = elements.modelSelect.value; if (!apiBaseUrl || !apiKey || !model) return; elements.videoStatusText.textContent = `${config.characterName}正在输入...`; const videoCallSystemPrompt = `${config.characterPrompt}\n[Current Situation: You are in a video call with the user.]\n[Special Instruction]\n- Your entire reply must be plain text, strictly following the format: "*expression or action* dialogue content".\n- Keep the dialogue short and natural, around 20-30 characters.`; const videoHistory = Array.from(elements.videoChatLog.children).map(el => ({ role: el.classList.contains('user') ? 'user' : 'assistant', content: el.textContent })); const messagesPayload = [{ role: 'system', content: videoCallSystemPrompt }, ...videoHistory.slice(-10)]; try { const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages: messagesPayload }) }); if (!response.ok) throw new Error(`HTTP Error ${response.status}: ${await response.text()}`); const responseData = await response.json(); if (responseData?.choices?.[0]?.message) { addVideoChatMessageToUI({ sender: character.id, text: responseData.choices[0].message.content }); elements.videoStatusText.textContent = "通话中"; } else { throw new Error('Invalid video call API response format.'); } } catch (error) { addVideoChatMessageToUI({ sender: character.id, text: `(连接错误)` }); elements.videoStatusText.textContent = "连接错误"; } };
+        const startVideoCall = () => { if (currentChat.type !== 'direct') return; const character = getCurrentCharacter(); if(!character) return; const { config } = character; const apiBaseUrl = elements.apiBaseUrlInput.value.trim(); const apiKey = elements.apiKeyInput.value.trim(); const model = elements.modelSelect.value; if (!apiBaseUrl || !apiKey || !model) { alert('请先在设置中填写API信息。'); return; } isVideoCallActive = true; elements.videoMainView.src = config.aiAvatar; elements.videoSelfView.src = userMomentsProfile.chatAvatar; elements.videoCharacterAvatar.src = config.aiAvatar; elements.videoCharacterName.textContent = config.characterName; elements.videoStatusText.textContent = "正在呼叫..."; elements.videoChatLog.innerHTML = ''; elements.videoControls.innerHTML = `<button class="video-btn decline"><svg viewBox="0 0 24 24"><path d="M12 9c-1.6 0-3.15.25-4.62.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.1-2.69 1.8l-1.1-1.1c.99-.99 2.1-1.82 3.31-2.48C7.06 10.72 9.03 10 12 10c.05 0 .1 0 .16.01l2.4-2.4C13.84 7.23 12.95 7 12 7c-4.97 0-9 4.03-9 9H0c0-6.08 4.92-11 11-11 .34 0 .67.02 1 .05l-1.43 1.43C12.21 9.02 12.11 9 12 9zM1.39 4.22l2.27 2.27C2.63 7.62 2 8.91 2 10.31v3.1c1.53-.69 3.23-1.14 5.08-1.28l3.43 3.43c-3.11.3-6.01 1.54-7.96 3.4l1.41 1.41c2.19-2.19 5.08-3.48 8.04-3.83l2.84 2.84c.32.32.88.1.88-.36V13.5c.75-.24 1.46-.56 2.12-.95l2.07 2.07 1.41-1.41L2.81 2.81 1.39 4.22zM21 5h-2.59l4.59 4.59-1.41 1.41L12 1.41 2.81 11.59l-1.41-1.41L6 5.59V5h2v.59l4-4 4 4V5h2v3.41l2.29-2.29C23.36 5.64 22.25 5 21 5z"/></svg></button>`; elements.videoControls.querySelector('.decline').onclick = endVideoCall; elements.videoCallOverlay.classList.add('show'); addVideoChatMessageToUI({ sender: 'user', text: '[发起视频通话]' }); triggerVideoCallAIResponse(); };
+        const handleIncomingVideoCall = (text) => { if (currentChat.type !== 'direct') return; const { config } = getCurrentCharacter(); elements.videoMainView.src = config.aiAvatar; elements.videoSelfView.src = userMomentsProfile.chatAvatar; elements.videoCharacterAvatar.src = config.aiAvatar; elements.videoCharacterName.textContent = config.characterName; elements.videoStatusText.textContent = text || "视频来电..."; elements.videoChatLog.innerHTML = ''; elements.videoControls.innerHTML = `<button class="video-btn accept"><svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.21-3.72-6.56-6.56l1.97-1.57c.27-.27.36-.66.24-1.01-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19c-.55 0-.99.45-.99.99 0 9.02 7.38 16.4 16.4 16.4.55 0 .99-.45.99-.99v-3.47c0-.54-.45-.99-.99-.99z"/></svg></button> <button class="video-btn decline"><svg viewBox="0 0 24 24"><path d="M12 9c-1.6 0-3.15.25-4.62.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.1-2.69 1.8l-1.1-1.1c.99-.99 2.1-1.82 3.31-2.48C7.06 10.72 9.03 10 12 10c.05 0 .1 0 .16.01l2.4-2.4C13.84 7.23 12.95 7 12 7c-4.97 0-9 4.03-9 9H0c0-6.08 4.92-11 11-11 .34 0 .67.02 1 .05l-1.43 1.43C12.21 9.02 12.11 9 12 9zM1.39 4.22l2.27 2.27C2.63 7.62 2 8.91 2 10.31v3.1c1.53-.69 3.23-1.14 5.08-1.28l3.43 3.43c-3.11.3-6.01 1.54-7.96 3.4l1.41 1.41c2.19-2.19 5.08-3.48 8.04-3.83l2.84 2.84c.32.32.88.1.88-.36V13.5c.75-.24 1.46-.56 2.12-.95l2.07 2.07 1.41-1.41L2.81 2.81 1.39 4.22zM21 5h-2.59l4.59 4.59-1.41 1.41L12 1.41 2.81 11.59l-1.41-1.41L6 5.59V5h2v.59l4-4 4 4V5h2v3.41l2.29-2.29C23.36 5.64 22.25 5 21 5z"/></svg></button>`; elements.videoControls.querySelector('.accept').onclick = () => { isVideoCallActive = true; elements.videoStatusText.textContent = "已接通"; elements.videoControls.innerHTML = elements.videoControls.innerHTML.replace(/<button class="video-btn accept">.*?<\/button>/, ''); addVideoChatMessageToUI({sender:'user', text:'[接听了视频通话]'}); triggerVideoCallAIResponse(); }; elements.videoControls.querySelector('.decline').onclick = () => { elements.videoCallOverlay.classList.remove('show'); }; elements.videoCallOverlay.classList.add('show'); };
+                const endVideoCall = () => {
+            // 第一步：检查通话是否真的发生过，并且有聊天内容
+            const chatLogChildren = elements.videoChatLog.children;
+            if (isVideoCallActive && chatLogChildren.length > 1) {
+                const character = getCurrentCharacter();
+
+                // 第二步：把视频聊天记录整理成一段【给AI看的】文字记忆
+                const conversationForAI = Array.from(chatLogChildren).map(el => {
+                    const speaker = el.classList.contains('user') ? 'user' : character.config.characterName;
+                    return `${speaker}: ${el.textContent}`;
+                }).join('\n');
+
+                // 我们把这段记忆包装得更像一个日记条目，让AI更容易理解
+                const memoryContent = `[我刚刚和用户结束了一次视频通话，为了记住我们聊了什么，这是通话记录：\n${conversationForAI}\n]`;
+
+                // 第三步：创建一个【隐形的】记忆消息，它不会在聊天窗口显示出来
+                // 它只有llmContent（给AI看的内容），没有text（给用户看的内容）
+                // 它的类型'video_log'也是一个自定义的、不会被渲染的类型
+                addMessage({
+                    sender: 'system', // 来源是系统
+                    type: 'video_log', // 一个不会显示的特殊类型
+                    llmContent: memoryContent // 这就是角色的记忆核心
+                });
+            }
+
+            // 最后，执行原本的挂断电话操作
+            isVideoCallActive = false;
+            elements.videoCallOverlay.classList.remove('show');
+        };
         
-        const showMindVoice = async () => { if (currentChat.type !== 'direct') return; const character = getCurrentCharacter(); if(!character) return; const { config, chatHistory } = character; const apiConfigSource = characterSets[0]; const {apiBaseUrl, apiKey, model} = apiConfigSource.config; if (!apiBaseUrl || !apiKey || !model) return; elements.mindVoiceContent.textContent = '思考中...'; elements.mindVoiceModal.classList.add('show'); const mindVoiceSystemPrompt = `${config.characterPrompt}\n[Current Task: Inner Monologue]\n[CRITICAL INSTRUCTION] Based on the recent conversation, what are you thinking right now? Write ONE SINGLE SENTENCE (20-40 characters) of your raw, unfiltered thoughts in a diary-like, first-person style. DO NOT ask questions or make conversation. Just state your inner thought. For example: "I wonder if she noticed..." or "Today was surprisingly fun."`; const messagesPayload = [{ role: 'system', content: mindVoiceSystemPrompt }, ...chatHistory.slice(-config.memorySize).map(m => ({ role: m.sender === 'user' ? 'user' : 'assistant', content: m.llmContent || m.text }))]; try { const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages: messagesPayload }) }); if (!response.ok) { throw new Error(`HTTP Error ${response.status}: ${await response.text()}`); } const responseData = await response.json(); if (responseData?.choices?.[0]?.message) { elements.mindVoiceContent.textContent = responseData.choices[0].message.content; } else { throw new Error('No valid mind voice returned from API.'); } } catch (error) { elements.mindVoiceContent.textContent = `读取心声失败: ${error.message}`; } };
+                        const showMindVoice = async () => {
+            if (currentChat.type !== 'direct') return;
+            const character = getCurrentCharacter();
+            if (!character) return;
+            const { config, chatHistory } = character;
+            const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
+            const apiKey = elements.apiKeyInput.value.trim();
+            const model = elements.modelSelect.value;
+            if (!apiBaseUrl || !apiKey || !model) {
+                elements.mindVoiceContent.textContent = '请先在设置中填写API信息。';
+                elements.mindVoiceModal.classList.add('show');
+                return;
+            }
+
+            elements.mindVoiceContent.textContent = '思考中...';
+            elements.mindVoiceModal.classList.add('show');
+
+                        const mindVoiceSystemPrompt = `[System Instruction for Language Model]
+1.  **Your Persona**: You are the character defined by the following prompt. You should ONLY use the personality, NOT the chat format instructions.
+    ${config.characterPrompt}
+
+2.  **Your Task**: You will be given a chat history. Your ONLY job is to analyze the conversation and output a single, short, internal thought of your character in the first person. This is an UNSPOKEN thought.
+
+3.  **Output Rules (MANDATORY)**:
+    - Your entire response MUST be a single sentence of plain text.
+    - It MUST be an internal, unspoken thought, not a line of dialogue.
+    - It MUST NOT contain any actions like (pounces) or descriptions in parentheses or asterisks. This is absolutely forbidden.
+    - It MUST NOT be a direct reply to the user. It is a private thought.
+
+4.  **Example**:
+    - Chat History ends with User saying: "You are so sweet!"
+    - Correct Output Example: She actually called me sweet... I can't stop smiling.
+    - Incorrect Output Example: (blushes) Thank you, you too.`;
+            
+            // --- 这里就是我们的最终决战修改！ ---
+            // 我们新建了一个专门给‘心声’功能用的‘翻译机’(formatForMindVoice)
+            const formatForMindVoice = (msg) => {
+                const role = msg.sender === 'user' ? 'user' : 'assistant';
+                
+                // 这是关键！我们不再使用可能包含JSON代码的 llmContent。
+                // 我们只使用 msg.text，因为它只包含干净的、我们能看到的文字。
+                const content = msg.text; 
+
+                if (!content) {
+                    return null; // 同样，过滤掉表情等没有文字的消息
+                }
+                return { role, content };
+            };
+
+            const messagesPayload = [
+                { role: 'system', content: mindVoiceSystemPrompt },
+                // 使用我们全新的、更智能的‘翻译机’来处理历史记录
+                ...chatHistory.slice(-config.memorySize)
+                             .map(formatForMindVoice) 
+                             .filter(msg => msg !== null)
+            ];
+            
+            try {
+                const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages: messagesPayload }) });
+                if (!response.ok) {
+                    throw new Error(`HTTP Error ${response.status}: ${await response.text()}`);
+                }
+                const responseData = await response.json();
+                if (responseData?.choices?.[0]?.message?.content) {
+                    // 心声功能不应该返回JSON，所以我们直接用它返回的内容
+                    elements.mindVoiceContent.textContent = responseData.choices[0].message.content;
+                } else if (responseData.error) {
+                    throw new Error(`API返回错误: ${responseData.error.message}`);
+                } else {
+                    throw new Error('API没有返回有效的心声内容。');
+                }
+            } catch (error) {
+                elements.mindVoiceContent.textContent = `读取心声失败: ${error.message}`;
+            }
+        };
         const openStickerManager = (context) => { if (currentChat.type !== 'direct') return; const character = getCurrentCharacter(); if(!character) return; let stickerManagementContext = context; const currentStickers = context === 'user' ? character.userStickers : character.aiStickers; let galleryHtml = '<p style="text-align:center; color:#999;">点击下方按钮添加，点击已添加的表情可删除。</p>' + currentStickers.map(url => `<img src="${url}" data-sticker-url="${url}" alt="sticker">`).join(''); openFeatureModal(context === 'user' ? '我的表情管理' : '他的表情管理', `<div id="sticker-gallery" style="margin-bottom:15px;">${galleryHtml}</div><button id="add-stickers-btn" class="file-input-label" style="text-align:center; width:100%;">从相册批量添加</button>`, '完成', () => closeModal(elements.featureModal)); getEl('add-stickers-btn').onclick = () => elements.stickerUploadInput.click(); getEl('sticker-gallery').onclick = e => { if (e.target.tagName === 'IMG') { if(confirm('要删除这个表情吗？')) { const urlToDelete = e.target.dataset.stickerUrl; if(stickerManagementContext === 'user') character.userStickers = character.userStickers.filter(url => url !== urlToDelete); else character.aiStickers = character.aiStickers.filter(url => url !== urlToDelete); saveAllData(); e.target.remove(); } } }; elements.stickerUploadInput.onchange = (e) => { Array.from(e.target.files).forEach((file, i, arr) => { handleFileUpload(file, (result) => { if (stickerManagementContext === 'user') character.userStickers.push(result); else character.aiStickers.push(result); if (i === arr.length - 1) { saveAllData(); alert(`已成功添加 ${arr.length} 个表情！`); closeModal(elements.featureModal); openStickerManager(stickerManagementContext); } }); }); e.target.value = ''; }; };
 
         // --- Chat Management Logic (Characters & Groups) ---
@@ -1594,7 +2092,6 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
             };
         };
 
-        // --- BUG 1 FIX: Changed preview image ID to avoid conflicts ---
         const openCreateGroupModal = () => {
             let tempGroupAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2EwYTBiMyI+PHBhdGggZD0iTTExIDEyYy0uNTUgMC0xLS40NS0xLTFzLjQ1LTEgMS0xIDEgLjQ1IDEgMXMtLjQ1IDEtMSAxem00IDBjLS41NSAwLTEtLjQ1LTEtMXMuNDUtMSAxLTEgMSAuNDUgMSAxcy0uNDUgMS0xIDF6bS04IDBjLS41NSAwLTEtLjQ1LTEtMXMuNDUtMSAxLTEgMSAuNDUgMSAxcy0uNDUgMS0xIDF6bTEwLThINWMtMS4xIDAtMiAuOS0yIDJ2MTRsNC00aDEyYzEuMSAwIDItLjkgMi0yVjZjMC0xLjEtLjktMi0yLTJ6bTAtMTJoMTJjMS4xIDAgMiAuOSAyIDJ2MTBsMiAydjQtMmMwLTEuMS0uOS0yLTItMkg2bC00IDRWMnYyaDR6Ii8+PC9zdmc+';
             const memberSelectionHtml = characterSets.map(c => `
@@ -1647,8 +2144,7 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
                         loadChat('direct', characterSets[0].id);
                     }
                     saveAllData();
-                    closeModal(elements.settingsModal);
-                    closeModal(elements.featureModal);
+                    openChatManager(); 
                 }
             } else { // group
                 const groupToDelete = groupChats.find(g => g.id === idToDelete);
@@ -1658,73 +2154,86 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
                         loadChat('direct', characterSets[0].id);
                     }
                     saveAllData();
-                    closeModal(elements.settingsModal);
-                    closeModal(elements.featureModal);
+                    openChatManager();
                 }
             }
+             closeModal(elements.settingsModal);
         };
 
-        // --- Moments (朋友圈) Logic ---
         const addMomentByAI = (characterId, momentData, momentType) => {
             const character = characterSets.find(c => c.id === characterId);
             if (!character) return;
-            const imageUrl = momentData.image_query ? `https://source.unsplash.com/500x500/?${encodeURIComponent(momentData.image_query)}` : null;
+                        const imageUrl = null;
             const newMoment = { id: generateId('moment'), senderId: character.id, timestamp: getFullTimestamp(), likes: [], comments: [], content: momentData.content, imageUrl };
             
             showTopNotification(`${character.config.characterName} 发布了一条新动态`, character.config.aiAvatar);
 
             if (momentType === 'direct') {
                 character.moments.unshift(newMoment);
-            } else if (momentType === 'group' && currentChat.type === 'group') {
-                const group = getCurrentGroup();
-                group.groupMoments.unshift(newMoment);
-                // Trigger other members to comment ("修罗场")
-                const otherMembers = group.memberIds.filter(id => id !== characterId);
-                otherMembers.forEach((memberId, index) => {
-                    setTimeout(() => {
-                        triggerAiMomentComment(newMoment, memberId, 'group');
-                    }, (index + 1) * 2000); // Stagger the comments
-                });
+            } else if (momentType === 'group') {
+                const group = groupChats.find(g => g.memberIds.includes(characterId));
+                if (group) {
+                    if (!group.groupMoments) group.groupMoments = [];
+                    group.groupMoments.unshift(newMoment);
+                    const otherMembers = group.memberIds.filter(id => id !== characterId);
+                    otherMembers.forEach((memberId, index) => {
+                        setTimeout(() => {
+                            triggerAiMomentComment(newMoment, memberId, 'group');
+                        }, (index + 1) * 4000); 
+                    });
+                }
             }
             saveAllData();
+            if(elements.momentsOverlay.classList.contains('show')) renderMoments();
         };
 
         const addMomentByUser = async (momentData) => { 
             const newMoment = { id: generateId('moment'), senderId: 'user', timestamp: getFullTimestamp(), likes: [], comments: [], ...momentData }; 
             userMomentsProfile.posts.unshift(newMoment); 
             saveAllData();
-            openMoments(); // Refresh moments view
+            openMoments(); // This will re-render
             
-            if (currentChat.type === 'direct') {
-                await triggerAiMomentComment(newMoment, getCurrentCharacter().id, 'direct');
+            const relevantChars = currentChat.type === 'direct' 
+                ? [getCurrentCharacter()] 
+                : (getCurrentGroup() ? getCurrentGroup().memberIds.map(id => characterSets.find(c => c.id === id)).filter(Boolean) : []);
+            
+            // Trigger AI comments sequentially to avoid rate limits
+            for (let i = 0; i < relevantChars.length; i++) {
+                setTimeout(() => {
+                    triggerAiMomentComment(newMoment, relevantChars[i].id, currentChat.type);
+                }, (i + 1) * 3000);
             }
         };
 
         const triggerAiMomentComment = async (moment, commenterId, momentType) => {
-            const apiConfigSource = characterSets[0];
+            const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
+            const apiKey = elements.apiKeyInput.value.trim();
+            const model = elements.modelSelect.value;
             const commenterChar = characterSets.find(c => c.id === commenterId);
-            if (!apiConfigSource || !commenterChar) return;
-            const { apiBaseUrl, apiKey, model } = apiConfigSource.config;
-            if (!apiBaseUrl || !apiKey || !model) return;
+            if (!apiBaseUrl || !apiKey || !model || !commenterChar) return;
             
-            const postedBy = moment.senderId === 'user' ? userMomentsProfile.name : characterSets.find(c => c.id === moment.senderId)?.config.characterName;
+            const postedBy = moment.senderId === 'user' ? (userMomentsProfile.name || '我') : (characterSets.find(c => c.id === moment.senderId)?.config.characterName || '一位朋友');
             
-            const prompt = `[Role]: You are ${commenterChar.config.characterName} (ID: ${commenterId}).
-[Situation]: ${postedBy} just posted a new Moment: "${moment.content}"
-[Task]: Based on your personality, write a witty or insightful comment for this post in Simplified Chinese.
-[Output Format]: Your response MUST be a JSON array containing a single object, like this:
-[{"type": "moment_comment", "momentId": "${moment.id}", "comment_text": "Your comment here."}]`;
+            const prompt = `[Role]: You are ${commenterChar.config.characterName} (ID: ${commenterId}). Your personality is: ${commenterChar.config.characterPrompt}
+[Situation]: ${postedBy} just posted a new Moment: "${moment.content}".
+[Task]: Based on your personality and relationship with the poster, write a comment in Simplified Chinese. It MUST be natural, short, and without punctuation.
+[CRITICAL: Output Format]: Your response MUST be a JSON array containing a single object, like this:
+[{"type": "moment_comment", "momentId": "${moment.id}", "comment_text": "Your comment here."}]
+DO NOT add any text outside the JSON array.`;
 
             const messages = [{ role: 'system', content: prompt }];
             try {
-                const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model: model, messages }) });
+                const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages }) });
                 if (!response.ok) { console.error("AI comment failed: ", await response.text()); return; }
                 const responseData = await response.json();
                 if (responseData?.choices?.[0]?.message?.content) {
                     let parsed;
-                    try { parsed = JSON.parse(responseData.choices[0].message.content); } catch (e) { return; }
+                    try { 
+                        const jsonMatch = responseData.choices[0].message.content.match(/\[\s*\{.*\}\s*\]/s);
+                        parsed = JSON.parse(jsonMatch ? jsonMatch[0] : responseData.choices[0].message.content);
+                    } catch (e) { console.error("Parsing moment comment failed:", e); return; }
                     const action = parsed[0];
-                    if (action && action.type === 'moment_comment') {
+                    if (action && action.type === 'moment_comment' && action.comment_text) {
                         addCommentOrReplyByAI('comment', moment.id, action.comment_text, commenterId, null, momentType);
                     }
                 }
@@ -1732,18 +2241,19 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
         };
 
         const triggerAiMomentReply = async (moment, comment, replierId, momentType) => {
-             const apiConfigSource = characterSets[0];
+            const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
+            const apiKey = elements.apiKeyInput.value.trim();
+            const model = elements.modelSelect.value;
             const replierChar = characterSets.find(c => c.id === replierId);
-            const commenterName = comment.sender === 'user' ? userMomentsProfile.name : characterSets.find(c => c.id === comment.sender)?.config.characterName;
-            if (!apiConfigSource || !replierChar) return;
-            const { apiBaseUrl, apiKey, model } = apiConfigSource.config;
-            if (!apiBaseUrl || !apiKey || !model) return;
+            const commenterName = comment.sender === 'user' ? (userMomentsProfile.name || '我') : (characterSets.find(c => c.id === comment.sender)?.config.characterName || '一位朋友');
+            if (!apiBaseUrl || !apiKey || !model || !replierChar) return;
 
-            const prompt = `[Role]: You are ${replierChar.config.characterName} (ID: ${replierId}).
+            const prompt = `[Role]: You are ${replierChar.config.characterName} (ID: ${replierId}). Your personality is: ${replierChar.config.characterPrompt}.
 [Situation]: On a Moment, ${commenterName} commented: "${comment.text}".
-[Task]: Based on your personality, reply to this comment in Simplified Chinese.
-[Output Format]: Your response MUST be a JSON array containing a single object, like this:
-[{"type": "moment_reply", "momentId": "${moment.id}", "commentId": "${comment.id}", "reply_text": "Your reply here."}]`;
+[Task]: Based on your personality, reply to this comment in Simplified Chinese. It MUST be brief, natural, and without punctuation.
+[CRITICAL: Output Format]: Your response MUST be a JSON array containing a single object, like this:
+[{"type": "moment_reply", "momentId": "${moment.id}", "commentId": "${comment.id}", "reply_text": "Your reply here."}]
+DO NOT add any text outside the JSON array.`;
 
             const messages = [{ role: 'system', content: prompt }];
             try {
@@ -1752,9 +2262,12 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
                 const responseData = await response.json();
                  if (responseData?.choices?.[0]?.message?.content) {
                     let parsed;
-                    try { parsed = JSON.parse(responseData.choices[0].message.content); } catch (e) { return; }
+                    try { 
+                        const jsonMatch = responseData.choices[0].message.content.match(/\[\s*\{.*\}\s*\]/s);
+                        parsed = JSON.parse(jsonMatch ? jsonMatch[0] : responseData.choices[0].message.content);
+                    } catch (e) { console.error("Parsing moment reply failed:", e); return; }
                     const action = parsed[0];
-                    if (action && action.type === 'moment_reply') {
+                    if (action && action.type === 'moment_reply' && action.reply_text) {
                         addCommentOrReplyByAI('reply', moment.id, action.reply_text, replierId, comment.id, momentType);
                     }
                 }
@@ -1765,13 +2278,139 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
         
         const openPostMomentModal = () => { let tempImage = null; const bodyHtml = ` <div class="form-group"> <textarea id="new-moment-text" rows="5" placeholder="在想些什么？"></textarea> </div> <div class="form-group"> <label for="moment-post-image-input" class="file-input-label">添加图片</label> <img id="new-moment-preview" src="" style="max-width: 100px; max-height: 100px; border-radius: 8px; margin-top: 10px; display: none;"> </div> `; openFeatureModal('发布新动态', bodyHtml, '发布', () => { const text = getEl('new-moment-text').value.trim(); if(text || tempImage) { addMomentByUser({ content: text, imageUrl: tempImage }); closeModal(elements.featureModal); } }); const preview = getEl('new-moment-preview'); getEl('feature-modal-body').querySelector('label').onclick = () => elements.momentPostImageInput.click(); elements.momentPostImageInput.onchange = e => handleFileUpload(e.target.files[0], (dataUrl) => { tempImage = dataUrl; preview.src = dataUrl; preview.style.display = 'block'; }); };
         
+        const openCreateRedPacketModal = () => {
+            const bodyHtml = `
+                <div class="form-group"><label for="red-packet-amount">总金额</label><input type="number" id="red-packet-amount" placeholder="0.00"></div>
+                <div class="form-group"><label for="red-packet-count">红包个数</label><input type="number" id="red-packet-count" placeholder="例如: 5"></div>
+                <div class="form-group"><label for="red-packet-memo">祝福语</label><input type="text" id="red-packet-memo" value="恭喜发财，大吉大利"></div>
+            `;
+            openFeatureModal('发红包', bodyHtml, '塞钱进红包', () => {
+                const amount = parseFloat(getEl('red-packet-amount').value);
+                const count = parseInt(getEl('red-packet-count').value);
+                const memo = getEl('red-packet-memo').value.trim() || '恭喜发财，大吉大利';
+                const group = getCurrentGroup();
+                if (!group || amount <= 0 || count <= 0) { alert('请输入有效的金额和数量。'); return; }
+                if (count > group.memberIds.length + 1) { alert('红包个数不能超过群成员总数。'); return; }
+                if (amount < count * 0.01) { alert('总金额不足以让每个红包至少有0.01元。'); return; }
+
+                handleUserAction({ 
+                    sender: 'user', type: 'red-packet', packetId: generateId('rp'),
+                    amount, count, memo, grabbers: {}, status: 'open',
+                    llmContent: `[用户发了一个红包。祝福语: "${memo}"]` 
+                });
+                closeModal(elements.featureModal);
+            });
+        };
+
+        const renderRedPacket = (msg) => {
+            const { packetId, memo, grabbers, count, status } = msg;
+            const hasGrabbed = Object.keys(grabbers).includes('user');
+            const isFullyClaimed = Object.keys(grabbers).length >= count;
+
+            let resultsHtml = '';
+            if (hasGrabbed || isFullyClaimed) {
+                const items = Object.entries(grabbers).map(([id, amount]) => {
+                    const name = id === 'user' ? userMomentsProfile.name : characterSets.find(c => c.id === id)?.config.characterName || '未知';
+                    return `<div class="red-packet-result-item"><span>${name}</span><span>${amount.toFixed(2)}元</span></div>`;
+                }).join('');
+                resultsHtml = `<div class="red-packet-results">${items}</div>`;
+            }
+
+            const buttonHtml = (!hasGrabbed && !isFullyClaimed) ? `<button class="red-packet-grab-btn" onclick="handleGrabRedPacket('${packetId}')">开</button>` : '';
+
+            return `
+                <div class="red-packet-body">
+                    <div class="red-packet-body-header">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 4H6C4.9 4 4 4.9 4 6v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-6 11.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 6.5 12 6.5s4.5 2.01 4.5 4.5-2.01 4.5-4.5 4.5z"/></svg>
+                        <span class="red-packet-memo">${memo}</span>
+                    </div>
+                    ${buttonHtml}
+                </div>
+                ${resultsHtml}
+                <div class="red-packet-footer">群红包</div>
+            `;
+        };
+        
+        window.handleGrabRedPacket = (packetId) => { // Make it global for inline onclick
+            const group = getCurrentGroup();
+            if (!group) return;
+            const packet = group.chatHistory.find(m => m.packetId === packetId);
+            if (!packet || packet.status === 'claimed' || Object.keys(packet.grabbers).includes('user')) return;
+
+            const remainingAmount = packet.amount - Object.values(packet.grabbers).reduce((a, b) => a + b, 0);
+            const remainingCount = packet.count - Object.keys(packet.grabbers).length;
+            
+            let grabbedAmount;
+            if (remainingCount === 1) {
+                grabbedAmount = remainingAmount;
+            } else {
+                const min = 0.01;
+                const max = (remainingAmount - (remainingCount - 1) * min);
+                grabbedAmount = Math.random() * (max - min) + min;
+            }
+            
+            packet.grabbers['user'] = parseFloat(grabbedAmount.toFixed(2));
+            if (Object.keys(packet.grabbers).length >= packet.count) {
+                packet.status = 'claimed';
+            }
+            saveAllData();
+            renderAllMessages();
+            handleUserAction({ sender: 'user', type: 'text', text: `[我领取了红包]`, llmContent: `[用户领取了红包]` });
+        };
+        
+        const handleAiGrabRedPacket = (packetId, grabberId) => {
+            const group = getCurrentGroup();
+            if (!group) return;
+            const packet = group.chatHistory.find(m => m.packetId === packetId);
+            if (!packet || packet.status === 'claimed' || Object.keys(packet.grabbers).includes(grabberId)) return;
+
+            const remainingAmount = packet.amount - Object.values(packet.grabbers).reduce((a, b) => a + b, 0);
+            const remainingCount = packet.count - Object.keys(packet.grabbers).length;
+            
+            if (remainingCount <= 0) return;
+
+            let grabbedAmount;
+            if (remainingCount === 1) {
+                grabbedAmount = remainingAmount;
+            } else {
+                 const min = 0.01;
+                const max = (remainingAmount - (remainingCount - 1) * min);
+                grabbedAmount = Math.random() * (max - min) + min;
+            }
+
+            packet.grabbers[grabberId] = parseFloat(grabbedAmount.toFixed(2));
+            if (Object.keys(packet.grabbers).length >= packet.count) {
+                packet.status = 'claimed';
+            }
+            saveAllData();
+            renderAllMessages();
+        };
+
+
         // --- Poll Logic ---
         const openCreatePollModal = () => { const bodyHtml = ` <div class="form-group"><label for="poll-question">投票问题</label><input type="text" id="poll-question" placeholder="晚饭吃什么？"></div> <div class="form-group"><label>选项 (每行一个)</label><textarea id="poll-options" rows="4" placeholder="披萨\n寿司\n墨西哥卷饼"></textarea></div> `; openFeatureModal('创建投票', bodyHtml, '创建', () => { const question = getEl('poll-question').value.trim(); const options = getEl('poll-options').value.split('\n').map(o => o.trim()).filter(o => o); if (question && options.length >= 2) { const pollId = generateId('poll'); handleUserAction({ sender: 'user', type: 'poll', pollId, question, options, llmContent: `[用户发起了一个投票。问题: "${question}", 选项: ${options.join(", ")}]` }); closeModal(elements.featureModal); } else { alert('请输入问题和至少两个选项。'); } }); };
-        const renderPoll = (msg) => { if (currentChat.type !== 'group') return ''; const group = getCurrentGroup(); if (!group) return ''; const pollData = (group.polls || []).find(p => p.pollId === msg.pollId); if (!pollData) return `<p>投票数据加载失败。</p>`; const totalVotes = Object.values(pollData.votes).flat().length; const userHasVoted = Object.values(pollData.votes).flat().includes('user'); const optionsHtml = pollData.options.map(option => { const voters = pollData.votes[option] || []; const voteCount = voters.length; const percentage = totalVotes > 0 ? (voteCount / totalVotes * 100).toFixed(0) : 0; const voterAvatars = voters.map(voterId => { const avatarSrc = voterId === 'user' ? userMomentsProfile.chatAvatar : characterSets.find(c => c.id === voterId)?.config.aiAvatar; return avatarSrc ? `<img src="${avatarSrc}" class="poll-voter-avatar" title="${characterSets.find(c=>c.id===voterId)?.config.characterName || '我'}">` : ''; }).join(''); return ` <div class="poll-option"> <div class="poll-option-label">${option} (${voteCount}票)</div> <div class="poll-progress-bar"> <div class="poll-progress-fill" style="width: ${percentage}%;"> <span class="poll-percentage">${percentage}%</span> </div> </div> <div class="poll-voters">${voterAvatars}</div> ${!userHasVoted ? `<button class="poll-vote-btn" data-poll-id="${pollData.pollId}" data-option="${option}">投这一票</button>` : ''} </div>`; }).join(''); return `<div class="poll-question">${pollData.question}</div>${optionsHtml}`; };
-        const handleUserVote = (pollId, option) => { if (currentChat.type !== 'group') return; const group = getCurrentGroup(); if (!group) return; const poll = (group.polls || []).find(p => p.pollId === pollId); if (!poll || poll.status === 'closed') return; Object.keys(poll.votes).forEach(key => { poll.votes[key] = (poll.votes[key] || []).filter(v => v !== 'user'); }); if (!poll.votes[option]) poll.votes[option] = []; poll.votes[option].push('user'); saveAllData(); renderAllMessages(); handleUserAction({ sender: 'user', type: 'text', text: `[我投了: 「${option}」]`, llmContent: `[用户投票了。选项: "${option}"]` }); };
-        const handleAiVote = (voteAction) => { if (currentChat.type !== 'group') return; const group = getCurrentGroup(); if (!group) return; const poll = (group.polls || []).find(p => p.pollId === voteAction.pollId); const voterId = voteAction.senderId; const option = voteAction.option; if (!poll || !voterId || !option || poll.status === 'closed' || !poll.options.includes(option)) return; Object.keys(poll.votes).forEach(key => { poll.votes[key] = (poll.votes[key] || []).filter(v => v !== voterId); }); if (!poll.votes[option]) poll.votes[option] = []; poll.votes[option].push(voterId); saveAllData(); renderAllMessages(); };
+        const renderPoll = (msg) => { const group = getCurrentGroup(); if (!group) return ''; const pollData = (group.polls || []).find(p => p.pollId === msg.pollId); if (!pollData) return `<p>投票数据加载失败。</p>`; const totalVotes = Object.values(pollData.votes).flat().length; const userHasVoted = Object.values(pollData.votes).flat().includes('user'); const optionsHtml = pollData.options.map(option => { const voters = pollData.votes[option] || []; const voteCount = voters.length; const percentage = totalVotes > 0 ? (voteCount / totalVotes * 100).toFixed(0) : 0; const voterAvatars = voters.map(voterId => { const avatarSrc = voterId === 'user' ? userMomentsProfile.chatAvatar : characterSets.find(c => c.id === voterId)?.config.aiAvatar; return avatarSrc ? `<img src="${avatarSrc}" class="poll-voter-avatar" title="${characterSets.find(c=>c.id===voterId)?.config.characterName || '我'}">` : ''; }).join(''); return ` <div class="poll-option"> <div class="poll-option-label">${option} (${voteCount}票)</div> <div class="poll-progress-bar"> <div class="poll-progress-fill" style="width: ${percentage}%;"> <span class="poll-percentage">${percentage}%</span> </div> </div> <div class="poll-voters">${voterAvatars}</div> ${!userHasVoted ? `<button class="poll-vote-btn" data-poll-id="${pollData.pollId}" data-option="${option}">投这一票</button>` : ''} </div>`; }).join(''); return `<div class="poll-question">${pollData.question}</div>${optionsHtml}`; };
+        const handleUserVote = (pollId, option) => { const group = getCurrentGroup(); if (!group) return; const poll = (group.polls || []).find(p => p.pollId === pollId); if (!poll || poll.status === 'closed') return; Object.keys(poll.votes).forEach(key => { poll.votes[key] = (poll.votes[key] || []).filter(v => v !== 'user'); }); if (!poll.votes[option]) poll.votes[option] = []; poll.votes[option].push('user'); saveAllData(); renderAllMessages(); handleUserAction({ sender: 'user', type: 'text', text: `[我投了: 「${option}」]`, llmContent: `[用户投票了。选项: "${option}"]` }); };
+        // 这是专为AI设计的、只更新数据不刷新画面的“安静版”投票函数
+const handleAiVote_dataOnly = (voteAction) => {
+    const group = getCurrentGroup();
+    if (!group) return;
+    const poll = (group.polls || []).find(p => p.pollId === voteAction.pollId);
+    const voterId = voteAction.senderId;
+    const option = voteAction.option;
+    if (!poll || !voterId || !option || poll.status === 'closed' || !poll.options.includes(option)) return;
+    
+    // 更新投票数据
+    Object.keys(poll.votes).forEach(key => {
+        poll.votes[key] = (poll.votes[key] || []).filter(v => v !== voterId);
+    });
+    if (!poll.votes[option]) poll.votes[option] = [];
+    poll.votes[option].push(voterId);
+
+    // 只保存数据，不大喊“刷新”
+    saveAllData();
+};
         
-        // --- Moments Rendering & Interaction (with nesting) ---
         const renderMoments = () => {
             const chatData = getCurrentChatData();
             if(!chatData) { elements.momentsFeed.innerHTML = ''; return; }
@@ -1781,7 +2420,7 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
             if (currentChat.type === 'direct') {
                 const character = chatData;
                 allPosts = [
-                    ...character.moments.map(m => ({ ...m, senderType: 'ai' })),
+                    ...(character.moments || []).map(m => ({ ...m, senderType: 'ai' })),
                     ...userMomentsProfile.posts.map(p => ({ ...p, senderType: 'user' }))
                 ];
                 elements.postNewMomentBtn.style.display = 'block';
@@ -1791,8 +2430,8 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
 
             } else { // Group Chat Moments
                 const group = chatData;
-                allPosts = [...group.groupMoments.map(m => ({...m, senderType: 'ai'}))];
-                elements.postNewMomentBtn.style.display = 'none'; // Users can't post in group moments
+                allPosts = [...(group.groupMoments || []).map(m => ({...m, senderType: 'ai'}))];
+                elements.postNewMomentBtn.style.display = 'none';
                 elements.momentsUserAvatar.src = group.avatar;
                 elements.momentsUserName.textContent = group.name;
                 elements.momentsCoverArea.style.backgroundImage = `url(${group.avatar})`;
@@ -1806,14 +2445,14 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
         };
         
         const renderSingleMoment = (post) => {
-            const senderIsUser = post.senderType === 'user';
+            const senderIsUser = post.senderId === 'user';
             const postChar = !senderIsUser ? characterSets.find(c => c.id === post.senderId) : null;
             const senderName = senderIsUser ? userMomentsProfile.name : postChar?.config.characterName || '未知';
-            const senderAvatar = senderIsUser ? userMomentsProfile.momentsAvatar : postChar?.config.aiAvatar || ''; // **FIXED HERE**
+            const senderAvatar = senderIsUser ? userMomentsProfile.momentsAvatar : postChar?.config.aiAvatar || '';
             const momentType = currentChat.type === 'direct' ? 'direct' : 'group';
 
             return `
-                <div class="moment-post" data-moment-id="${post.id}" data-sender-type="${post.senderType}" data-sender-id="${post.senderId}" data-moment-type="${momentType}">
+                <div class="moment-post" data-moment-id="${post.id}" data-sender-id="${post.senderId}" data-moment-type="${momentType}">
                     <img src="${senderAvatar}" alt="avatar" class="moment-avatar">
                     <div class="moment-body">
                         <div class="moment-username">${senderName}</div>
@@ -1861,31 +2500,33 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
             </div>`;
         };
 
-        const addCommentOrReplyByAI = (type, momentId, text, senderId, targetCommentId = null, momentType) => {
+        const addCommentOrReplyByAI = (type, momentId, text, senderId, targetCommentId, momentType) => {
             let momentSource;
             if (momentType === 'direct') {
-                momentSource = [...userMomentsProfile.posts, ...characterSets.flatMap(c => c.moments)];
+                momentSource = [...userMomentsProfile.posts, ...characterSets.flatMap(c => c.moments || [])];
             } else {
-                momentSource = getCurrentGroup()?.groupMoments || [];
+                momentSource = (getCurrentGroup() || {}).groupMoments || [];
             }
             const moment = momentSource.find(m => m.id === momentId);
             if (!moment) return;
             
             const newComment = { id: generateId('cmt'), sender: senderId, text, replies: [] };
             
+            let parentComment = null;
             if (type === 'comment') {
+                if (!moment.comments) moment.comments = [];
                 moment.comments.push(newComment);
             } else if (type === 'reply' && targetCommentId) {
                 const findAndPushReply = (comments) => {
                     for (const c of comments) {
                         if (c.id === targetCommentId) {
                             newComment.replyTo = c.sender;
+                            if (!c.replies) c.replies = [];
                             c.replies.push(newComment);
+                            parentComment = c;
                             return true;
                         }
-                        if (c.replies && c.replies.length > 0) {
-                            if (findAndPushReply(c.replies)) return true;
-                        }
+                        if (c.replies && findAndPushReply(c.replies)) return true;
                     }
                     return false;
                 };
@@ -1893,8 +2534,11 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
             }
             
             saveAllData();
-            if (elements.momentsOverlay.classList.contains('show')) {
-                renderMoments();
+            if (elements.momentsOverlay.classList.contains('show')) renderMoments();
+            
+            if (momentType === 'group' && senderId !== 'user') {
+                const group = getCurrentGroup();
+                const commentToReplyTo = type === 'reply' ? parentComment : newComment;
             }
         };
 
@@ -1903,13 +2547,12 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
             if (!postEl) return;
             
             const momentId = postEl.dataset.momentId;
-            const senderType = postEl.dataset.senderType;
             const senderId = postEl.dataset.senderId;
             const momentType = postEl.dataset.momentType;
 
             let postSource;
             if (momentType === 'direct') {
-                 postSource = senderType === 'user' ? userMomentsProfile.posts : characterSets.find(c => c.id === senderId)?.moments;
+                 postSource = senderId === 'user' ? userMomentsProfile.posts : characterSets.find(c => c.id === senderId)?.moments;
             } else {
                  postSource = getCurrentGroup()?.groupMoments;
             }
@@ -1923,7 +2566,6 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
             const commentText = e.target.closest('.comment-text');
             const commentForm = e.target.closest('.comment-input-form');
             
-            // Handle Like
             if (likeBtn) {
                 const likeIndex = moment.likes.indexOf('user');
                 if (likeIndex > -1) { moment.likes.splice(likeIndex, 1); } else { moment.likes.push('user'); }
@@ -1931,14 +2573,13 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
                 renderMoments();
             }
             
-            // Handle clicking "Comment" button or a comment text to reply
             if (commentBtn || commentText) {
                 const form = postEl.querySelector('.comment-input-form');
                 const input = form.querySelector('.comment-input');
                 const targetCommentEl = e.target.closest('.comment');
 
                 if(form.style.display === 'flex' && (targetCommentEl?.dataset.commentId === form.dataset.replyTo || !targetCommentEl)) {
-                    form.style.display = 'none'; // Hide if clicking the same thing again
+                    form.style.display = 'none';
                 } else {
                     form.style.display = 'flex';
                     if (targetCommentEl) {
@@ -1952,7 +2593,6 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
                 }
             }
 
-            // Handle Comment/Reply Submission
             if (commentForm) {
                 e.preventDefault();
                 const input = commentForm.querySelector('.comment-input');
@@ -1963,34 +2603,34 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
                     const newComment = { id: generateId('cmt'), sender: 'user', text, replies: [] };
                     let repliedToAI = false;
 
-                    if (replyToCommentId) { // It's a reply
+                    if (replyToCommentId) { // Reply
                          const findAndPushReply = (comments) => {
                             for (const c of comments) {
                                 if (c.id === replyToCommentId) {
                                     newComment.replyTo = c.sender;
+                                    if(!c.replies) c.replies = [];
                                     c.replies.push(newComment);
-                                    if(c.sender !== 'user') repliedToAI = {moment: moment, comment: c};
+                                    if(c.sender !== 'user') repliedToAI = {moment: moment, comment: c, replierId: c.sender};
                                     return true;
                                 }
-                                if (c.replies && c.replies.length > 0) {
-                                    if (findAndPushReply(c.replies)) return true;
-                                }
+                                if (c.replies && findAndPushReply(c.replies)) return true;
                             }
                             return false;
                         };
                         findAndPushReply(moment.comments);
-                    } else { // It's a new top-level comment
+                    } else { // New comment
+                        if (!moment.comments) moment.comments = [];
                         moment.comments.push(newComment);
-                        if(moment.senderType === 'ai') repliedToAI = {moment: moment, comment: newComment};
+                        if(moment.senderId !== 'user') repliedToAI = {moment: moment, comment: newComment, replierId: moment.senderId};
                     }
                     
                     input.value = '';
                     commentForm.style.display = 'none';
                     saveAllData();
                     renderMoments();
-
+                    
                     if (repliedToAI) {
-                        triggerAiMomentReply(repliedToAI.moment, repliedToAI.comment, repliedToAI.moment.senderId, momentType);
+                        setTimeout(() => triggerAiMomentReply(repliedToAI.moment, newComment, repliedToAI.replierId, momentType), 2000);
                     }
                 }
             }
@@ -2010,48 +2650,93 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
             if (todaysEntry) {
                 renderDiary(character);
             } else {
-                // Generate today's entry
                 elements.diaryEntries.innerHTML = '<p>正在写今天的日记...</p>';
-                await triggerAiDiaryEntry(character);
+                await 
+                  (character);
             }
         };
         
-        const triggerAiDiaryEntry = async (character) => {
+                const triggerAiDiaryEntry = async (character) => {
             const { config, chatHistory } = character;
-            const apiConfigSource = characterSets[0];
-            const { apiBaseUrl, apiKey, model } = apiConfigSource.config;
+            const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
+            const apiKey = elements.apiKeyInput.value.trim();
+            const model = elements.modelSelect.value;
             if (!apiBaseUrl || !apiKey || !model) return;
 
             const prompt = `[Role]: You are ${config.characterName}.
 [Task]: It is the end of the day. Based on your conversations with the user today, write a short diary entry in Simplified Chinese, reflecting on your feelings and the day's events. Your personality must be consistent.
-[Output Format]: Your response MUST be a JSON array containing a single object like this:
+[CRITICAL: Output Format]: Your response MUST be a JSON array containing a single object like this:
 [{"type": "diary_entry", "content": "Your diary content here."}]`;
+
+                       const formatDiaryMessage = (msg) => {
+                // 这个辅助函数的作用是，确保我们只打包有文字内容的消息。
+                const role = msg.sender === 'user' ? 'user' : 'assistant';
+                // 优先使用llmContent（给AI看的内容），其次是text（用户看到的内容）。
+                const content = msg.llmContent || msg.text;
+                
+                // 这是关键！如果一条消息没有文字内容（比如它是个表情），就返回null。
+                if (!content) {
+                    return null;
+                }
+
+                // 如果有内容，就打包成API要求的格式。
+                return { role, content };
+            };
 
             const messages = [
                 { role: 'system', content: prompt },
-                ...chatHistory.slice(-config.memorySize).map(m => ({
-                    role: m.sender === 'user' ? 'user' : 'assistant',
-                    content: m.llmContent || m.text
-                }))
-            ];
+                // 这里是修改的核心：
+                // 1. .map(formatDiaryMessage) - 使用我们上面的辅助函数来打包每一条消息。
+                // 2. .filter(msg => msg !== null) - 把所有返回null的消息（也就是那些没内容的消息）过滤掉。
+                ...chatHistory.slice(-config.memorySize)
+                             .map(formatDiaryMessage)
+                             .filter(msg => msg !== null)
+            ];       
             
             try {
                 const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages }) });
-                if (!response.ok) throw new Error(await response.text());
+                
+                // --- 修改点 1: 更详细地处理服务器错误 ---
+                // 无论服务器返回什么错误，我们都确保把它包装成一个标准错误，这样程序就能读懂了。
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`服务器错误 (状态码: ${response.status}): ${errorText}`);
+                }
+
                 const data = await response.json();
+
                 if (data?.choices?.[0]?.message?.content) {
                     let parsed;
-                    try { parsed = JSON.parse(data.choices[0].message.content); } catch(e) { throw e; }
+                    const rawContent = data.choices[0].message.content;
+                    try { 
+                        const jsonMatch = rawContent.match(/\[\s*\{.*\}\s*\]/s);
+                        parsed = JSON.parse(jsonMatch ? jsonMatch[0] : rawContent);
+                    } catch(e) {
+                        // 如果解析失败，抛出一个更清晰的错误信息
+                        throw new Error(`AI返回的内容不是有效的JSON格式。收到的内容是: ${rawContent}`);
+                    }
+                    
                     const action = parsed[0];
+
+                    // --- 修改点 2: 严格检查AI返回的内容 ---
+                    // 我们要确保AI不仅返回了JSON，而且JSON里的内容也是我们想要的日记格式。
                     if (action && action.type === 'diary_entry' && action.content) {
                         addDiaryEntry(character.id, action.content);
                     } else {
-                         elements.diaryEntries.innerHTML = '<p>今天没什么特别的想写...</p>';
+                        // 如果格式不对，同样抛出一个清晰的错误
+                        throw new Error(`AI返回的不是有效的日记格式。收到的内容是: ${JSON.stringify(action)}`);
                     }
+                } else if (data.error) {
+                    // 如果API本身就返回了错误信息
+                     throw new Error(`API返回错误: ${data.error.message}`);
+                } else {
+                    // 如果AI没有返回任何内容
+                    elements.diaryEntries.innerHTML = '<p>今天没什么特别的想写...</p>';
                 }
             } catch (e) {
+                // 现在，无论上面哪个环节出错，这里的 e.message 都会有详细的内容
                 console.error("Failed to generate diary entry:", e);
-                elements.diaryEntries.innerHTML = `<p>写日记时出错了: ${e.message}</p>`;
+                elements.diaryEntries.innerHTML = `<p style="color: red; font-weight: bold;">写日记时出错了:</p><p style="word-break: break-all;">${e.message}</p>`;
             }
         };
 
@@ -2059,7 +2744,8 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
             const character = characterSets.find(c => c.id === characterId);
             if (!character) return;
             const today = getCurrentDate();
-            if (!(character.diary || []).some(e => e.date === today)) {
+            if (!character.diary) character.diary = [];
+            if (!character.diary.some(e => e.date === today)) {
                 character.diary.unshift({ date: today, content });
                 saveAllData();
             }
@@ -2083,19 +2769,37 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
         };
 
         // --- Data Import/Export ---
-        const exportData = () => { saveCurrentSettings(); const data = localStorage.getItem('aiBoyfriendBackup_v3'); const blob = new Blob([data], {type: 'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `ai_boyfriend_backup_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); alert('全部数据已导出！'); };
+                const exportData = async () => { 
+            await saveCurrentSettings(); // 修改了这里
+            await saveAllData(); // 修改了这里
+            const data = localStorage.getItem('aiBoyfriendBackup_v6_meta'); 
+            const blob = new Blob([data], {type: 'application/json'}); 
+            const url = URL.createObjectURL(blob); 
+            const a = document.createElement('a'); 
+            a.href = url; a.download = `ai_boyfriend_backup_${new Date().toISOString().slice(0,10)}.json`; 
+            document.body.appendChild(a); 
+            a.click(); 
+            document.body.removeChild(a); 
+            URL.revokeObjectURL(url); 
+            alert('全部数据已导出！(请注意，导出的文件不包含图片本身，只包含文本数据)'); 
+        };
         const importData = () => { if(confirm('确定要导入数据吗？这会覆盖所有当前数据。')) { elements.importDataInput.click(); } };
-        const handleDataImport = (event) => { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { try { const data = e.target.result; const parsed = JSON.parse(data); if (parsed.characterSets && parsed.currentChat) { localStorage.setItem('aiBoyfriendBackup_v3', data); alert('导入成功！页面即将刷新。'); location.reload(); } else { alert('无效的文件格式。'); } } catch (error) { alert(`错误: ${error.message}`); } }; reader.readAsText(file); elements.importDataInput.value = ''; };
+        const handleDataImport = (event) => { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { try { const data = e.target.result; const parsed = JSON.parse(data); if (parsed.characterSets && parsed.currentChat) { localStorage.setItem('aiBoyfriendBackup_v6', data); alert('导入成功！页面即将刷新。'); location.reload(); } else { alert('无效的文件格式。'); } } catch (error) { alert(`错误: ${error.message}`); } }; reader.readAsText(file); elements.importDataInput.value = ''; };
 
         const setupEventListeners = () => {
             elements.settingsBtn.onclick = openSettingsModal;
             elements.closeSettingsBtn.onclick = () => closeModal(elements.settingsModal);
-            elements.saveSettingsBtn.onclick = () => { saveCurrentSettings(); alert('设置已保存！'); closeModal(elements.settingsModal); };
+                        // 在 setupEventListeners 函数里找到这一行
+            elements.saveSettingsBtn.onclick = async () => { // 添加了 async
+                await saveCurrentSettings(); // 添加了 await
+                alert('设置已保存！'); 
+                closeModal(elements.settingsModal); 
+            };
             
             elements.sendBtn.onclick = () => { const text = elements.messageInput.value.trim(); if (!text) return; handleUserAction({ sender: 'user', type: 'text', text, llmContent: text }); elements.messageInput.value = ''; autoResizeTextarea(); };
             elements.messageInput.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); elements.sendBtn.click(); } };
             
-            elements.videoSendBtn.onclick = () => { const text = elements.videoMessageInput.value.trim(); if (!text) return; addMessage({ sender: 'user', text: text, type: 'text', isVideoCallMessage: true }); elements.videoMessageInput.value = ''; triggerVideoCallAIResponse(); };
+            elements.videoSendBtn.onclick = () => { const text = elements.videoMessageInput.value.trim(); if (!text) return; addVideoChatMessageToUI({ sender: 'user', text: text }); elements.videoMessageInput.value = ''; triggerVideoCallAIResponse(); };
             elements.videoMessageInput.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); elements.videoSendBtn.click(); } };
 
             elements.mindVoiceCloseBtn.onclick = () => elements.mindVoiceModal.classList.remove('show');
@@ -2108,33 +2812,34 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
             elements.actionSendRealImage.onclick = () => { elements.realImageUploadInput.click(); toggleActionPanel(true); };
             elements.actionSendVoice.onclick = () => { handleVoiceSend(); toggleActionPanel(true); };
             elements.actionSendTransfer.onclick = () => { handleTransferSend(); toggleActionPanel(true); };
+            elements.actionSendRedPacket.onclick = () => { openCreateRedPacketModal(); toggleActionPanel(true); };
             elements.actionSendSticker.onclick = () => { handleStickerSend(); toggleActionPanel(true); };
             elements.actionVideoCall.onclick = () => { startVideoCall(); toggleActionPanel(true); };
             elements.actionCreatePoll.onclick = () => { openCreatePollModal(); toggleActionPanel(true); };
 
-            elements.fetchModelsBtn.onclick = async () => { const baseUrl = elements.apiBaseUrlInput.value.trim(); const apiKey = elements.apiKeyInput.value.trim(); if (!baseUrl || !apiKey) { alert('请输入API端点和API密钥'); return; } elements.fetchModelsBtn.textContent = '获取中...'; elements.fetchModelsBtn.disabled = true; try { const response = await fetch(`${baseUrl}/v1/models`, { headers: { 'Authorization': `Bearer ${apiKey}` } }); if (!response.ok) throw new Error(`获取模型列表失败, Status: ${response.status} ${await response.text()}`); const data = await response.json(); elements.modelSelect.innerHTML = ''; const models = data.data || data; if (!Array.isArray(models)) throw new Error('API返回的模型列表格式不正确'); models.sort((a, b) => a.id.localeCompare(b.id)).forEach(model => { if (model.id) elements.modelSelect.add(new Option(model.id, model.id)); }); const apiConfigSource = characterSets[0]; if (apiConfigSource?.config?.model) { elements.modelSelect.value = apiConfigSource.config.model; } } catch (error) { alert(`获取模型失败: ${error.message}`); } finally { elements.fetchModelsBtn.textContent = '获取模型列表'; elements.fetchModelsBtn.disabled = false; } };
+            elements.fetchModelsBtn.onclick = async () => { const baseUrl = elements.apiBaseUrlInput.value.trim(); const apiKey = elements.apiKeyInput.value.trim(); if (!baseUrl || !apiKey) { alert('请输入API端点和API密钥'); return; } elements.fetchModelsBtn.textContent = '获取中...'; elements.fetchModelsBtn.disabled = true; try { const response = await fetch(`${baseUrl}/v1/models`, { headers: { 'Authorization': `Bearer ${apiKey}` } }); if (!response.ok) throw new Error(`获取模型列表失败, Status: ${response.status} ${await response.text()}`); const data = await response.json(); elements.modelSelect.innerHTML = ''; const models = data.data || data; if (!Array.isArray(models)) throw new Error('API返回的模型列表格式不正确'); models.sort((a, b) => a.id.localeCompare(b.id)).forEach(model => { if (model.id) elements.modelSelect.add(new Option(model.id, model.id)); }); const currentModel = elements.modelSelect.value; if(currentModel) elements.modelSelect.value = currentModel; } catch (error) { alert(`获取模型失败: ${error.message}`); } finally { elements.fetchModelsBtn.textContent = '获取模型列表'; elements.fetchModelsBtn.disabled = false; } };
             elements.themeSelector.onclick = (e) => { const t = e.target.closest('.theme-option'); if (t) applyTheme(t.dataset.theme); };
-            
-            queryEl('label[for="background-upload-input"]').onclick = () => elements.backgroundUploadInput.click();
-            elements.backgroundUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { 
-                const chatData = getCurrentChatData();
-                if(chatData && currentChat.type === 'direct') {
-                    chatData.config.chatBackground = d;
-                    saveAllData();
-                    elements.chatContainer.style.backgroundImage = `url(${d})`;
-                }
-            });
+          elements.customBubbleCssInput.addEventListener('input', () => {
+    const customStyleTag = getEl('custom-bubble-style-tag');
+    customStyleTag.textContent = elements.customBubbleCssInput.value;
+    // 如果当前不是自定义主题，则自动切换到自定义主题
+    if (!elements.themeSelector.querySelector('.theme-option[data-theme="custom"]').classList.contains('active')) {
+        applyTheme('custom');
+    }
+});
+     elements.fontSelect.addEventListener('change', () => {
+    applyFont(elements.fontSelect.value);
+});       
+            elements.backgroundUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.chatContainer.style.backgroundImage = `url(${d})`; });
 
-            queryEl('label[for="ai-avatar-upload-input"]').onclick = () => elements.aiAvatarUploadInput.click();
             elements.aiAvatarUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.aiAvatarPreview.src = d; if(currentChat.type==='direct') elements.headerAvatar.src = d; });
-            queryEl('label[for="group-avatar-settings-input"]').onclick = () => elements.groupAvatarSettingsInput.click();
-            elements.groupAvatarSettingsInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.groupAvatarPreview.src = d; });
-            queryEl('label[for="user-avatar-upload-input"]').onclick = () => elements.userAvatarUploadInput.click();
-            elements.userAvatarUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.userAvatarPreview.src = d; });
-            queryEl('label[for="user-moments-avatar-upload-input"]').onclick = () => elements.userMomentsAvatarInput.click();
-            elements.userMomentsAvatarInput.onchange = e => handleFileUpload(e.target.files[0], d => { elements.userMomentsAvatarPreview.src = d; });
-            queryEl('label[for="user-moments-cover-upload-input"]').onclick = () => elements.userMomentsCoverInput.click();
-            elements.userMomentsCoverInput.onchange = e => handleFileUpload(e.target.files[0], d => { elements.userMomentsCoverPreview.src = d; });
+            elements.backgroundUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.chatContainer.style.backgroundImage = `url(${d})`; }, { compress: true, quality: 0.8, maxWidth: 1280, maxHeight: 1280 });
+            const avatarCompression = { compress: true, quality: 0.7, maxWidth: 300, maxHeight: 300 };
+            elements.aiAvatarUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.aiAvatarPreview.src = d; if(currentChat.type==='direct') elements.headerAvatar.src = d; }, avatarCompression);
+            elements.groupAvatarSettingsInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.groupAvatarPreview.src = d; }, avatarCompression);
+            elements.userAvatarUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.userAvatarPreview.src = d; }, avatarCompression);
+            elements.userMomentsAvatarInput.onchange = e => handleFileUpload(e.target.files[0], d => { elements.userMomentsAvatarPreview.src = d; }, avatarCompression);
+          elements.userMomentsCoverInput.onchange = e => handleFileUpload(e.target.files[0], d => { elements.userMomentsCoverPreview.src = d; }, { compress: true, quality: 0.75, maxWidth: 800, maxHeight: 800 });
 
             elements.manageStickersBtn.onclick = () => openStickerManager('user');
             elements.manageAiStickersBtn.onclick = () => openStickerManager('ai');
@@ -2174,11 +2879,8 @@ Your user in this chat has this profile: ${userProfilePrompt}. NEVER call them '
                 const newName = elements.chatNameHeader.textContent.trim(); 
                 const oldName = currentChat.type === 'direct' ? chatData.config.characterName : chatData.name;
                 if(newName && newName !== oldName){ 
-                    if(currentChat.type === 'direct') {
-                        chatData.config.characterName = newName;
-                    } else {
-                        chatData.name = newName;
-                    }
+                    if(currentChat.type === 'direct') chatData.config.characterName = newName;
+                    else chatData.name = newName;
                     saveAllData();
                 } else { 
                     elements.chatNameHeader.textContent = oldName; 
