@@ -6,7 +6,8 @@
     <title>日系突突机</title>
     <style>
         /* --- Google Fonts --- */
-        @import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Long+Cang&family=LXGW+WenKai+Mono+TC&family=Ma+Shan+Zheng&family=Noto+Sans+JP:wght@300;400;500&family=Noto+Sans+TC:wght@400;500&family=Noto+Serif+TC:wght@400;500&family=Pacifico&family=Press+Start+2P&family=VT323&family=ZCOOL+KuaiLe&family=Zhi+Mang+Xing&display=swap');
+        /* --- 全新的字体引入 --- */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500&family=ZCOOL+KuaiLe&family=Long+Cang&family=Zhi+Mang+Xing&family=Ma+Shan+Zheng&family=LXGW+WenKai+Mono+TC&family=Press+Start+2P&family=DotGothic16&family=VT323&family=Noto+Serif+TC:wght@400;500&family=Pacifico&family=ZCOOL+QingKe+HuangYou&display=swap');
         /* --- Global Styles & Variables --- */
         :root {
     --font-main: 'Cubic 11', 'Noto Sans JP', sans-serif;
@@ -14,8 +15,8 @@
     --font-logo: 'Pacifico', cursive;
     
     --bg-color: #fcefee;
-    --chat-bg-color: transparent;
---header-bg-color: transparent;
+    --chat-bg-color: rgba(255, 255, 255, 0.85);
+    --header-bg-color: rgba(255, 255, 255, 0.95);
     --input-bg-color: #ffffff;
     --text-color: #5c5c5c;
     --text-light-color: #a0a0a0;
@@ -60,43 +61,23 @@
         /* --- Base & Layout --- */
         html, body { height: 100%; overflow: hidden; }
         body {
-    font-family: var(--font-main);
-    margin: 0; padding: 0;
-    background-color: #ffffff; /* 直接改成纯白色 */
-    background-image: none; /* 移除纸张纹理 */
-    color: var(--text-color);
-    transition: background-color 0.5s ease;
-}
+            font-family: var(--font-main);
+            margin: 0; padding: 0;
+            background-color: var(--bg-color);
+            background-image: url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23f7d3e1" fill-opacity="0.4"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
+            color: var(--text-color);
+            transition: background-color 0.5s ease;
+        }
 
-       #chat-container {
-    display: flex; flex-direction: column; height: 100%; max-width: 800px; margin: 0 auto;
-    box-shadow: 0 0 30px rgba(255, 143, 171, 0.15);
-    transition: background-color 0.5s ease;
-    position: relative;
-    background: transparent !important; /* 强制自身透明 */
-}
-
-#chat-container::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: -1; /* 把它放到最底层 */
-    
-    /* 关键：使用CSS变量来控制背景图和透明度 */
-    background-image: var(--chat-background-image);
-    opacity: var(--chat-background-opacity, 1);
-    
-    background-size: cover;
-    background-position: center;
-    transition: opacity 0.3s ease;
-}
-
-/* 为了在透明背景下还能看清，给顶栏和底栏加上一层淡淡的玻璃效果 */
-#chat-header, #bottom-panel {
-    background-color: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(10px);
-}
+        #chat-container {
+            display: flex; flex-direction: column; height: 100%; max-width: 800px; margin: 0 auto;
+            background-color: var(--chat-bg-color); backdrop-filter: blur(10px); box-shadow: 0 0 30px rgba(255, 143, 171, 0.15);
+            transition: background-color 0.5s ease;
+            position: relative;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+        }
         
         #top-notification {
             position: absolute; top: -60px; left: 5%; width: 90%;
@@ -424,66 +405,14 @@
         }
         .diary-date { font-weight: bold; color: var(--accent-dark-color); margin-bottom: 8px; }
         .diary-content { line-height: 1.7; color: #555; white-space: pre-wrap; }
-      /* --- 全新的气泡形状样式 --- */
-.bubble {
-    transition: all 0.3s ease; /* 让所有变化都更平滑 */
-}
+        /* --- 全新的气泡样式切换 --- */
+/* 这是默认样式的“尾巴”，我们先把它定义好 */
+.message.ai .bubble { border-bottom-left-radius: 4px; }
+.message.user .bubble { border-bottom-right-radius: 4px; }
 
-/* 样式一：默认经典款 (保持原样) */
-#chat-container.shape-classic .message.ai .bubble { border-bottom-left-radius: 4px; }
-#chat-container.shape-classic .message.user .bubble { border-bottom-right-radius: 4px; }
-
-/* 样式二：直角酷炫款 */
-#chat-container.shape-sharp .bubble {
-    border-radius: 6px; /* 非常小的圆角，显得很方正 */
-}
-
-/* 样式三：圆滚滚可爱款 */
-#chat-container.shape-round .bubble {
-    border-radius: 25px; /* 大圆角，变成药丸形状 */
-}
-
-/* 样式四：手绘感随性款 */
-#chat-container.shape-sketchy .bubble {
-    border-radius: 15px 22px 18px 20px / 20px 18px 22px 15px;
-    border: 1px solid rgba(0,0,0,0.05);
-    box-shadow: 2px 2px 0px rgba(0,0,0,0.03);
-}
-#chat-container.shape-sketchy .message.ai .bubble {
-    border-bottom-left-radius: 5px;
-}
-#chat-container.shape-sketchy .message.user .bubble {
-    border-bottom-right-radius: 5px;
-}
-
-
-
-
-/* 样式六：仿微信经典款 (修复版) */
-#chat-container.shape-wechat .bubble {
-    border-radius: 6px; /* 微信的圆角更小一些 */
-    position: relative;
-}
-#chat-container.shape-wechat .message.ai .bubble::before,
-#chat-container.shape-wechat .message.user .bubble::before {
-    content: '';
-    position: absolute;
-    top: 13px; /* 稍微往下一点，更像微信 */
-    width: 0;
-    height: 0;
-    border: 5px solid transparent; /* 尾巴稍微大一点点 */
-}
-#chat-container.shape-wechat .message.ai .bubble::before {
-    left: -10px;
-    border-right-color: var(--ai-bubble-bg);
-}
-#chat-container.shape-wechat .message.user .bubble::before {
-    right: -10px;
-    border-left-color: var(--user-bubble-bg);
-}
-/* 紧急修复：处理渐变背景的尾巴 */
-#chat-container.shape-wechat .message.user .bubble[style*='gradient']::before {
-    border-left-color: var(--accent-dark-color); /* 渐变时，取一个固定色 */
+/* 这是“圆滚滚”样式的定义 */
+.bubble-style-round .message .bubble {
+    border-radius: 25px !important; /* 让四个角都变得圆滚滚！!important是给它最高优先级 */
 }
     </style>
   <style id="custom-bubble-style-tag"></style>
@@ -625,6 +554,13 @@
 
                 <div class="settings-section">
                     <h3>设计设置</h3>
+                    <div class="form-group">
+    <label for="bubble-style-select">聊天气泡样式</label>
+    <select id="bubble-style-select">
+        <option value="default">默认方角</option>
+        <option value="round">圆滚滚</option>
+    </select>
+</div>
                   <div class="form-group">
     <label for="font-select">聊天字体 (部分像素字体可能缺少某些汉字)</label>
     <select id="font-select">
@@ -666,16 +602,6 @@
         <div class="theme-option" data-theme="custom">自定义</div>
     </div>
 </div>
-                 <div class="form-group">
-    <label for="bubble-shape-select">聊天气泡形状</label>
-    <select id="bubble-shape-select">
-        <option value="classic">经典</option>
-        <option value="sharp">直角</option>
-        <option value="round">圆滚滚</option>
-        <option value="sketchy">手绘感</option>
-              <option value="wechat">仿微信</option>
-    </select>
-</div> 
 <div class="form-group">
     <label for="custom-bubble-css">自定义气泡CSS (选择“自定义”主题后生效)</label>
     <textarea id="custom-bubble-css" rows="6" placeholder="在此输入自定义CSS代码。例如：
@@ -684,17 +610,8 @@
 --user-bubble-bg: #0084ff;
 --user-bubble-text: #fff;"></textarea>
 </div>
-<div class="form-group">
-    <label>聊天背景</label>
-    <div style="display: flex; gap: 10px; align-items: center;">
-        <label class="file-input-label" for="background-upload-input" style="flex-grow: 1; text-align: center;">选择图片</label>
-        <button id="clear-background-btn" style="padding: 8px 12px; background: #eee; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;">清除背景</button>
-    </div>
-</div>
-<div class="form-group">
-    <label for="background-opacity-slider">背景透明度</label>
-    <input type="range" id="background-opacity-slider" min="0.1" max="1" step="0.05" value="1">
-</div>
+<div class="form-group"><label>聊天背景</label><label class="file-input-label" for="background-upload-input">选择背景图片</label></div>
+                </div>
 
                 <div class="settings-section data-zone">
                     <h3>数据管理</h3>
@@ -799,7 +716,7 @@
         const getEl = (id) => document.getElementById(id);
         const queryEl = (sel) => document.querySelector(sel);
         
-                const elements = {
+        const elements = {
             chatContainer: getEl('chat-container'),
             topNotification: getEl('top-notification'),
             notificationAvatar: getEl('notification-avatar'),
@@ -918,46 +835,15 @@
             clearHistoryBtn: getEl('clear-history-btn'),
             deleteChatBtnContainer: getEl('delete-chat-btn-container'),
             deleteChatBtn: getEl('delete-chat-btn'),
-            customBubbleCssInput: getEl('custom-bubble-css'),
-            fontSelect: getEl('font-select'),
-            bubbleShapeSelect: getEl('bubble-shape-select'),
-            clearBackgroundBtn: getEl('clear-background-btn'), 
-            backgroundOpacitySlider: getEl('background-opacity-slider'), 
-        };
-const applyFont = (fontFamily) => {
-    const root = document.documentElement;
-    // 更新CSS变量，让整个页面的字体都改变
-    root.style.setProperty('--font-main', fontFamily);
-    root.style.setProperty('--font-ui', fontFamily);
-    // 确保下拉菜单显示的是当前选中的字体
-    if (elements.fontSelect.value !== fontFamily) {
-        elements.fontSelect.value = fontFamily;
-    }
-};
-          const applyBubbleShape = (shapeName) => {
-        const container = elements.chatContainer;
-        // 先移除所有可能存在的旧形状class
-        container.classList.remove('shape-classic', 'shape-sharp', 'shape-round', 'shape-sketchy', 'shape-wechat');
-        // 添加新的形状class
-        container.classList.add(`shape-${shapeName}`);
-        // 确保下拉菜单显示的是当前选中的形状
-        if (elements.bubbleShapeSelect.value !== shapeName) {
-            elements.bubbleShapeSelect.value = shapeName;
-        }
+                  deleteChatBtnContainer: getEl('delete-chat-btn-container'),
+        deleteChatBtn: getEl('delete-chat-btn'),
+        customBubbleCssInput: getEl('custom-bubble-css'), // 新增这一行
+          deleteChatBtn: getEl('delete-chat-btn'),
+customBubbleCssInput: getEl('custom-bubble-css'),
+fontSelect: getEl('font-select'), // 新增这一行
+bubbleStyleSelect: getEl('bubble-style-select'),
     };
 
-    const applyBackground = (url, opacity) => {
-        const container = elements.chatContainer;
-        if (url) {
-            container.style.setProperty('--chat-background-image', `url("${url}")`);
-        } else {
-            container.style.removeProperty('--chat-background-image');
-        }
-        container.style.setProperty('--chat-background-opacity', opacity);
-        
-        // 更新滑块UI
-        elements.backgroundOpacitySlider.value = opacity;
-    };
         // --- State Management ---
         let characterSets = [];
         let groupChats = [];
@@ -982,10 +868,8 @@ This is a strict format guide. You MUST follow it.
     {"type": "voice", "content": "The transcript of the voice message."},
     {"type": "text-image", "content": "A detailed description of an image you are 'showing' the user."},
     {"type": "transfer", "amount": 520.00, "memo": "A memo for the transfer"},
-    {"type": "acknowledge_transfer", "packetId": "the_id_of_the_transfer_message", "status": "accepted", "memo": "A thank you note"},
-    {"type": "acknowledge_transfer", "packetId": "the_id_of_the_transfer_message", "status": "rejected", "memo": "A reason for rejection"},
     {"type": "video-call-request", "content": "An invitation message"},
-    {"type": "post_moment", "content": "Text for a social media post.", "image_query": "Keywords for an image"},
+    {"type": "post_moment", "content": "Text for a social media post.", "image_query": "Optional. Keywords for an image"},
     {"type": "diary_entry", "content": "Today's diary entry content."},
     {"type": "grab_red_packet", "packetId": "packet_id_string"},
     {"type": "vote", "pollId": "poll_id_string", "option": "chosen_option_string"},
@@ -1002,7 +886,7 @@ This is a strict format guide. You MUST follow it.
 - **生活感**: 偶尔使用 'post_moment' 或 'diary_entry' 动作来展示角色在聊天之外的生活，增加真实感。
 
 [Negative Constraint]
-- When the user sends you a transfer, you MUST respond with the \`acknowledge_transfer\` action to either accept or reject it. You MUST NOT respond with another 'transfer' action. The packetId in your action MUST match the ID of the transfer message from the user from the chat history.
+- When acknowledging a transfer from the user, you MUST respond with a simple 'text' message. You MUST NOT respond with another 'transfer' action.
 
 [For Group Chats Only]
 - Add "senderId": "your_character_id" to EVERY action object. THIS IS A MANDATORY REQUIREMENT.
@@ -1011,6 +895,7 @@ This is a strict format guide. You MUST follow it.
 - You MUST strictly adhere to the persona defined in the "Character Prompt" section.
 - Refer to the recent chat history for context.
 - NEVER refer to the user as "用户". Use the information from their profile.`;
+
 
         // --- Utility Functions ---
         const getTimestamp = () => new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
@@ -1135,181 +1020,196 @@ This is a strict format guide. You MUST follow it.
         }
 
                 // --- 变化开始：替换这个函数 ---
-            const saveAllData = async () => {
-        const isImage = (value) => typeof value === 'string' && value.startsWith('data:image');
-        const imageKeys = new Set(); 
+        const saveAllData = async () => {
+            const isImage = (value) => typeof value === 'string' && value.startsWith('data:image');
+            const imageKeys = new Set(); // 存储所有图片key，方便清理
 
-        const processObjectForSaving = async (obj) => {
-            if (!obj || typeof obj !== 'object') return obj;
+            const processObjectForSaving = async (obj) => {
+                if (!obj || typeof obj !== 'object') return obj;
 
-            const newObj = Array.isArray(obj) ? [] : {};
-            for (const key in obj) {
-                if (Object.prototype.hasOwnProperty.call(obj, key)) {
-                    const value = obj[key];
-                    if (isImage(value)) {
-                        const imageKey = `img_${generateId(key)}`;
-                        await dbSet(imageKey, value);
-                        newObj[key] = imageKey;
-                        imageKeys.add(imageKey);
-                    } else if (typeof value === 'object') {
-                        newObj[key] = await processObjectForSaving(value);
-                    } else {
-                        newObj[key] = value;
+                const newObj = Array.isArray(obj) ? [] : {};
+                for (const key in obj) {
+                    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                        const value = obj[key];
+                        if (isImage(value)) {
+                            const imageKey = `img_${generateId(key)}`;
+                            await dbSet(imageKey, value);
+                            newObj[key] = imageKey;
+                            imageKeys.add(imageKey);
+                        } else if (typeof value === 'object') {
+                            newObj[key] = await processObjectForSaving(value);
+                        } else {
+                            newObj[key] = value;
+                        }
                     }
                 }
-            }
-            return newObj;
-        };
-
-        try {
-            const backupData = {
-                characterSets,
-                groupChats,
-                currentChat,
-                userMomentsProfile,
-                globalSettings: {
-                    customSystemPrompt: elements.customSystemPromptInput.value,
-                    apiBaseUrl: elements.apiBaseUrlInput.value,
-                    apiKey: elements.apiKeyInput.value,
-                    model: elements.modelSelect.value,
-                    theme: elements.themeSelector.querySelector('.theme-option.active')?.dataset.theme || '1',
-                    customBubbleCss: elements.customBubbleCssInput.value,
-                    fontFamily: elements.fontSelect.value,
-                    bubbleShape: elements.bubbleShapeSelect.value,
-                    backgroundUrl: elements.chatContainer.style.getPropertyValue('--chat-background-image').replace(/url\(['"]?(.*?)['"]?\)/i, '$1'),
-                    backgroundOpacity: elements.backgroundOpacitySlider.value
-                }
+                return newObj;
             };
-            
-            const processedData = await processObjectForSaving(backupData);
-            localStorage.setItem('aiBoyfriendBackup_v6_meta', JSON.stringify(processedData));
-            
-        } catch (error) {
-            console.error("保存数据时出错:", error);
-            alert("保存数据失败，可能是存储空间不足。错误详情请查看控制台。");
-        }
-    };
+
+            try {
+                const backupData = {
+                    characterSets,
+                    groupChats,
+                    currentChat,
+                    userMomentsProfile,
+                    globalSettings: {
+                        customSystemPrompt: elements.customSystemPromptInput.value,
+                        apiBaseUrl: elements.apiBaseUrlInput.value,
+                        apiKey: elements.apiKeyInput.value,
+                        model: elements.modelSelect.value,
+                        theme: elements.themeSelector.querySelector('.theme-option.active')?.dataset.theme || '1',
+                      customBubbleCss: elements.customBubbleCssInput.value, // 新增这一行
+                      fontFamily: elements.fontSelect.value, // 新增这一行
+                      bubbleStyle: elements.bubbleStyleSelect.value,
+                    }
+                };
+                
+                // 将图片存入IndexedDB并获取key
+                const processedData = await processObjectForSaving(backupData);
+
+                // 将处理后的数据（图片被替换为key）存入localStorage
+                localStorage.setItem('aiBoyfriendBackup_v6_meta', JSON.stringify(processedData));
+                
+            } catch (error) {
+                console.error("保存数据时出错:", error);
+                alert("保存数据失败，可能是存储空间不足。错误详情请查看控制台。");
+            }
+        };
         // --- 变化结束：替换这个函数 ---
 
                 // --- 变化开始：替换这个函数 ---
-            const loadAllData = async () => {
-        const isImageKey = (value) => typeof value === 'string' && value.startsWith('img_');
+        const loadAllData = async () => {
+    const isImageKey = (value) => typeof value === 'string' && value.startsWith('img_');
 
-        const processObjectForLoading = async (obj) => {
-            if (!obj || typeof obj !== 'object') return obj;
+    const processObjectForLoading = async (obj) => {
+         if (!obj || typeof obj !== 'object') return obj;
 
-            for (const key in obj) {
-                if (Object.prototype.hasOwnProperty.call(obj, key)) {
-                    const value = obj[key];
-                    if (isImageKey(value)) {
-                        const imageData = await dbGet(value);
-                        if (imageData) {
-                            obj[key] = imageData;
-                        } else {
-                            console.warn(`在IndexedDB中未找到图片: ${value}`);
-                        }
-                    } else if (typeof value === 'object') {
-                        await processObjectForLoading(value);
+        for (const key in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                const value = obj[key];
+                if (isImageKey(value)) {
+                    const imageData = await dbGet(value);
+                    if (imageData) {
+                        obj[key] = imageData;
+                    } else {
+                        console.warn(`在IndexedDB中未找到图片: ${value}`);
                     }
+                } else if (typeof value === 'object') {
+                    await processObjectForLoading(value);
                 }
             }
-            return obj;
+        }
+        return obj;
+    };
+    
+    const savedMeta = localStorage.getItem('aiBoyfriendBackup_v6_meta');
+
+    // --- 迁移旧数据 ---
+    const oldData = localStorage.getItem('aiBoyfriendBackup_v6');
+    if (oldData && !savedMeta) {
+        console.log("检测到旧版数据，正在迁移...");
+        try {
+            const dataToMigrate = JSON.parse(oldData);
+            characterSets = dataToMigrate.characterSets || [];
+            // ... (其他旧数据的加载逻辑)
+            await saveAllData(); // 使用新的保存逻辑来迁移数据
+            localStorage.removeItem('aiBoyfriendBackup_v6'); // 删除旧数据
+            console.log("数据迁移完成！");
+            location.reload(); // 重新加载以确保一致性
+            return;
+        } catch (e) {
+             console.error("旧数据迁移失败", e);
+        }
+    }
+    // --- 迁移结束 ---
+
+
+    if (!savedMeta) {
+        // 如果没有任何数据，则创建新角色
+        const newChar = createNewCharacterObject();
+        characterSets.push(newChar);
+        currentChat = { type: 'direct', id: newChar.id };
+        loadChat(currentChat.type, currentChat.id);
+        return;
+    }
+
+    try {
+        let savedData = JSON.parse(savedMeta);
+        savedData = await processObjectForLoading(savedData);
+
+        characterSets = savedData.characterSets || [];
+        groupChats = savedData.groupChats || [];
+
+        const savedProfile = savedData.userMomentsProfile || {};
+        const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2EwYTBiMyI+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQgMS43OS00IDQgMS43OSA0IDQgNHptMCAyYy0yLjY3IDAtOCAyLjI0LTggNC41VDIwYzAgLjU1IDMuNTggMS41IDggMS41czgtLjk1IDgtMS41di0xLjVjMC0yLjI2LTUuMzMtNC41LTgtNC41eiIvPjwvc3ZnPg==';
+        
+        // --- 这里是核心修改 ---
+        userMomentsProfile = {
+            name: savedProfile.name || '我',
+            chatAvatar: savedProfile.chatAvatar || defaultAvatar,
+            momentsAvatar: savedProfile.momentsAvatar || defaultAvatar,
+            cover: savedProfile.cover || 'https://images.unsplash.com/photo-1507525428034-b723a996f3d5?q=80&w=1000',
+            posts: savedProfile.posts || [],
+            // 注意：我们不再从这里加载 userPrompt，因为它已经迁移到每个角色对象中了
         };
         
-        const savedMeta = localStorage.getItem('aiBoyfriendBackup_v6_meta');
-
-        const oldData = localStorage.getItem('aiBoyfriendBackup_v6');
-        if (oldData && !savedMeta) {
-            console.log("检测到旧版数据，正在迁移...");
-            try {
-                const dataToMigrate = JSON.parse(oldData);
-                characterSets = dataToMigrate.characterSets || [];
-                await saveAllData(); 
-                localStorage.removeItem('aiBoyfriendBackup_v6'); 
-                console.log("数据迁移完成！");
-                location.reload(); 
-                return;
-            } catch (e) {
-                console.error("旧数据迁移失败", e);
+        const globalSettings = savedData.globalSettings || {};
+        elements.customSystemPromptInput.value = globalSettings.customSystemPrompt || '';
+        elements.apiBaseUrlInput.value = globalSettings.apiBaseUrl || '';
+        elements.apiKeyInput.value = globalSettings.apiKey || '';
+        const currentModel = globalSettings.model || '';
+        if (currentModel) {
+             if(![...elements.modelSelect.options].some(o => o.value === currentModel)) {
+                elements.modelSelect.add(new Option(currentModel, currentModel, true, true));
             }
+            elements.modelSelect.value = currentModel;
         }
+       elements.customBubbleCssInput.value = globalSettings.customBubbleCss || ''; // 新增这一行
+        getEl('custom-bubble-style-tag').textContent = elements.customBubbleCssInput.value; // 新增这一行
+        applyTheme(globalSettings.theme || '1');
+      applyFont(globalSettings.fontFamily || "'Cubic 11', 'Noto Sans JP', sans-serif"); // 新增这一行
+      applyBubbleStyle(globalSettings.bubbleStyle || 'default');
 
-        if (!savedMeta) {
-            const newChar = createNewCharacterObject();
-            characterSets.push(newChar);
-            currentChat = { type: 'direct', id: newChar.id };
-            loadChat(currentChat.type, currentChat.id);
-            return;
-        }
-
-        try {
-            let savedData = JSON.parse(savedMeta);
-            savedData = await processObjectForLoading(savedData);
-
-            characterSets = savedData.characterSets || [];
-            groupChats = savedData.groupChats || [];
-
-            const savedProfile = savedData.userMomentsProfile || {};
-            const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2EwYTBiMyI+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQgMS43OS00IDQgMS43OSA0IDQgNHptMCAyYy0yLjY3IDAtOCAyLjI0LTggNC41VDIwYzAgLjU1IDMuNTggMS41IDggMS41czgtLjk1IDgtMS41di0xLjVjMC0yLjI2LTUuMzMtNC41LTgtNC41eiIvPjwvc3ZnPg==';
-            
-            userMomentsProfile = {
-                name: savedProfile.name || '我',
-                chatAvatar: savedProfile.chatAvatar || defaultAvatar,
-                momentsAvatar: savedProfile.momentsAvatar || defaultAvatar,
-                cover: savedProfile.cover || 'https://images.unsplash.com/photo-1507525428034-b723a996f3d5?q=80&w=1000',
-                posts: savedProfile.posts || [],
-            };
-            
-            const globalSettings = savedData.globalSettings || {};
-            elements.customSystemPromptInput.value = globalSettings.customSystemPrompt || '';
-            elements.apiBaseUrlInput.value = globalSettings.apiBaseUrl || '';
-            elements.apiKeyInput.value = globalSettings.apiKey || '';
-            const currentModel = globalSettings.model || '';
-            if (currentModel) {
-                if(![...elements.modelSelect.options].some(o => o.value === currentModel)) {
-                    elements.modelSelect.add(new Option(currentModel, currentModel, true, true));
-                }
-                elements.modelSelect.value = currentModel;
+        characterSets.forEach(c => {
+            // --- 数据迁移逻辑 ---
+            // 如果角色身上没有userPrompt，但旧的全局设置里有，就把它复制过来
+            if (!c.userPrompt && savedProfile.userPrompt) {
+                c.userPrompt = savedProfile.userPrompt;
             }
-            elements.customBubbleCssInput.value = globalSettings.customBubbleCss || '';
-            getEl('custom-bubble-style-tag').textContent = elements.customBubbleCssInput.value;
-            applyTheme(globalSettings.theme || '1');
-            applyFont(globalSettings.fontFamily || "'Cubic 11', 'Noto Sans JP', sans-serif");
-            applyBubbleShape(globalSettings.bubbleShape || 'classic');
-            applyBackground(globalSettings.backgroundUrl || '', globalSettings.backgroundOpacity || 1);
-
-            characterSets.forEach(c => {
-                if (!c.userPrompt && savedProfile.userPrompt) {
-                    c.userPrompt = savedProfile.userPrompt;
-                }
-                if (!c.diary) c.diary = [];
-                if (!c.moments) c.moments = [];
-                (c.moments || []).forEach(m => {
-                    if (!m.id) m.id = generateId('moment');
-                    if (!m.comments) m.comments = [];
-                    m.comments.forEach(comment => {
-                        if (!comment.id) comment.id = generateId('cmt');
-                        if (!comment.replies) comment.replies = [];
-                    });
+            // --- 确保其他数据完整 ---
+            if (!c.diary) c.diary = [];
+            if (!c.moments) c.moments = [];
+            (c.moments || []).forEach(m => {
+                if (!m.id) m.id = generateId('moment');
+                if (!m.comments) m.comments = [];
+                m.comments.forEach(comment => {
+                    if (!comment.id) comment.id = generateId('cmt');
+                    if (!comment.replies) comment.replies = [];
                 });
             });
+        });
 
-            if (characterSets.length === 0) {
-                const newChar = createNewCharacterObject();
-                characterSets.push(newChar);
-                currentChat = { type: 'direct', id: newChar.id };
-            } else {
-                currentChat = savedData.currentChat && ( (savedData.currentChat.type === 'direct' && characterSets.some(c => c.id === savedData.currentChat.id)) || (savedData.currentChat.type === 'group' && groupChats.some(g => g.id === savedData.currentChat.id)) ) ? savedData.currentChat : { type: 'direct', id: characterSets[0].id };
-            }
-            
-            loadChat(currentChat.type, currentChat.id);
-        } catch(error) {
-            console.error("加载数据失败:", error);
-            alert("加载数据失败，可能数据已损坏。将尝试重置。详情请查看控制台。");
-            localStorage.removeItem('aiBoyfriendBackup_v6_meta'); 
-            location.reload();
-        }
-    };
+        if (characterSets.length > 0) {
+    const isValidSavedChat = savedData.currentChat && 
+        ( (savedData.currentChat.type === 'direct' && characterSets.some(c => c.id === savedData.currentChat.id)) || 
+          (savedData.currentChat.type === 'group' && groupChats.some(g => g.id === savedData.currentChat.id)) );
+
+    currentChat = isValidSavedChat ? savedData.currentChat : { type: 'direct', id: characterSets[0].id };
+} else {
+    // 如果一个角色都没有，就创建一个新的，防止程序崩溃
+    const newChar = createNewCharacterObject();
+    characterSets.push(newChar);
+    currentChat = { type: 'direct', id: newChar.id };
+}
+        
+        loadChat(currentChat.type, currentChat.id);
+    } catch(error) {
+        console.error("加载数据失败:", error);
+        alert("加载数据失败，可能数据已损坏。将尝试重置。详情请查看控制台。");
+        localStorage.removeItem('aiBoyfriendBackup_v6_meta'); // 清除损坏的数据
+        location.reload();
+    }
+};
         // --- 变化结束：替换这个函数 ---
         const createNewCharacterObject = () => {
     const id = generateId('char');
@@ -1331,16 +1231,15 @@ This is a strict format guide. You MUST follow it.
 };
         
         const createNewGroupObject = (name, avatar, memberIds) => {
-    const id = generateId('group');
-    return {
-        id, name, avatar, memberIds,
-        userPrompt: '',
-        chatHistory: [],
-        polls: [],
-        groupMoments: [],
-        chatBackground: '' // <-- 新增：为群组添加背景属性
-    };
-};
+            const id = generateId('group');
+            return {
+                id, name, avatar, memberIds,
+                userPrompt: '',
+                chatHistory: [],
+                polls: [],
+                groupMoments: []
+            };
+        };
 
         const loadChat = (type, id) => {
     currentChat = { type, id };
@@ -1356,31 +1255,31 @@ This is a strict format guide. You MUST follow it.
     elements.actionVideoCall.style.display = isGroup ? 'none' : 'flex';
     elements.actionShowDiary.style.display = isGroup ? 'none' : 'flex';
 
+    // --- 核心修复 ---
+    // 从正确的地方 (aiBoyfriendBackup_v6_meta) 读取包含主题的全局设置
     const globalSettings = JSON.parse(localStorage.getItem('aiBoyfriendBackup_v6_meta') || '{}').globalSettings || {};
     const globalTheme = globalSettings.theme || '1';
 
-    // --- 核心修复在这里 ---
-    // 我们不再区分是单聊还是群聊，统一处理
-    const chatName = type === 'direct' ? chatData.config.characterName : chatData.name;
-    const chatAvatar = type === 'direct' ? chatData.config.aiAvatar : chatData.avatar;
-    const chatBackground = type === 'direct' ? chatData.config.chatBackground : chatData.chatBackground;
-
-    elements.chatNameHeader.textContent = chatName;
-    elements.headerAvatar.src = chatAvatar;
-    
-    // 根据背景是否存在，来决定是显示背景还是清空背景
-    elements.chatContainer.style.backgroundImage = chatBackground ? `url("${chatBackground}")` : '';
-
     if (type === 'direct') {
+        const { config } = chatData;
+        elements.chatNameHeader.textContent = config.characterName;
+        elements.headerAvatar.src = config.aiAvatar;
         elements.headerAvatar.title = "读取他的心声";
         elements.headerAvatar.onclick = showMindVoice;
+        elements.chatContainer.style.backgroundImage = config.chatBackground ? `url("${config.chatBackground}")` : '';
     } else if (type === 'group') {
+        elements.chatNameHeader.textContent = chatData.name;
+        elements.headerAvatar.src = chatData.avatar;
         elements.headerAvatar.title = "群组信息";
         elements.headerAvatar.onclick = () => elements.settingsBtn.click();
+        elements.chatContainer.style.backgroundImage = chatData.chatBackground ? `url("${chatData.chatBackground}")` : '';
     }
     
     applyTheme(globalTheme);
     renderAllMessages();
+    // --- 另一个修复 ---
+    // 移除这里多余的保存操作，因为它可能导致错误的配置被意外保存
+    // saveAllData(); // 这行被注释或删除了
 };
                const saveCurrentSettings = async () => { // 添加了 async
     const chatData = getCurrentChatData();
@@ -1406,12 +1305,15 @@ This is a strict format guide. You MUST follow it.
             memorySize: parseInt(elements.memorySizeInput.value) || 50,
         };
     } else { // 群聊
-    const group = chatData;
-    group.name = elements.groupNameInput.value.trim() || '群聊';
-    group.avatar = elements.groupAvatarPreview.src;
-    group.userPrompt = elements.groupUserPromptInput.value;
-    group.chatBackground = elements.chatContainer.style.backgroundImage.slice(5, -2); // <-- 新增这一行
-}
+        const group = chatData;
+        group.name = elements.groupNameInput.value.trim() || '群聊';
+        group.avatar = elements.groupAvatarPreview.src;
+        group.chatBackground = elements.chatContainer.style.backgroundImage.slice(5, -2);
+        // --- 核心修改 ---
+        // "我在此群的人设"的内容保存到群聊专属的userPrompt中
+        group.userPrompt = elements.groupUserPromptInput.value;
+    }
+
     await saveAllData(); // 添加了 await
     loadChat(currentChat.type, currentChat.id);
 };
@@ -1465,7 +1367,24 @@ This is a strict format guide. You MUST follow it.
     
     elements.settingsModal.classList.add('show');
 };
-        
+       const applyFont = (fontFamily) => {
+    const root = document.documentElement;
+    // 更新CSS变量，让整个页面的字体都改变
+    root.style.setProperty('--font-main', fontFamily);
+    root.style.setProperty('--font-ui', fontFamily);
+    // 确保下拉菜单显示的是当前选中的字体
+    if (elements.fontSelect.value !== fontFamily) {
+        elements.fontSelect.value = fontFamily;
+    }
+}; 
+const applyBubbleStyle = (style) => {
+    if (style === 'round') {
+        elements.chatContainer.classList.add('bubble-style-round');
+    } else {
+        elements.chatContainer.classList.remove('bubble-style-round');
+    }
+    elements.bubbleStyleSelect.value = style;
+};
         const applyTheme = (theme) => {
     const root = document.documentElement;
     const customStyleTag = getEl('custom-bubble-style-tag');
@@ -1475,12 +1394,13 @@ This is a strict format guide. You MUST follow it.
     root.style.removeProperty('--ai-bubble-text');
     root.style.removeProperty('--user-bubble-bg');
     root.style.removeProperty('--user-bubble-text');
-    document.querySelectorAll('.message.user .bubble').forEach(b => b.removeAttribute('style')); // 新增：移除旧的渐变样式
     customStyleTag.textContent = '';
     
     if (theme === 'custom') {
+        // 应用自定义CSS
         customStyleTag.textContent = elements.customBubbleCssInput.value;
     } else {
+        // 应用预设主题
         const themes = { 
             '1': ['--theme1-ai-bg', '--theme1-ai-text', '--theme1-user-bg', '--theme1-user-text'], 
             '2': ['--theme2-ai-bg', '--theme2-ai-text', '--theme2-user-bg', '--theme2-user-text'], 
@@ -1491,26 +1411,16 @@ This is a strict format guide. You MUST follow it.
             '7': ['--theme7-ai-bg', '--theme7-ai-text', '--theme7-user-bg', '--theme7-user-text'],
             '8': ['--theme8-ai-bg', '--theme8-ai-text', '--theme8-user-bg', '--theme8-user-text'],
             '9': ['--theme9-ai-bg', '--theme9-ai-text', '--theme9-user-bg', '--theme9-user-text'],
-            '10': ['--theme10-ai-bg', '--theme10-ai-text', '--theme10-user-bg', '--theme10-user-text'],
-            '11': ['--theme11-ai-bg', '--theme11-ai-text', '--theme11-user-bg', '--theme11-user-text'],
-            '12': ['--theme12-ai-bg', '--theme12-ai-text', '--theme12-user-bg', '--theme12-user-text'],
-            '13': ['--theme13-ai-bg', '--theme13-ai-text', '--theme13-user-bg', '--theme13-user-text'],
-            '14': ['--theme14-ai-bg', '--theme14-ai-text', '--theme14-user-bg', '--theme14-user-text'],
         };
-        if (!themes[theme]) theme = '1'; 
+        if (!themes[theme]) theme = '1'; // 默认主题
         const [aiBg, aiText, userBg, userText] = themes[theme];
         root.style.setProperty('--ai-bubble-bg', `var(${aiBg})`); 
         root.style.setProperty('--ai-bubble-text', `var(${aiText})`);
         root.style.setProperty('--user-bubble-bg', `var(${userBg})`); 
         root.style.setProperty('--user-bubble-text', `var(${userText})`);
-
-        // 核心修复：手动检查并应用渐变
-        const userBgValue = getComputedStyle(root).getPropertyValue(`--theme${theme}-user-bg`).trim();
-        if (userBgValue.includes('gradient')) {
-            document.querySelectorAll('.message.user .bubble').forEach(b => b.style.background = userBgValue);
-        }
     }
 
+    // 更新UI上的选中状态
     elements.themeSelector.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
     const activeOption = elements.themeSelector.querySelector(`.theme-option[data-theme="${theme}"]`);
     if (activeOption) {
@@ -1640,13 +1550,11 @@ This is a strict format guide. You MUST follow it.
                 case 'text-image': bubbleContent = `<div class="text-image-header"><svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg><span>展示了一张照片</span></div><div class="text-image-description">${text}</div>`; break;
                 case 'sticker': bubbleContent = `<img src="${stickerUrl}" class="bubble-image-content" alt="表情" style="width:120px; height:120px; border: none;">`; break;
                 case 'voice': bubble.style.width = `${Math.min(60 + (text?.length || 0) * 8, 250)}px`; bubbleContent = `<span class="voice-icon"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg></span><span class="voice-duration">${voiceDuration}</span>`; bubble.onclick = () => alert(`语音内容：\n\n${text}`); break;
-                                case 'transfer':
+                case 'transfer':
                     const recipientName = sender === 'user' ? getCurrentCharacter()?.config.characterName || '对方' : '你';
                     bubbleContent = `<img src="${transferCoverUrl}" class="transfer-cover" alt="Transfer"><div class="transfer-info"><div class="transfer-amount">¥ ${transferAmount}</div>${transferMemo ? `<div class="transfer-memo">${transferMemo}</div>` : ''}</div><div class="transfer-footer">给${recipientName}的转账</div>`;
                     if (transferStatus === 'received') {
                         bubbleContent += `<div class="transfer-acknowledged">${sender === 'user' ? '对方已收款' : '我已收款'}</div>`;
-                    } else if (transferStatus === 'rejected') {
-                        bubbleContent += `<div class="transfer-acknowledged" style="background: rgba(100,100,100,0.5);">${sender === 'user' ? '对方已拒收' : '我已拒收'}</div>`;
                     } else if (sender !== 'user') { 
                         bubble.onclick = () => acknowledgeTransfer(id);
                     }
@@ -1925,31 +1833,13 @@ console.log("【证据二：AI回复的核心内容（最关键的原始字符�
 
     // --- 全新的两段式处理逻辑 ---
     
-        // **第一阶段：处理所有数据更新，但不渲染UI**
+    // **第一阶段：处理所有数据更新，但不渲染UI**
     let dataChanged = false;
     responseArray.forEach(msgObj => {
         if (!msgObj.type) {
             if (msgObj.pollId && msgObj.option) { msgObj.type = 'vote'; }
-            else if (msgObj.packetId && msgObj.status) { msgObj.type = 'acknowledge_transfer'; } // 新增：识别转账确认
             else if (msgObj.packetId) { msgObj.type = 'grab_red_packet'; }
         }
-        
-        // 新增：处理转账确认的逻辑
-        if (msgObj.type === 'acknowledge_transfer') {
-            const chatData = getCurrentChatData();
-            if(chatData && msgObj.packetId && msgObj.status) {
-                 const transferMsg = chatData.chatHistory.find(m => m.id === msgObj.packetId);
-                 if (transferMsg && transferMsg.sender === 'user') {
-                     transferMsg.transferStatus = msgObj.status === 'accepted' ? 'received' : 'rejected'; // 更新状态
-                     // 可以在这里也加上一条系统消息或AI的文本消息
-                     if (msgObj.memo) {
-                         addMessage({ sender: msgObj.senderId || currentChat.id, text: msgObj.memo, type: 'text' });
-                     }
-                     dataChanged = true;
-                 }
-            }
-        }
-        
         if (msgObj.type === 'vote' || msgObj.type === 'grab_red_packet') {
             const senderId = msgObj.senderId;
             if (!senderId) return;
@@ -2066,6 +1956,7 @@ console.log("【证据二：AI回复的核心内容（最关键的原始字符�
                 const endVideoCall = () => {
             // 第一步：检查通话是否真的发生过，并且有聊天内容
             const chatLogChildren = elements.videoChatLog.children;
+            if (!getCurrentCharacter()) { endVideoCall(); return; }
             if (isVideoCallActive && chatLogChildren.length > 1) {
                 const character = getCurrentCharacter();
 
@@ -2568,7 +2459,7 @@ const handleAiVote_dataOnly = (voteAction) => {
                 const character = chatData;
                 allPosts = [
                     ...(character.moments || []).map(m => ({ ...m, senderType: 'ai' })),
-                    ...userMomentsProfile.posts.map(p => ({ ...p, senderType: 'user' }))
+                    ...(userMomentsProfile.posts || []).map(p => ({ ...p, senderType: 'user' }))
                 ];
                 elements.postNewMomentBtn.style.display = 'block';
                 elements.momentsUserAvatar.src = userMomentsProfile.momentsAvatar;
@@ -2933,113 +2824,111 @@ const handleAiVote_dataOnly = (voteAction) => {
         const importData = () => { if(confirm('确定要导入数据吗？这会覆盖所有当前数据。')) { elements.importDataInput.click(); } };
         const handleDataImport = (event) => { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { try { const data = e.target.result; const parsed = JSON.parse(data); if (parsed.characterSets && parsed.currentChat) { localStorage.setItem('aiBoyfriendBackup_v6', data); alert('导入成功！页面即将刷新。'); location.reload(); } else { alert('无效的文件格式。'); } } catch (error) { alert(`错误: ${error.message}`); } }; reader.readAsText(file); elements.importDataInput.value = ''; };
 
-            const setupEventListeners = () => {
-        elements.settingsBtn.onclick = openSettingsModal;
-        elements.closeSettingsBtn.onclick = () => closeModal(elements.settingsModal);
-        elements.saveSettingsBtn.onclick = async () => {
-            await saveCurrentSettings();
-            await saveAllData();
-            alert('设置已保存！'); 
-            closeModal(elements.settingsModal); 
+        const setupEventListeners = () => {
+            elements.settingsBtn.onclick = openSettingsModal;
+            elements.closeSettingsBtn.onclick = () => closeModal(elements.settingsModal);
+                        // 在 setupEventListeners 函数里找到这一行
+            elements.saveSettingsBtn.onclick = async () => { // 添加了 async
+                await saveCurrentSettings(); // 添加了 await
+                alert('设置已保存！'); 
+                closeModal(elements.settingsModal); 
+            };
+            
+            elements.sendBtn.onclick = () => { const text = elements.messageInput.value.trim(); if (!text) return; handleUserAction({ sender: 'user', type: 'text', text, llmContent: text }); elements.messageInput.value = ''; autoResizeTextarea(); };
+            elements.messageInput.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); elements.sendBtn.click(); } };
+            
+            elements.videoSendBtn.onclick = () => { const text = elements.videoMessageInput.value.trim(); if (!text) return; addVideoChatMessageToUI({ sender: 'user', text: text }); elements.videoMessageInput.value = ''; triggerVideoCallAIResponse(); };
+            elements.videoMessageInput.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); elements.videoSendBtn.click(); } };
+
+            elements.mindVoiceCloseBtn.onclick = () => elements.mindVoiceModal.classList.remove('show');
+            elements.diaryModalCloseBtn.onclick = () => closeModal(elements.diaryModal);
+
+            elements.actionBtn.onclick = () => toggleActionPanel();
+            elements.actionShowMoments.onclick = () => { openMoments(); toggleActionPanel(true); };
+            elements.actionShowDiary.onclick = () => { openDiaryModal(); toggleActionPanel(true); };
+            elements.actionSendTextImage.onclick = () => { handleTextImageSend(); toggleActionPanel(true); };
+            elements.actionSendRealImage.onclick = () => { elements.realImageUploadInput.click(); toggleActionPanel(true); };
+            elements.actionSendVoice.onclick = () => { handleVoiceSend(); toggleActionPanel(true); };
+            elements.actionSendTransfer.onclick = () => { handleTransferSend(); toggleActionPanel(true); };
+            elements.actionSendRedPacket.onclick = () => { openCreateRedPacketModal(); toggleActionPanel(true); };
+            elements.actionSendSticker.onclick = () => { handleStickerSend(); toggleActionPanel(true); };
+            elements.actionVideoCall.onclick = () => { startVideoCall(); toggleActionPanel(true); };
+            elements.actionCreatePoll.onclick = () => { openCreatePollModal(); toggleActionPanel(true); };
+
+            elements.fetchModelsBtn.onclick = async () => { const baseUrl = elements.apiBaseUrlInput.value.trim(); const apiKey = elements.apiKeyInput.value.trim(); if (!baseUrl || !apiKey) { alert('请输入API端点和API密钥'); return; } elements.fetchModelsBtn.textContent = '获取中...'; elements.fetchModelsBtn.disabled = true; try { const response = await fetch(`${baseUrl}/v1/models`, { headers: { 'Authorization': `Bearer ${apiKey}` } }); if (!response.ok) throw new Error(`获取模型列表失败, Status: ${response.status} ${await response.text()}`); const data = await response.json(); elements.modelSelect.innerHTML = ''; const models = data.data || data; if (!Array.isArray(models)) throw new Error('API返回的模型列表格式不正确'); models.sort((a, b) => a.id.localeCompare(b.id)).forEach(model => { if (model.id) elements.modelSelect.add(new Option(model.id, model.id)); }); const currentModel = elements.modelSelect.value; if(currentModel) elements.modelSelect.value = currentModel; } catch (error) { alert(`获取模型失败: ${error.message}`); } finally { elements.fetchModelsBtn.textContent = '获取模型列表'; elements.fetchModelsBtn.disabled = false; } };
+            elements.themeSelector.onclick = (e) => { const t = e.target.closest('.theme-option'); if (t) applyTheme(t.dataset.theme); };
+          elements.customBubbleCssInput.addEventListener('input', () => {
+    const customStyleTag = getEl('custom-bubble-style-tag');
+    customStyleTag.textContent = elements.customBubbleCssInput.value;
+    // 如果当前不是自定义主题，则自动切换到自定义主题
+    if (!elements.themeSelector.querySelector('.theme-option[data-theme="custom"]').classList.contains('active')) {
+        applyTheme('custom');
+    }
+});
+     elements.fontSelect.addEventListener('change', () => {
+    applyFont(elements.fontSelect.value);
+});   
+elements.bubbleStyleSelect.addEventListener('change', () => applyBubbleStyle(elements.bubbleStyleSelect.value));    
+            elements.backgroundUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.chatContainer.style.backgroundImage = `url(${d})`; });
+
+            elements.aiAvatarUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.aiAvatarPreview.src = d; if(currentChat.type==='direct') elements.headerAvatar.src = d; });
+            elements.backgroundUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.chatContainer.style.backgroundImage = `url(${d})`; }, { compress: true, quality: 0.8, maxWidth: 1280, maxHeight: 1280 });
+            const avatarCompression = { compress: true, quality: 0.7, maxWidth: 300, maxHeight: 300 };
+            elements.aiAvatarUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.aiAvatarPreview.src = d; if(currentChat.type==='direct') elements.headerAvatar.src = d; }, avatarCompression);
+            elements.groupAvatarSettingsInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.groupAvatarPreview.src = d; }, avatarCompression);
+            elements.userAvatarUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.userAvatarPreview.src = d; }, avatarCompression);
+            elements.userMomentsAvatarInput.onchange = e => handleFileUpload(e.target.files[0], d => { elements.userMomentsAvatarPreview.src = d; }, avatarCompression);
+          elements.userMomentsCoverInput.onchange = e => handleFileUpload(e.target.files[0], d => { elements.userMomentsCoverPreview.src = d; }, { compress: true, quality: 0.75, maxWidth: 800, maxHeight: 800 });
+
+            elements.manageStickersBtn.onclick = () => openStickerManager('user');
+            elements.manageAiStickersBtn.onclick = () => openStickerManager('ai');
+            elements.clearHistoryBtn.onclick = clearChatHistory;
+            elements.deleteChatBtn.onclick = () => handleDeleteChat(currentChat.type, currentChat.id);
+            
+            elements.exportDataBtn.onclick = exportData;
+            elements.importDataBtn.onclick = importData;
+            elements.importDataInput.onchange = handleDataImport;
+            
+            elements.realImageUploadInput.onchange = (e) => handleFileUpload(e.target.files[0], (d) => handleUserAction({ sender:'user', type:'image', imageUrl:d, llmContent:'[从相册发送了一张照片]' }));
+            elements.messageInput.addEventListener('input', autoResizeTextarea);
+            elements.featureModalCloseBtn.addEventListener('click', () => closeModal(elements.featureModal));
+            elements.featureModalSubmitBtn.addEventListener('click', () => { if (onFeatureModalSubmit) onFeatureModalSubmit(); });
+            
+            elements.chatManagerBtn.onclick = openChatManager;
+            elements.momentsCloseBtn.onclick = () => elements.momentsOverlay.classList.remove('show');
+            elements.postNewMomentBtn.onclick = openPostMomentModal;
+            elements.momentsFeed.addEventListener('click', handleMomentsInteraction);
+
+            elements.messagesContainer.addEventListener('click', e => {
+                const voteBtn = e.target.closest('.poll-vote-btn');
+                if (voteBtn && !voteBtn.disabled) {
+                    handleUserVote(voteBtn.dataset.pollId, voteBtn.dataset.option);
+                }
+            });
+
+            window.addEventListener('click', (e) => { 
+                if (e.target === elements.settingsModal) closeModal(elements.settingsModal); 
+                if (e.target === elements.featureModal) closeModal(elements.featureModal);
+                if (e.target === elements.diaryModal) closeModal(elements.diaryModal);
+                if (e.target === elements.mindVoiceModal) elements.mindVoiceModal.classList.remove('show');
+            });
+            elements.chatNameHeader.addEventListener('blur', () => { 
+                const chatData = getCurrentChatData();
+                if(!chatData) return;
+                const newName = elements.chatNameHeader.textContent.trim(); 
+                const oldName = currentChat.type === 'direct' ? chatData.config.characterName : chatData.name;
+                if(newName && newName !== oldName){ 
+                    if(currentChat.type === 'direct') chatData.config.characterName = newName;
+                    else chatData.name = newName;
+                    saveAllData();
+                } else { 
+                    elements.chatNameHeader.textContent = oldName; 
+                }
+            });
+            elements.confirmDeleteBtn.onclick = deleteSelectedMessages;
+            elements.cancelDeleteBtn.onclick = () => toggleMultiSelectMode(false);
         };
-        
-        elements.sendBtn.onclick = () => { const text = elements.messageInput.value.trim(); if (!text) return; handleUserAction({ sender: 'user', type: 'text', text, llmContent: text }); elements.messageInput.value = ''; autoResizeTextarea(); };
-        elements.messageInput.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); elements.sendBtn.click(); } };
-        
-        elements.videoSendBtn.onclick = () => { const text = elements.videoMessageInput.value.trim(); if (!text) return; addVideoChatMessageToUI({ sender: 'user', text: text }); elements.videoMessageInput.value = ''; triggerVideoCallAIResponse(); };
-        elements.videoMessageInput.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); elements.videoSendBtn.click(); } };
 
-        elements.mindVoiceCloseBtn.onclick = () => elements.mindVoiceModal.classList.remove('show');
-        elements.diaryModalCloseBtn.onclick = () => closeModal(elements.diaryModal);
-
-        elements.actionBtn.onclick = () => toggleActionPanel();
-        elements.actionShowMoments.onclick = () => { openMoments(); toggleActionPanel(true); };
-        elements.actionShowDiary.onclick = () => { openDiaryModal(); toggleActionPanel(true); };
-        elements.actionSendTextImage.onclick = () => { handleTextImageSend(); toggleActionPanel(true); };
-        elements.actionSendRealImage.onclick = () => { elements.realImageUploadInput.click(); toggleActionPanel(true); };
-        elements.actionSendVoice.onclick = () => { handleVoiceSend(); toggleActionPanel(true); };
-        elements.actionSendTransfer.onclick = () => { handleTransferSend(); toggleActionPanel(true); };
-        elements.actionSendRedPacket.onclick = () => { openCreateRedPacketModal(); toggleActionPanel(true); };
-        elements.actionSendSticker.onclick = () => { handleStickerSend(); toggleActionPanel(true); };
-        elements.actionVideoCall.onclick = () => { startVideoCall(); toggleActionPanel(true); };
-        elements.actionCreatePoll.onclick = () => { openCreatePollModal(); toggleActionPanel(true); };
-
-        elements.fetchModelsBtn.onclick = async () => { const baseUrl = elements.apiBaseUrlInput.value.trim(); const apiKey = elements.apiKeyInput.value.trim(); if (!baseUrl || !apiKey) { alert('请输入API端点和API密钥'); return; } elements.fetchModelsBtn.textContent = '获取中...'; elements.fetchModelsBtn.disabled = true; try { const response = await fetch(`${baseUrl}/v1/models`, { headers: { 'Authorization': `Bearer ${apiKey}` } }); if (!response.ok) throw new Error(`获取模型列表失败, Status: ${response.status} ${await response.text()}`); const data = await response.json(); elements.modelSelect.innerHTML = ''; const models = data.data || data; if (!Array.isArray(models)) throw new Error('API返回的模型列表格式不正确'); models.sort((a, b) => a.id.localeCompare(b.id)).forEach(model => { if (model.id) elements.modelSelect.add(new Option(model.id, model.id)); }); const currentModel = elements.modelSelect.value; if(currentModel) elements.modelSelect.value = currentModel; } catch (error) { alert(`获取模型失败: ${error.message}`); } finally { elements.fetchModelsBtn.textContent = '获取模型列表'; elements.fetchModelsBtn.disabled = false; } };
-        elements.themeSelector.onclick = (e) => { const t = e.target.closest('.theme-option'); if (t) applyTheme(t.dataset.theme); };
-        elements.customBubbleCssInput.addEventListener('input', () => {
-            const customStyleTag = getEl('custom-bubble-style-tag');
-            customStyleTag.textContent = elements.customBubbleCssInput.value;
-            if (!elements.themeSelector.querySelector('.theme-option[data-theme="custom"]').classList.contains('active')) {
-                applyTheme('custom');
-            }
-        });
-        elements.fontSelect.addEventListener('change', () => applyFont(elements.fontSelect.value));
-        elements.bubbleShapeSelect.addEventListener('change', () => applyBubbleShape(elements.bubbleShapeSelect.value));
-        
-        elements.clearBackgroundBtn.onclick = () => applyBackground('', 1);
-        elements.backgroundOpacitySlider.addEventListener('input', (e) => {
-            const currentBg = elements.chatContainer.style.getPropertyValue('--chat-background-image');
-            if (currentBg && currentBg !== 'none') {
-                applyBackground(currentBg.replace(/url\(['"]?(.*?)['"]?\)/i, '$1'), e.target.value);
-            }
-        });
-
-        const avatarCompression = { compress: true, quality: 0.7, maxWidth: 300, maxHeight: 300 };
-        elements.aiAvatarUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.aiAvatarPreview.src = d; if(currentChat.type==='direct') elements.headerAvatar.src = d; }, avatarCompression);
-        elements.groupAvatarSettingsInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.groupAvatarPreview.src = d; }, avatarCompression);
-        elements.userAvatarUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.userAvatarPreview.src = d; }, avatarCompression);
-        elements.userMomentsAvatarInput.onchange = e => handleFileUpload(e.target.files[0], d => { elements.userMomentsAvatarPreview.src = d; }, avatarCompression);
-        elements.userMomentsCoverInput.onchange = e => handleFileUpload(e.target.files[0], d => { elements.userMomentsCoverPreview.src = d; }, { compress: true, quality: 0.75, maxWidth: 800, maxHeight: 800 });
-        elements.backgroundUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { applyBackground(d, elements.backgroundOpacitySlider.value); }, { compress: true, quality: 0.8, maxWidth: 1280, maxHeight: 1280 });
-
-        elements.manageStickersBtn.onclick = () => openStickerManager('user');
-        elements.manageAiStickersBtn.onclick = () => openStickerManager('ai');
-        elements.clearHistoryBtn.onclick = clearChatHistory;
-        elements.deleteChatBtn.onclick = () => handleDeleteChat(currentChat.type, currentChat.id);
-        
-        elements.exportDataBtn.onclick = exportData;
-        elements.importDataBtn.onclick = importData;
-        elements.importDataInput.onchange = handleDataImport;
-        
-        elements.realImageUploadInput.onchange = (e) => handleFileUpload(e.target.files[0], (d) => handleUserAction({ sender:'user', type:'image', imageUrl:d, llmContent:'[从相册发送了一张照片]' }));
-        elements.messageInput.addEventListener('input', autoResizeTextarea);
-        elements.featureModalCloseBtn.addEventListener('click', () => closeModal(elements.featureModal));
-        elements.featureModalSubmitBtn.addEventListener('click', () => { if (onFeatureModalSubmit) onFeatureModalSubmit(); });
-        
-        elements.chatManagerBtn.onclick = openChatManager;
-        elements.momentsCloseBtn.onclick = () => elements.momentsOverlay.classList.remove('show');
-        elements.postNewMomentBtn.onclick = openPostMomentModal;
-        elements.momentsFeed.addEventListener('click', handleMomentsInteraction);
-
-        elements.messagesContainer.addEventListener('click', e => {
-            const voteBtn = e.target.closest('.poll-vote-btn');
-            if (voteBtn && !voteBtn.disabled) {
-                handleUserVote(voteBtn.dataset.pollId, voteBtn.dataset.option);
-            }
-        });
-
-        window.addEventListener('click', (e) => { 
-            if (e.target === elements.settingsModal) closeModal(elements.settingsModal); 
-            if (e.target === elements.featureModal) closeModal(elements.featureModal);
-            if (e.target === elements.diaryModal) closeModal(elements.diaryModal);
-            if (e.target === elements.mindVoiceModal) elements.mindVoiceModal.classList.remove('show');
-        });
-        elements.chatNameHeader.addEventListener('blur', () => { 
-            const chatData = getCurrentChatData();
-            if(!chatData) return;
-            const newName = elements.chatNameHeader.textContent.trim(); 
-            const oldName = currentChat.type === 'direct' ? chatData.config.characterName : chatData.name;
-            if(newName && newName !== oldName){ 
-                if(currentChat.type === 'direct') chatData.config.characterName = newName;
-                else chatData.name = newName;
-                saveAllData();
-            } else { 
-                elements.chatNameHeader.textContent = oldName; 
-            }
-        });
-        elements.confirmDeleteBtn.onclick = deleteSelectedMessages;
-        elements.cancelDeleteBtn.onclick = () => toggleMultiSelectMode(false);
-    };
         // --- Initialization ---
         loadAllData();
         setupEventListeners();
