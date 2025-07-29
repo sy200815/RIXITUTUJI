@@ -414,6 +414,27 @@
 .bubble-style-round .message .bubble {
     border-radius: 25px !important; /* 让四个角都变得圆滚滚！!important是给它最高优先级 */
 }
+      /* --- 仿微信尖角样式 --- */
+.bubble-style-wechat .message .bubble {
+    border-radius: 8px !important; /* 微信的圆角比较小 */
+}
+.bubble-style-wechat .message .bubble::before {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    top: 14px;
+}
+.bubble-style-wechat .message.ai .bubble::before {
+    left: -10px;
+    border-right: 10px solid var(--ai-bubble-bg, #ffffff);
+}
+.bubble-style-wechat .message.user .bubble::before {
+    right: -10px;
+    border-left: 10px solid var(--user-bubble-bg, #95ec69);
+}
     </style>
   <style id="custom-bubble-style-tag"></style>
 </head>
@@ -552,67 +573,83 @@
                     </div>
                 </div>
 
-                <div class="settings-section">
+                                <div class="settings-section">
                     <h3>设计设置</h3>
                     <div class="form-group">
-    <label for="bubble-style-select">聊天气泡样式</label>
-    <select id="bubble-style-select">
-        <option value="default">默认方角</option>
-        <option value="round">圆滚滚</option>
-    </select>
-</div>
-                  <div class="form-group">
-    <label for="font-select">聊天字体 (部分像素字体可能缺少某些汉字)</label>
-    <select id="font-select">
-        <option value="'Cubic 11', 'Noto Sans JP', sans-serif">默认字体 (Cubic 11)</option>
-        <optgroup label="台湾繁体风格">
-            <option value="'Noto Sans TC', sans-serif">思源黑体 TC</option>
-            <option value="'ZCOOL KuaiLe', cursive">站酷快乐体</option>
-            <option value="'Long Cang', cursive">龙藏体</option>
-        </optgroup>
-        <optgroup label="可爱手写风格">
-            <option value="'Zhi Mang Xing', cursive">芝麻星体</option>
-            <option value="'Ma Shan Zheng', cursive">马善政体</option>
-            <option value="'LXGW WenKai Mono TC', sans-serif">霞鹜文楷 TC</option>
-        </optgroup>
-        <optgroup label="复古像素风格">
-            <option value="'Press Start 2P', cursive">Press Start 2P</option>
-            <option value="'DotGothic16', sans-serif">点阵哥特体 16</option>
-            <option value="'VT323', monospace">VT323</option>
-        </optgroup>
-        <optgroup label="其他风格">
-            <option value="'Noto Serif TC', serif">思源宋体 TC</option>
-            <option value="'Pacifico', cursive">Pacifico</option>
-            <option value="'ZCOOL QingKe HuangYou', cursive">站酷庆科黄油体</option>
-        </optgroup>
-    </select>
-</div>
-                    <div class="form-group">
-    <label>聊天气泡主题</label>
-    <div class="theme-selector">
-        <div class="theme-option active" data-theme="1">白/黑<span></span></div>
-        <div class="theme-option" data-theme="2">黑/白<span></span></div>
-        <div class="theme-option" data-theme="3">天蓝色<span></span></div>
-        <div class="theme-option" data-theme="4">草绿色<span></span></div>
-        <div class="theme-option" data-theme="5">樱花色<span></span></div>
-        <div class="theme-option" data-theme="6">深空蓝<span></span></div>
-        <div class="theme-option" data-theme="7">奶油黄<span></span></div>
-        <div class="theme-option" data-theme="8">微信(日)<span></span></div>
-        <div class="theme-option" data-theme="9">微信(夜)<span></span></div>
-        <div class="theme-option" data-theme="custom">自定义</div>
-    </div>
-</div>
-<div class="form-group">
-    <label for="custom-bubble-css">自定义气泡CSS (选择“自定义”主题后生效)</label>
-    <textarea id="custom-bubble-css" rows="6" placeholder="在此输入自定义CSS代码。例如：
---ai-bubble-bg: #f0f0f0;
---ai-bubble-text: #333;
---user-bubble-bg: #0084ff;
---user-bubble-text: #fff;"></textarea>
-</div>
-<div class="form-group"><label>聊天背景</label><label class="file-input-label" for="background-upload-input">选择背景图片</label></div>
-                </div>
+                        <label for="bubble-style-select">聊天气泡样式</label>
+                        <select id="bubble-style-select">
+                            <option value="default">默认方角</option>
+                            <option value="round">圆滚滚</option>
+                            <option value="wechat">仿微信尖角</option>
+                            <option value="custom">自定义高级</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="custom-style-select-group" style="display: none;">
+                        <label for="custom-style-select">选择自定义样式</label>
+                        <select id="custom-style-select">
+                            <option value="">无 (仅使用主题颜色)</option>
+                        </select>
+                    </div>
 
+                    <div class="form-group">
+                        <label for="font-select">聊天字体 (部分像素字体可能缺少某些汉字)</label>
+                        <select id="font-select">
+                            <option value="'Cubic 11', 'Noto Sans JP', sans-serif">默认字体 (Cubic 11)</option>
+                            <optgroup label="台湾繁体风格">
+                                <option value="'Noto Sans TC', sans-serif">思源黑体 TC</option>
+                                <option value="'ZCOOL KuaiLe', cursive">站酷快乐体</option>
+                                <option value="'Long Cang', cursive">龙藏体</option>
+                            </optgroup>
+                            <optgroup label="可爱手写风格">
+                                <option value="'Zhi Mang Xing', cursive">芝麻星体</option>
+                                <option value="'Ma Shan Zheng', cursive">马善政体</option>
+                                <option value="'LXGW WenKai Mono TC', sans-serif">霞鹜文楷 TC</option>
+                            </optgroup>
+                            <optgroup label="复古像素风格">
+                                <option value="'Press Start 2P', cursive">Press Start 2P</option>
+                                <option value="'DotGothic16', sans-serif">点阵哥特体 16</option>
+                                <option value="'VT323', monospace">VT323</option>
+                            </optgroup>
+                            <optgroup label="其他风格">
+                                <option value="'Noto Serif TC', serif">思源宋体 TC</option>
+                                <option value="'Pacifico', cursive">Pacifico</option>
+                                <option value="'ZCOOL QingKe HuangYou', cursive">站酷庆科黄油体</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>聊天气泡主题 (颜色)</label>
+                        <div class="theme-selector">
+                            <div class="theme-option active" data-theme="1">白/黑<span></span></div>
+                            <div class="theme-option" data-theme="2">黑/白<span></span></div>
+                            <div class="theme-option" data-theme="3">天蓝色<span></span></div>
+                            <div class="theme-option" data-theme="4">草绿色<span></span></div>
+                            <div class="theme-option" data-theme="5">樱花色<span></span></div>
+                            <div class="theme-option" data-theme="6">深空蓝<span></span></div>
+                            <div class="theme-option" data-theme="7">奶油黄<span></span></div>
+                            <div class="theme-option" data-theme="8">微信(日)<span></span></div>
+                            <div class="theme-option" data-theme="9">微信(夜)<span></span></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="advanced-bubble-styles">高级样式库 (选择“自定义高级”样式后生效)</label>
+                        <textarea id="advanced-bubble-styles" rows="10" placeholder="在此处粘贴您的自定义样式代码。
+每个样式必须用注释命名，像这样：
+/* Style Name: 小狗生气 */
+.message.user .bubble {
+    /* ...您的CSS代码... */
+}
+.message.ai .bubble {
+    /* ...您的CSS代码... */
+}
+"></textarea>
+                    </div>
+                    
+                    <div class="form-group"><label>聊天背景</label><label class="file-input-label" for="background-upload-input">选择背景图片</label></div>
+                </div>
                 <div class="settings-section data-zone">
                     <h3>数据管理</h3>
                      <div class="form-group" style="gap: 10px; flex-direction: row;">
@@ -711,6 +748,39 @@
 
 
     <script>
+      // 主题切换函数
+function applyTheme(themeNum) {
+    // 这里假设 themeNum 是 1-9 之间的数字字符串
+    const root = document.documentElement;
+    // 主题色变量名
+    root.style.setProperty('--ai-bubble-bg', getComputedStyle(root).getPropertyValue(`--theme${themeNum}-ai-bg`).trim());
+    root.style.setProperty('--ai-bubble-text', getComputedStyle(root).getPropertyValue(`--theme${themeNum}-ai-text`).trim());
+    root.style.setProperty('--user-bubble-bg', getComputedStyle(root).getPropertyValue(`--theme${themeNum}-user-bg`).trim());
+    root.style.setProperty('--user-bubble-text', getComputedStyle(root).getPropertyValue(`--theme${themeNum}-user-text`).trim());
+    // 高亮主题按钮
+    document.querySelectorAll('.theme-option').forEach(el => {
+        if (el.dataset.theme === themeNum) el.classList.add('active');
+        else el.classList.remove('active');
+    });
+}
+      function populateCustomStyles() {
+    const advancedStylesText = document.getElementById('advanced-bubble-styles').value;
+    const customSelect = document.getElementById('custom-style-select');
+    const currentCustomVal = customSelect.value;
+    customSelect.innerHTML = '<option value="">无 (仅使用主题颜色)</option>';
+    const regex = /\/\*\s*Style Name:\s*([^/]+?)\s*\*\//g;
+    let match;
+    while ((match = regex.exec(advancedStylesText)) !== null) {
+        const styleName = match[1].trim();
+        if (styleName) {
+            const option = document.createElement('option');
+            option.value = styleName;
+            option.textContent = styleName;
+            customSelect.appendChild(option);
+        }
+    }
+    customSelect.value = currentCustomVal;
+}
     document.addEventListener('DOMContentLoaded', () => {
         // --- DOM Elements ---
         const getEl = (id) => document.getElementById(id);
@@ -833,13 +903,9 @@
             importDataBtn: getEl('import-data-btn'),
             dangerZoneSection: getEl('danger-zone-section'),
             clearHistoryBtn: getEl('clear-history-btn'),
-            deleteChatBtnContainer: getEl('delete-chat-btn-container'),
             deleteChatBtn: getEl('delete-chat-btn'),
                   deleteChatBtnContainer: getEl('delete-chat-btn-container'),
-        deleteChatBtn: getEl('delete-chat-btn'),
-        customBubbleCssInput: getEl('custom-bubble-css'), // 新增这一行
-          deleteChatBtn: getEl('delete-chat-btn'),
-customBubbleCssInput: getEl('custom-bubble-css'),
+        advancedBubbleStylesInput: getEl('advanced-bubble-styles'),
 fontSelect: getEl('font-select'), // 新增这一行
 bubbleStyleSelect: getEl('bubble-style-select'),
     };
@@ -1058,7 +1124,7 @@ This is a strict format guide. You MUST follow it.
                         apiKey: elements.apiKeyInput.value,
                         model: elements.modelSelect.value,
                         theme: elements.themeSelector.querySelector('.theme-option.active')?.dataset.theme || '1',
-                      customBubbleCss: elements.customBubbleCssInput.value, // 新增这一行
+                      customBubbleCss: elements.advancedBubbleStylesInput.value, // 新增这一行
                       fontFamily: elements.fontSelect.value, // 新增这一行
                       bubbleStyle: elements.bubbleStyleSelect.value,
                     }
@@ -1164,8 +1230,8 @@ This is a strict format guide. You MUST follow it.
             }
             elements.modelSelect.value = currentModel;
         }
-       elements.customBubbleCssInput.value = globalSettings.customBubbleCss || ''; // 新增这一行
-        getEl('custom-bubble-style-tag').textContent = elements.customBubbleCssInput.value; // 新增这一行
+       elements.advancedBubbleStylesInput.value = globalSettings.customBubbleCss || ''; // 新增这一行
+        getEl('custom-bubble-style-tag').textContent = elements.advancedBubbleStylesInput.value; // 新增这一行
         applyTheme(globalSettings.theme || '1');
       applyFont(globalSettings.fontFamily || "'Cubic 11', 'Noto Sans JP', sans-serif"); // 新增这一行
       applyBubbleStyle(globalSettings.bubbleStyle || 'default');
@@ -1211,24 +1277,24 @@ This is a strict format guide. You MUST follow it.
     }
 };
         // --- 变化结束：替换这个函数 ---
-        const createNewCharacterObject = () => {
-    const id = generateId('char');
-    return {
-        id: id,
-        config: {
-            characterName: '他', 
-            aiAvatar: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBkPSJNNTAsMi41QzI0LjgsMi41LDIuNSwyNC44LDIuNSw1MHMxOS4zLDQ3LjUsNDcuNSw0Ny41czQ3LjUtMjIuMyw0Ny41LTQ3LjVMNTAsMi41eiBNMzgsNDQuOGMtMi4xLDAtMy44LTEuNy0zLjgtMy44czEuNy0zLjgsMy44LTMuOHMzLjgsMS43LDMuOCwzLjhTNDAuMSw0NC44LDM4LDQ0Ljh6IE02Miw0NC44Yy0yLjEsMC0zLjgtMS43LTMuOC0zLighYzAtMi4xLDEuNy0zLjgsMy44LTMuOHMzLjgsMS43LDMuOCwzLjhDNTguMiw0My4xLDY0LjEsNDQuOCw2Miw0NC44eiBNNzcuNSw2Ny41YzAsMC0xMC03LjUtMjcuNS03LjVzLTI3LjUsNy41LTI3LjUsNy41cy0yLjUtMTAgMC0yMHMxMi41LTEyLjUsMjcuNS0xMi41czI3LjUsMi41LDI3LjUsMTIuNVM3Ny41LDY3LjUsNzcuNSw2Ny41eiIgZmlsbD0iI2ZlY2VkNiIvPjwvc3ZnPg==', 
-            characterPrompt: '', 
-            memorySize: 50,
-        },
-        userPrompt: '', // 新增：为这个角色单独设置的“我的人设”
-        chatHistory: [],
-        userStickers: [],
-        aiStickers: [],
-        moments: [],
-        diary: []
+           const createNewCharacterObject = () => {
+        const id = generateId('char');
+        return {
+            id: id,
+            config: {
+                characterName: '他',
+                aiAvatar: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBkPSJNNTAsMi41QzI0LjgsMi41LDIuNSwyNC44LDIuNSw1MHMxOS4zLDQ3LjUsNDcuNSw0Ny41czQ3LjUtMjIuMyw0Ny41LTQ3LjVMNTAsMi41eiBNMzgsNDQuOGMtMi4xLDAtMy44LTEuNy0zLjgtMy44czEuNy0zLjgsMy44LTMuOHMzLjgsMS43LDMuOCwzLjhTNDAuMSw0NC44LDM4LDQ0Ljh6IE02Miw0NC44Yy0yLjEsMC0zLjgtMS43LTMuOC0zLighYzAtMi4xLDEuNy0zLjgsMy44LTMuOHMzLjgsMS43LDMuOCwzLjhDNTguMiw0My4xLDY0LjEsNDQuOCw2Miw0NC44eiBNNzcuNSw2Ny41YzAsMC0xMC03LjUtMjcuNS03LjVzLTI3LjUsNy41LTI3LjUsNy41cy0yLjUtMTAgMC0yMHMxMi41LTEyLjUsMjcuNS0xMi41czI3LjUsMi41LDI3LjUsMTIuNVM3Ny41LDY3LjUsNzcuNSw2Ny41eiIgZmlsbD0iI2ZlY2VkNiIvPjwvc3ZnPg==',
+                characterPrompt: '请在这里详细地设定你的人格、背景故事、说话的风格和口癖。一个丰富和独特的角色设定，会让对话变得更加生动有趣。',
+                memorySize: 50,
+            },
+            userPrompt: '', // 这里就是为这个角色单独设置的“关于我”的人设
+            chatHistory: [],
+            userStickers: [],
+            aiStickers: [],
+            moments: [],
+            diary: []
+        };
     };
-};
         
         const createNewGroupObject = (name, avatar, memberIds) => {
             const id = generateId('group');
@@ -1281,92 +1347,87 @@ This is a strict format guide. You MUST follow it.
     // 移除这里多余的保存操作，因为它可能导致错误的配置被意外保存
     // saveAllData(); // 这行被注释或删除了
 };
-               const saveCurrentSettings = async () => { // 添加了 async
-    const chatData = getCurrentChatData();
-    if (!chatData) return;
+                  const saveCurrentSettings = async () => {
+        const chatData = getCurrentChatData();
+        if (!chatData) return;
 
-    // 全局的用户头像等信息保持不变
-    userMomentsProfile.chatAvatar = elements.userAvatarPreview.src;
-    userMomentsProfile.momentsAvatar = elements.userMomentsAvatarPreview.src;
-    userMomentsProfile.cover = elements.userMomentsCoverPreview.src;
+        userMomentsProfile.chatAvatar = elements.userAvatarPreview.src;
+        userMomentsProfile.momentsAvatar = elements.userMomentsAvatarPreview.src;
+        userMomentsProfile.cover = elements.userMomentsCoverPreview.src;
 
-    if (currentChat.type === 'direct') {
-        const character = chatData;
-        // --- 核心修改 ---
-        // 将"关于我"的内容保存到角色专属的userPrompt中
-        character.userPrompt = elements.userPromptInput.value;
+        if (currentChat.type === 'direct') {
+            const character = chatData;
+            // 将“关于我”的内容保存到角色专属的位置
+            character.userPrompt = elements.userPromptInput.value;
 
-        character.config = {
-            ...character.config,
-            characterName: elements.characterNameInput.value.trim() || '他', 
-            characterPrompt: elements.characterPromptInput.value,
-            aiAvatar: elements.aiAvatarPreview.src, 
-            chatBackground: elements.chatContainer.style.backgroundImage.slice(5, -2),
-            memorySize: parseInt(elements.memorySizeInput.value) || 50,
-        };
-    } else { // 群聊
-        const group = chatData;
-        group.name = elements.groupNameInput.value.trim() || '群聊';
-        group.avatar = elements.groupAvatarPreview.src;
-        group.chatBackground = elements.chatContainer.style.backgroundImage.slice(5, -2);
-        // --- 核心修改 ---
-        // "我在此群的人设"的内容保存到群聊专属的userPrompt中
-        group.userPrompt = elements.groupUserPromptInput.value;
-    }
+            character.config = {
+                ...character.config,
+                characterName: elements.characterNameInput.value.trim() || '他', 
+                characterPrompt: elements.characterPromptInput.value,
+                aiAvatar: elements.aiAvatarPreview.src, 
+                memorySize: parseInt(elements.memorySizeInput.value) || 50,
+            };
+            character.config.chatBackground = elements.chatContainer.style.backgroundImage.slice(5, -2);
 
-    await saveAllData(); // 添加了 await
-    loadChat(currentChat.type, currentChat.id);
-};
+        } else { // 如果是群聊
+            const group = chatData;
+            group.name = elements.groupNameInput.value.trim() || '群聊';
+            group.avatar = elements.groupAvatarPreview.src;
+            group.chatBackground = elements.chatContainer.style.backgroundImage.slice(5, -2);
+            // 将“我在此群的人设”的内容保存到群聊专属的位置
+            group.userPrompt = elements.groupUserPromptInput.value;
+        }
 
-        const openSettingsModal = () => {
-    const chatData = getCurrentChatData();
-    if (!chatData) return;
-    
-    elements.myProfileSettingsSection.style.display = 'block';
-    // 全局的用户头像等信息保持不变
-    elements.userAvatarPreview.src = userMomentsProfile.chatAvatar;
-    elements.userMomentsAvatarPreview.src = userMomentsProfile.momentsAvatar; 
-    elements.userMomentsCoverPreview.src = userMomentsProfile.cover;
+        await saveAllData();
+        loadChat(currentChat.type, currentChat.id);
+    };
 
-    if (currentChat.type === 'direct') {
-        const character = chatData;
-        elements.characterSettingsSection.style.display = 'block';
-        elements.groupSettingsSection.style.display = 'none';
-        elements.deleteChatBtn.textContent = '删除此角色';
+            const openSettingsModal = () => {
+        const chatData = getCurrentChatData();
+        if (!chatData) return;
         
-        // --- 核心修改 ---
-        // "关于我"的文本框现在读取角色专属的userPrompt
-        elements.userPromptInput.value = character.userPrompt || ''; 
-        // 隐藏群聊专属的"我的人设"输入框
-        getEl('group-user-prompt').closest('.form-group').style.display = 'none';
-        // 显示单聊专属的"我的人设"输入框
-        getEl('user-prompt').closest('.form-group').style.display = 'flex';
+        elements.myProfileSettingsSection.style.display = 'block';
+        elements.userAvatarPreview.src = userMomentsProfile.chatAvatar;
+        elements.userMomentsAvatarPreview.src = userMomentsProfile.momentsAvatar; 
+        elements.userMomentsCoverPreview.src = userMomentsProfile.cover;
 
-        elements.characterNameInput.value = character.config.characterName;
-        elements.aiAvatarPreview.src = character.config.aiAvatar;
-        elements.memorySizeInput.value = character.config.memorySize;
-        elements.characterPromptInput.value = character.config.characterPrompt;
+        if (currentChat.type === 'direct') {
+            const character = chatData;
+            elements.characterSettingsSection.style.display = 'block';
+            elements.groupSettingsSection.style.display = 'none';
+            elements.deleteChatBtn.textContent = '删除此角色';
+            
+            // 让“关于我”的文本框读取这个角色专属的设定
+            elements.userPromptInput.value = character.userPrompt || ''; 
+            // 隐藏群聊专属的设定框
+            getEl('group-user-prompt').closest('.form-group').style.display = 'none';
+            // 显示单聊专属的设定框
+            getEl('user-prompt').closest('.form-group').style.display = 'flex';
+
+            elements.characterNameInput.value = character.config.characterName;
+            elements.aiAvatarPreview.src = character.config.aiAvatar;
+            elements.memorySizeInput.value = character.config.memorySize;
+            elements.characterPromptInput.value = character.config.characterPrompt;
+            
+        } else { // 如果是群聊
+            const group = chatData;
+            elements.characterSettingsSection.style.display = 'none';
+            elements.groupSettingsSection.style.display = 'block';
+            elements.deleteChatBtn.textContent = '删除此群聊';
+
+            // 让“我在此群的人设”文本框读取这个群聊专属的设定
+            elements.groupUserPromptInput.value = group.userPrompt || '';
+            // 显示群聊专属的设定框
+            getEl('group-user-prompt').closest('.form-group').style.display = 'flex';
+            // 隐藏单聊专属的设定框
+            getEl('user-prompt').closest('.form-group').style.display = 'none';
+
+            elements.groupNameInput.value = group.name;
+            elements.groupAvatarPreview.src = group.avatar;
+        }
         
-    } else { // 群聊
-        const group = chatData;
-        elements.characterSettingsSection.style.display = 'none';
-        elements.groupSettingsSection.style.display = 'block';
-        elements.deleteChatBtn.textContent = '删除此群聊';
-
-        // --- 核心修改 ---
-        // "我在此群的人设"文本框现在读取群聊专属的userPrompt
-        elements.groupUserPromptInput.value = group.userPrompt || '';
-        // 显示群聊专属的"我的人设"输入框
-        getEl('group-user-prompt').closest('.form-group').style.display = 'flex';
-        // 隐藏单聊专属的"我的人设"输入框
-        getEl('user-prompt').closest('.form-group').style.display = 'none';
-
-        elements.groupNameInput.value = group.name;
-        elements.groupAvatarPreview.src = group.avatar;
-    }
-    
-    elements.settingsModal.classList.add('show');
-};
+        elements.settingsModal.classList.add('show');
+    };
        const applyFont = (fontFamily) => {
     const root = document.documentElement;
     // 更新CSS变量，让整个页面的字体都改变
@@ -1378,57 +1439,49 @@ This is a strict format guide. You MUST follow it.
     }
 }; 
 const applyBubbleStyle = (style) => {
-    if (style === 'round') {
-        elements.chatContainer.classList.add('bubble-style-round');
-    } else {
-        elements.chatContainer.classList.remove('bubble-style-round');
-    }
-    elements.bubbleStyleSelect.value = style;
-};
-        const applyTheme = (theme) => {
-    const root = document.documentElement;
+    const container = elements.chatContainer;
     const customStyleTag = getEl('custom-bubble-style-tag');
 
-    // 清理旧样式
-    root.style.removeProperty('--ai-bubble-bg');
-    root.style.removeProperty('--ai-bubble-text');
-    root.style.removeProperty('--user-bubble-bg');
-    root.style.removeProperty('--user-bubble-text');
-    customStyleTag.textContent = '';
-    
-    if (theme === 'custom') {
-        // 应用自定义CSS
-        customStyleTag.textContent = elements.customBubbleCssInput.value;
-    } else {
-        // 应用预设主题
-        const themes = { 
-            '1': ['--theme1-ai-bg', '--theme1-ai-text', '--theme1-user-bg', '--theme1-user-text'], 
-            '2': ['--theme2-ai-bg', '--theme2-ai-text', '--theme2-user-bg', '--theme2-user-text'], 
-            '3': ['--theme3-ai-bg', '--theme3-ai-text', '--theme3-user-bg', '--theme3-user-text'], 
-            '4': ['--theme4-ai-bg', '--theme4-ai-text', '--theme4-user-bg', '--theme4-user-text'], 
-            '5': ['--theme5-ai-bg', '--theme5-ai-text', '--theme5-user-bg', '--theme5-user-text'],
-            '6': ['--theme6-ai-bg', '--theme6-ai-text', '--theme6-user-bg', '--theme6-user-text'],
-            '7': ['--theme7-ai-bg', '--theme7-ai-text', '--theme7-user-bg', '--theme7-user-text'],
-            '8': ['--theme8-ai-bg', '--theme8-ai-text', '--theme8-user-bg', '--theme8-user-text'],
-            '9': ['--theme9-ai-bg', '--theme9-ai-text', '--theme9-user-bg', '--theme9-user-text'],
-        };
-        if (!themes[theme]) theme = '1'; // 默认主题
-        const [aiBg, aiText, userBg, userText] = themes[theme];
-        root.style.setProperty('--ai-bubble-bg', `var(${aiBg})`); 
-        root.style.setProperty('--ai-bubble-text', `var(${aiText})`);
-        root.style.setProperty('--user-bubble-bg', `var(${userBg})`); 
-        root.style.setProperty('--user-bubble-text', `var(${userText})`);
-    }
+    // 第一步：重置所有样式状态，确保一个干净的开始
+    container.classList.remove('bubble-style-round', 'bubble-style-wechat', 'custom-style-active');
+    customStyleTag.textContent = ''; // 清空上一轮注入的自定义样式
 
-    // 更新UI上的选中状态
-    elements.themeSelector.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
-    const activeOption = elements.themeSelector.querySelector(`.theme-option[data-theme="${theme}"]`);
-    if (activeOption) {
-        activeOption.classList.add('active');
+    // 第二步：根据传入的样式名，应用不同的样式
+    if (style === 'round') {
+        container.classList.add('bubble-style-round');
+    } else if (style === 'wechat') {
+        container.classList.add('bubble-style-wechat');
+    } else if (style.startsWith('custom:')) {
+        // 核心升级：如果样式名以 'custom:' 开头，说明它来自“高级样式库”
+        const styleName = style.split(':')[1]; // 提取出真正的样式名，比如“小狗生气”
+        if (styleName) { // 确保样式名存在
+            const allCustomStyles = getEl('advanced-bubble-styles').value;
+            
+            // 使用程序精确查找并提取出您定义的那个样式块
+            const regex = new RegExp(`\\/\\*\\s*Style Name:\\s*${styleName}\\s*\\*\\/([\\s\\S]*?)(?=\\/\\*\\s*Style Name:|$)`, 'i');
+            const match = allCustomStyles.match(regex);
+
+            if (match && match[1]) {
+                // 找到了！把这个样式的CSS代码注入到页面中让它生效
+                customStyleTag.textContent = match[1].trim();
+                container.classList.add('custom-style-active');
+            }
+        }
+    }
+    
+    // 第三步：同步更新设置界面里两个下拉菜单的显示状态
+    if (style.startsWith('custom:')) {
+        elements.bubbleStyleSelect.value = 'custom'; // 主菜单设为“自定义”
+        const styleName = style.split(':')[1];
+        getEl('custom-style-select').value = styleName; // 子菜单选中对应的样式名
+    } else {
+        elements.bubbleStyleSelect.value = style; // 主菜单设为对应的内置样式
+        getEl('custom-style-select').value = ""; // 子菜单重置为“无”
     }
 };
 
                 // --- 变化开始：替换这个函数 ---
+      
         const handleFileUpload = (file, callback, compressionOptions = {}) => { 
             if (file) { 
                 const reader = new FileReader(); 
@@ -1691,69 +1744,67 @@ const applyBubbleStyle = (style) => {
             return { role, content };
         };
         
-                                const triggerAiResponse = async (overridePayload = null, lastUserMessage = null) => {
-            clearTimeout(responseTriggerTimer);
-            const chatData = getCurrentChatData();
-            const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
-            const apiKey = elements.apiKeyInput.value.trim();
-            const model = elements.modelSelect.value;
+                                    const triggerAiResponse = async (overridePayload = null, lastUserMessage = null) => {
+        clearTimeout(responseTriggerTimer);
+        const chatData = getCurrentChatData();
+        const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
+        const apiKey = elements.apiKeyInput.value.trim();
+        const model = elements.modelSelect.value;
 
-            if (!chatData || isVideoCallActive || !apiBaseUrl || !apiKey || !model) {
-                console.log("AI response prerequisites not met.");
-                getEl('typing-indicator')?.remove();
-                return;
+        if (!chatData || isVideoCallActive || !apiBaseUrl || !apiKey || !model) {
+            getEl('typing-indicator')?.remove();
+            return;
+        }
+        
+        addMessage({ sender: 'ai', type: 'text', isLoading: true });
+
+        const formatApiMessage = (msg) => {
+            if (msg.type === 'system' || msg.sender === 'system') return null;
+            const role = msg.sender === 'user' ? 'user' : 'assistant';
+            if (msg.sender === 'user' && msg.type === 'image' && msg.imageUrl) {
+                return {
+                    role: 'user',
+                    content: [
+                        { type: 'text', text: msg.llmContent || '用户发送了一张图片。' },
+                        { type: 'image_url', image_url: { url: msg.imageUrl } }
+                    ]
+                };
             }
-            
-            addMessage({ sender: 'ai', type: 'text', isLoading: true });
+            const content = msg.llmContent || msg.text;
+            if (!content) return null;
+            return { role, content };
+        };
 
-            // 这是一个内部辅助函数，用来将我们的聊天记录转换成AI能看懂的格式
-            const formatApiMessage = (msg) => {
-                if (msg.type === 'system' || msg.sender === 'system') return null;
-                const role = msg.sender === 'user' ? 'user' : 'assistant';
-                if (msg.sender === 'user' && msg.type === 'image' && msg.imageUrl) {
-                    return {
-                        role: 'user',
-                        content: [
-                            { type: 'text', text: msg.llmContent || '用户发送了一张图片。' },
-                            { type: 'image_url', image_url: { url: msg.imageUrl } }
-                        ]
-                    };
-                }
-                const content = msg.llmContent || msg.text;
-                if (!content) return null;
-                return { role, content };
-            };
+        let messagesPayload;
+        if (overridePayload) {
+            messagesPayload = overridePayload;
+        } else {
+            const systemPrompt = elements.customSystemPromptInput.value.trim() || DEFAULT_SYSTEM_PROMPT;
+            const momentsContext = getRecentMomentsContext();
 
-            let messagesPayload;
-            if (overridePayload) {
-                messagesPayload = overridePayload;
-            } else {
-                const systemPrompt = elements.customSystemPromptInput.value.trim() || DEFAULT_SYSTEM_PROMPT;
-                
-                const momentsContext = getRecentMomentsContext();
-
-                            if (currentChat.type === 'direct') {
+            if (currentChat.type === 'direct') {
                 const character = chatData;
                 const memorySize = character.config.memorySize || 50;
-                // --- 核心修改 ---
-                // 这里我们告诉AI，您的用户资料是角色专属的 userPrompt
+                // 告诉AI，当前用户的资料是这个角色专属的设定
                 const fullPrompt = `${systemPrompt}\n\n[Character Prompt]:\n${character.config.characterPrompt}\n\n[Your User's Profile]: ${character.userPrompt || `The user's name is ${userMomentsProfile.name}`}${momentsContext}`;
                 messagesPayload = [
                     { role: 'system', content: fullPrompt }, 
                     ...character.chatHistory.slice(-memorySize).map(formatApiMessage).filter(m => m !== null)
                 ];
-            } else { // Group Chat
-                    const group = chatData;
-                    const memorySize = 50;
-                    const memberProfiles = group.memberIds.map(id => {
-                        const char = characterSets.find(c => c.id === id);
-                        return char ? `\n### Character: ${char.config.characterName} (ID: ${id})\n${char.config.characterPrompt}` : '';
-                    }).join('\n');
+            } else { // 如果是群聊
+                const group = chatData;
+                const memorySize = 50;
+                const memberProfiles = group.memberIds.map(id => {
+                    const char = characterSets.find(c => c.id === id);
+                    return char ? `\n### Character: ${char.config.characterName} (ID: ${id})\n${char.config.characterPrompt}` : '';
+                }).join('\n');
+                
+                const openPollsInfo = (group.polls || []).filter(p => p.status === 'open').map(p => `\n[Ongoing Poll: "${p.question}" (ID: ${p.pollId})]`).join('');
+                const openRedPacketsInfo = group.chatHistory.filter(m => m.type === 'red-packet' && m.status === 'open').map(p => `\n[Open Red Packet: "${p.memo}" (ID: ${p.packetId})]`).join('');
+                
+                // 告诉AI，您在这个群里的身份是群聊专属的设定
+                const groupSystemPrompt = `[Role Definition]                  
                     
-                    const openPollsInfo = (group.polls || []).filter(p => p.status === 'open').map(p => `\n[Ongoing Poll: "${p.question}" (ID: ${p.pollId})]`).join('');
-                    const openRedPacketsInfo = group.chatHistory.filter(m => m.type === 'red-packet' && m.status === 'open').map(p => `\n[Open Red Packet: "${p.memo}" (ID: ${p.packetId})]`).join('');
-                    
-                    const groupSystemPrompt = `[Role Definition]
 You are an advanced AI group chat coordinator. You MUST role-play the following characters based on their profiles to create a natural conversation in Simplified Chinese.
 ${memberProfiles}
 Your user in this chat has this profile: ${group.userPrompt || `The user's name is ${userMomentsProfile.name}`}. NEVER call them '用户'.
@@ -1791,112 +1842,117 @@ ${momentsContext}
                 }
             }
             
-            try {
-                const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages: messagesPayload, stream: false }) });
-                getEl('typing-indicator')?.remove();
-                if (!response.ok) { const errorData = await response.text(); throw new Error(`HTTP Error ${response.status}: ${errorData}`); }
-                const responseData = await response.json();
-
-// --- 这是全新的加强版探针 ---
-console.log("【证据一：完整的原始数据包】（可以点开看详细结构）", responseData);
-console.log("【证据二：AI回复的核心内容（最关键的原始字符串）】", responseData?.choices?.[0]?.message?.content);
-// --- 探针结束 ---
-                if (responseData?.choices?.[0]?.message?.content) {
-                    processAiResponse(responseData.choices[0].message.content);
-                } else if (responseData?.error) { throw new Error(`API Error: ${responseData.error.message}`);
-                } else { throw new Error('Invalid or empty API response format.'); }
-            } catch (error) {
-                getEl('typing-indicator')?.remove();
-                addMessage({ sender: 'system', text: `错误: ${error.message}`, type: 'system' });
-            }
-        };
+                  try {
+          const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages: messagesPayload, stream: false }) });
+          getEl('typing-indicator')?.remove();
+          if (!response.ok) { const errorData = await response.text(); throw new Error(`HTTP Error ${response.status}: ${errorData}`); }
+          const responseData = await response.json();
+          console.log("【证据一：完整的原始数据包】（可以点开看详细结构）", responseData);
+          console.log("【证据二：AI回复的核心内容（最关键的原始字符串）】", responseData?.choices?.[0]?.message?.content);
+          if (responseData?.choices?.[0]?.message?.content) {
+              processAiResponse(responseData.choices[0].message.content);
+          } else if (responseData?.error) { throw new Error(`API Error: ${responseData.error.message}`);
+          } else { throw new Error('Invalid or empty API response format.'); }
+      } catch (error) {
+          getEl('typing-indicator')?.remove();
+          addMessage({ sender: 'system', text: `错误: ${error.message}`, type: 'system' });
+      }
+  };
         
-                        const processAiResponse = (rawText) => {
-    let responseArray = [];
-    try {
-        const parsed = JSON.parse(rawText);
-        if (Array.isArray(parsed)) { responseArray = parsed; }
-    } catch (e) {
-        const jsonObjects = rawText.match(/\{[\s\S]*?\}/g);
-        if (jsonObjects) {
-            jsonObjects.forEach(objStr => {
-                try { responseArray.push(JSON.parse(objStr)); } catch (jsonErr) { console.warn('解析器跳过了一个损坏的JSON片段:', objStr, jsonErr); }
-            });
-        }
-    }
-
-    if (responseArray.length === 0) {
-        console.error("AI响应解析彻底失败。收到的原始文本:", rawText);
-        addMessage({ sender: 'system', text: `AI响应格式错误，无法解析：<pre>${rawText}</pre>`, type: 'system' });
-        return;
-    }
-
-    // --- 全新的两段式处理逻辑 ---
-    
-    // **第一阶段：处理所有数据更新，但不渲染UI**
-    let dataChanged = false;
-    responseArray.forEach(msgObj => {
-        if (!msgObj.type) {
-            if (msgObj.pollId && msgObj.option) { msgObj.type = 'vote'; }
-            else if (msgObj.packetId) { msgObj.type = 'grab_red_packet'; }
-        }
-        if (msgObj.type === 'vote' || msgObj.type === 'grab_red_packet') {
-            const senderId = msgObj.senderId;
-            if (!senderId) return;
-
-            if (msgObj.type === 'vote') {
-                handleAiVote_dataOnly(msgObj);
-            }
-            if (msgObj.type === 'grab_red_packet') {
-                handleAiGrabRedPacket(msgObj.packetId, senderId);
-            }
-            dataChanged = true; // 标记数据已发生变化
-        }
-    });
-    
-    // **如果数据有变，立刻刷新一次UI**
-    if (dataChanged) {
-        renderAllMessages();
-    }
-
-    // **第二阶段：只处理需要延迟显示的UI消息（如文字、语音等）**
-    responseArray.forEach((msgObj, index) => {
-        if (!msgObj.type) {
-            if (msgObj.message || msgObj.content) {
-                msgObj.type = 'text';
-                msgObj.content = msgObj.message || msgObj.content;
+                                const processAiResponse = (rawText) => {
+        let responseArray = [];
+        try {
+            const jsonMatch = rawText.match(/\[\s*\{[\s\S]*?\}\s*\]/s);
+            responseArray = jsonMatch ? JSON.parse(jsonMatch[0]) : [JSON.parse(rawText)];
+        } catch (e) {
+            const jsonObjects = rawText.match(/\{[\s\S]*?\}/g);
+            if (jsonObjects) {
+                jsonObjects.forEach(objStr => {
+                    try { responseArray.push(JSON.parse(objStr)); } catch (jsonErr) { console.warn('程序跳过了一个损坏的信息片段:', objStr, jsonErr); }
+                });
             }
         }
-        
-        // 跳过已经处理过的数据更新动作
-        if (msgObj.type === 'vote' || msgObj.type === 'grab_red_packet') {
+
+        if (responseArray.length === 0) {
+            console.error("AI响应解析彻底失败。收到的原始文本:", rawText);
+            addMessage({ sender: 'system', text: `AI响应格式错误，无法解析：<pre>${rawText}</pre>`, type: 'system' });
             return;
         }
 
-        setTimeout(() => {
-            if (currentChat.type === 'group' && !msgObj.senderId) { return; }
+        let dataChanged = false;
+        // 第一阶段：处理所有会改变数据状态的“动作”，比如投票、点赞、评论等
+        responseArray.forEach(msgObj => {
+            // 自动识别动作类型，让程序更聪明
+            if (!msgObj.type) {
+                if (msgObj.pollId && msgObj.option) msgObj.type = 'vote';
+                else if (msgObj.packetId) msgObj.type = 'grab_red_packet';
+                else if (msgObj.will_like === true) msgObj.type = 'moment_like'; // 新增：识别点赞动作
+                else if (msgObj.momentId && msgObj.comment_text) msgObj.type = 'moment_comment'; // 新增：识别评论动作
+                else if (msgObj.momentId && msgObj.reply_text) msgObj.type = 'moment_reply'; // 新增：识别回复动作
+            }
+
             const senderId = msgObj.senderId || currentChat.id;
-            const character = characterSets.find(c => c.id === senderId);
-            if (!character) { return; }
-            
-            const llmContentForHistory = (index === 0) ? rawText : null;
-            let messageData = { sender: senderId, llmContent: llmContentForHistory };
+            const momentType = currentChat.type === 'group' ? 'group' : 'direct';
 
             switch(msgObj.type) {
-                case 'text': addMessage({ ...messageData, text: msgObj.content, type: 'text' }); break;
-                case 'voice': addMessage({ ...messageData, text: msgObj.content, type: 'voice', voiceDuration: `0:${Math.max(1, Math.round((msgObj.content||'').length / 5)).toString().padStart(2, '0')}` }); break;
-                case 'text-image': addMessage({ ...messageData, text: msgObj.content, type: 'text-image' }); break;
-                case 'sticker': if (character?.aiStickers?.length > 0) { addMessage({ ...messageData, type: 'sticker', stickerUrl: character.aiStickers[Math.floor(Math.random() * character.aiStickers.length)] }); } break;
-                case 'transfer': addMessage({ ...messageData, type: 'transfer', transferAmount: msgObj.amount, transferMemo: msgObj.memo, transferCoverUrl: `https://files.catbox.moe/qwu221.jpg`, transferStatus: 'pending' }); break;
-                case 'video-call-request': if(currentChat.type === 'direct') handleIncomingVideoCall(msgObj.content); break;
-                case 'post_moment': if(character) { const momentType = currentChat.type === 'group' ? 'group' : 'direct'; addMomentByAI(character.id, { content: msgObj.content, image_query: msgObj.image_query }, momentType); } break;
-                case 'diary_entry': if (character && msgObj.content) addDiaryEntry(character.id, msgObj.content); break;
-                case 'moment_comment': if (msgObj.momentId && msgObj.comment_text) { const momentType = currentChat.type === 'group' ? 'group' : 'direct'; addCommentOrReplyByAI('comment', msgObj.momentId, msgObj.comment_text, senderId, null, momentType); } break;
-                case 'moment_reply': if (msgObj.momentId && msgObj.commentId && msgObj.reply_text) { const momentType = currentChat.type === 'group' ? 'group' : 'direct'; addCommentOrReplyByAI('reply', msgObj.momentId, msgObj.reply_text, senderId, msgObj.commentId, momentType); } break;
+                case 'vote':
+                    if (senderId) { handleAiVote_dataOnly(msgObj); dataChanged = true; }
+                    break;
+                case 'grab_red_packet':
+                    if (senderId) { handleAiGrabRedPacket(msgObj.packetId, senderId); dataChanged = true; }
+                    break;
+                case 'moment_like': // 新增：处理点赞
+                    if (senderId && msgObj.momentId) { handleAiLike(msgObj.momentId, senderId, momentType); dataChanged = true; }
+                    break;
+                case 'moment_comment': // 新增：处理评论
+                    if (senderId && msgObj.momentId) { addCommentOrReplyByAI('comment', msgObj.momentId, msgObj.comment_text, senderId, null, momentType); dataChanged = true; }
+                    break;
+                case 'moment_reply': // 新增：处理回复
+                    if (senderId && msgObj.momentId) { addCommentOrReplyByAI('reply', msgObj.momentId, msgObj.reply_text, senderId, msgObj.commentId, momentType); dataChanged = true; }
+                    break;
             }
-        }, index * 1200);
-    });
-};
+        });
+
+        // 如果数据有变，立刻刷新界面
+        if (dataChanged) {
+            if (elements.momentsOverlay.classList.contains('show')) {
+                renderMoments();
+            } else {
+                renderAllMessages();
+            }
+        }
+
+        // 第二阶段：处理普通的聊天消息
+        responseArray.forEach((msgObj, index) => {
+            const isAction = ['vote', 'grab_red_packet', 'moment_like', 'moment_comment', 'moment_reply'].includes(msgObj.type);
+            if (isAction) return; // 跳过已经处理过的动作
+
+            if (!msgObj.type && (msgObj.content || msgObj.message)) {
+                msgObj.type = 'text';
+                msgObj.content = msgObj.content || msgObj.message;
+            }
+            
+            setTimeout(() => {
+                const senderId = msgObj.senderId || currentChat.id;
+                const character = characterSets.find(c => c.id === senderId);
+                if (!character) return;
+
+                const llmContentForHistory = (index === 0) ? rawText : null;
+                let messageData = { sender: senderId, llmContent: llmContentForHistory };
+
+                switch (msgObj.type) {
+                    case 'text': addMessage({ ...messageData, text: msgObj.content, type: 'text' }); break;
+                    case 'voice': addMessage({ ...messageData, text: msgObj.content, type: 'voice', voiceDuration: `0:${Math.max(1, Math.round((msgObj.content || '').length / 5)).toString().padStart(2, '0')}` }); break;
+                    case 'text-image': addMessage({ ...messageData, text: msgObj.content, type: 'text-image' }); break;
+                    case 'sticker': if (character.aiStickers.length > 0) { addMessage({ ...messageData, type: 'sticker', stickerUrl: character.aiStickers[Math.floor(Math.random() * character.aiStickers.length)] }); } break;
+                    case 'transfer': addMessage({ ...messageData, type: 'transfer', transferAmount: msgObj.amount, transferMemo: msgObj.memo, transferCoverUrl: `https://files.catbox.moe/qwu221.jpg`, transferStatus: 'pending' }); break;
+                    case 'video-call-request': if (currentChat.type === 'direct') handleIncomingVideoCall(msgObj.content); break;
+                    case 'post_moment': if (character) { const momentType = currentChat.type === 'group' ? 'group' : 'direct'; addMomentByAI(character.id, { content: msgObj.content, image_query: msgObj.image_query }, momentType); } break;
+                    case 'diary_entry': if (character && msgObj.content) addDiaryEntry(character.id, msgObj.content); break;
+                }
+            }, index * 1200 + (dataChanged ? 200 : 0));
+        });
+    };
         
         const acknowledgeTransfer = (msgId) => {
             const chatData = getCurrentChatData();
@@ -1984,80 +2040,72 @@ console.log("【证据二：AI回复的核心内容（最关键的原始字符�
             elements.videoCallOverlay.classList.remove('show');
         };
         
-                        const showMindVoice = async () => {
-            if (currentChat.type !== 'direct') return;
-            const character = getCurrentCharacter();
-            if (!character) return;
-            const { config, chatHistory } = character;
-            const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
-            const apiKey = elements.apiKeyInput.value.trim();
-            const model = elements.modelSelect.value;
-            if (!apiBaseUrl || !apiKey || !model) {
-                elements.mindVoiceContent.textContent = '请先在设置中填写API信息。';
-                elements.mindVoiceModal.classList.add('show');
-                return;
-            }
-
-            elements.mindVoiceContent.textContent = '思考中...';
+                            const showMindVoice = async () => {
+        if (currentChat.type !== 'direct') return;
+        const character = getCurrentCharacter();
+        if (!character) return;
+        const { config, chatHistory } = character;
+        const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
+        const apiKey = elements.apiKeyInput.value.trim();
+        const model = elements.modelSelect.value;
+        if (!apiBaseUrl || !apiKey || !model) {
+            elements.mindVoiceContent.textContent = '请先在设置中填写API信息。';
             elements.mindVoiceModal.classList.add('show');
+            return;
+        }
 
-                        const mindVoiceSystemPrompt = `[System Instruction for Language Model]
-1.  **Your Persona**: You are the character defined by the following prompt. You should ONLY use the personality, NOT the chat format instructions.
-    ${config.characterPrompt}
+        elements.mindVoiceContent.textContent = '思考中...';
+        elements.mindVoiceModal.classList.add('show');
 
-2.  **Your Task**: You will be given a chat history. Your ONLY job is to analyze the conversation and output a single, short, internal thought of your character in the first person. This is an UNSPOKEN thought.
-
-3.  **Output Rules (MANDATORY)**:
-    - Your entire response MUST be a single sentence of plain text.
-    - It MUST be an internal, unspoken thought, not a line of dialogue.
-    - It MUST NOT contain any actions like (pounces) or descriptions in parentheses or asterisks. This is absolutely forbidden.
-    - It MUST NOT be a direct reply to the user. It is a private thought.
-
-4.  **Example**:
-    - Chat History ends with User saying: "You are so sweet!"
-    - Correct Output Example: She actually called me sweet... I can't stop smiling.
-    - Incorrect Output Example: (blushes) Thank you, you too.`;
+        const mindVoiceSystemPrompt = `[System Instruction for Language Model]
+                      
+Your Persona: You are the character defined by the following prompt. You should ONLY use the personality, NOT the chat format instructions.
+${config.characterPrompt}
+Your Task: You will be given a chat history. Your ONLY job is to analyze the conversation and output a single, short, internal thought of your character in the first person. This is an UNSPOKEN thought.
+Output Rules (MANDATORY):
+Your entire response MUST be a single sentence of plain text.
+It MUST be an internal, unspoken thought, not a line of dialogue.
+It MUST NOT contain any actions like (pounces) or descriptions in parentheses or asterisks. This is absolutely forbidden.
+It MUST NOT be a direct reply to the user. It is a private thought.
+Example:
+Chat History ends with User saying: "You are so sweet!"
+Correct Output Example: She actually called me sweet... I can't stop smiling.
+Incorrect Output Example: (blushes) Thank you, you too.`;
             
-            // --- 这里就是我们的最终决战修改！ ---
-            // 我们新建了一个专门给‘心声’功能用的‘翻译机’(formatForMindVoice)
-            const formatForMindVoice = (msg) => {
-                const role = msg.sender === 'user' ? 'user' : 'assistant';
-                
-                // 这是关键！我们不再使用可能包含JSON代码的 llmContent。
-                // 我们只使用 msg.text，因为它只包含干净的、我们能看到的文字。
-                const content = msg.text; 
+              // 这个小程序专门负责把聊天记录“翻译”成干净的文字
+  const formatForMindVoice = (msg) => {
+      const role = msg.sender === 'user' ? 'user' : 'assistant';
+      const content = msg.text; 
+      // 过滤掉表情、图片等没有文字的消息
+      if (!content || msg.type === 'sticker' || msg.type === 'image') {
+          return null;
+      }
+      return { role, content };
+  };
 
-                if (!content) {
-                    return null; // 同样，过滤掉表情等没有文字的消息
-                }
-                return { role, content };
-            };
-
-            const messagesPayload = [
-                { role: 'system', content: mindVoiceSystemPrompt },
-                // 使用我们全新的、更智能的‘翻译机’来处理历史记录
-                ...chatHistory.slice(-config.memorySize)
-                             .map(formatForMindVoice) 
-                             .filter(msg => msg !== null)
-            ];
-            
-            try {
-                const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages: messagesPayload }) });
-                if (!response.ok) {
-                    throw new Error(`HTTP Error ${response.status}: ${await response.text()}`);
-                }
-                const responseData = await response.json();
-                if (responseData?.choices?.[0]?.message?.content) {
-                    // 心声功能不应该返回JSON，所以我们直接用它返回的内容
-                    elements.mindVoiceContent.textContent = responseData.choices[0].message.content;
-                } else if (responseData.error) {
-                    throw new Error(`API返回错误: ${responseData.error.message}`);
-                } else {
-                    throw new Error('API没有返回有效的心声内容。');
-                }
-            } catch (error) {
-                elements.mindVoiceContent.textContent = `读取心声失败: ${error.message}`;
-            }
+  const messagesPayload = [
+      { role: 'system', content: mindVoiceSystemPrompt },
+      ...chatHistory.slice(-config.memorySize)
+                   .map(formatForMindVoice) 
+                   .filter(msg => msg !== null) // 把所有空消息都过滤掉
+  ];
+  
+  try {
+      const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages: messagesPayload }) });
+      if (!response.ok) {
+          throw new Error(`服务器错误 ${response.status}: ${await response.text()}`);
+      }
+      const responseData = await response.json();
+      if (responseData?.choices?.[0]?.message?.content) {
+          elements.mindVoiceContent.textContent = responseData.choices[0].message.content;
+      } else if (responseData.error) {
+          throw new Error(`API返回错误: ${responseData.error.message}`);
+      } else {
+          throw new Error('API没有返回有效的心声内容。');
+      }
+  } catch (error) {
+      elements.mindVoiceContent.textContent = `读取心声失败: ${error.message}`;
+  }
         };
         const openStickerManager = (context) => { if (currentChat.type !== 'direct') return; const character = getCurrentCharacter(); if(!character) return; let stickerManagementContext = context; const currentStickers = context === 'user' ? character.userStickers : character.aiStickers; let galleryHtml = '<p style="text-align:center; color:#999;">点击下方按钮添加，点击已添加的表情可删除。</p>' + currentStickers.map(url => `<img src="${url}" data-sticker-url="${url}" alt="sticker">`).join(''); openFeatureModal(context === 'user' ? '我的表情管理' : '他的表情管理', `<div id="sticker-gallery" style="margin-bottom:15px;">${galleryHtml}</div><button id="add-stickers-btn" class="file-input-label" style="text-align:center; width:100%;">从相册批量添加</button>`, '完成', () => closeModal(elements.featureModal)); getEl('add-stickers-btn').onclick = () => elements.stickerUploadInput.click(); getEl('sticker-gallery').onclick = e => { if (e.target.tagName === 'IMG') { if(confirm('要删除这个表情吗？')) { const urlToDelete = e.target.dataset.stickerUrl; if(stickerManagementContext === 'user') character.userStickers = character.userStickers.filter(url => url !== urlToDelete); else character.aiStickers = character.aiStickers.filter(url => url !== urlToDelete); saveAllData(); e.target.remove(); } } }; elements.stickerUploadInput.onchange = (e) => { Array.from(e.target.files).forEach((file, i, arr) => { handleFileUpload(file, (result) => { if (stickerManagementContext === 'user') character.userStickers.push(result); else character.aiStickers.push(result); if (i === arr.length - 1) { saveAllData(); alert(`已成功添加 ${arr.length} 个表情！`); closeModal(elements.featureModal); openStickerManager(stickerManagementContext); } }); }); e.target.value = ''; }; };
 
@@ -2198,67 +2246,81 @@ console.log("【证据二：AI回复的核心内容（最关键的原始字符�
              closeModal(elements.settingsModal);
         };
 
-        const addMomentByAI = (characterId, momentData, momentType) => {
-            const character = characterSets.find(c => c.id === characterId);
-            if (!character) return;
-                        const imageUrl = null;
-            const newMoment = { id: generateId('moment'), senderId: character.id, timestamp: getFullTimestamp(), likes: [], comments: [], content: momentData.content, imageUrl };
-            
-            showTopNotification(`${character.config.characterName} 发布了一条新动态`, character.config.aiAvatar);
+               const addMomentByAI = (characterId, momentData, momentType) => {
+        const character = characterSets.find(c => c.id === characterId);
+        if (!character) return;
+        const imageUrl = null;
+        const newMoment = { id: generateId('moment'), senderId: character.id, timestamp: getFullTimestamp(), likes: [], comments: [], content: momentData.content, imageUrl };
+        
+        showTopNotification(`${character.config.characterName} 发布了一条新动态`, character.config.aiAvatar);
 
-            if (momentType === 'direct') {
-                character.moments.unshift(newMoment);
-            } else if (momentType === 'group') {
-                const group = groupChats.find(g => g.memberIds.includes(characterId));
-                if (group) {
-                    if (!group.groupMoments) group.groupMoments = [];
-                    group.groupMoments.unshift(newMoment);
-                    const otherMembers = group.memberIds.filter(id => id !== characterId);
-                    otherMembers.forEach((memberId, index) => {
-                        setTimeout(() => {
+        if (momentType === 'direct') {
+            if (!character.moments) character.moments = [];
+            character.moments.unshift(newMoment);
+        } else if (momentType === 'group') {
+            const group = getCurrentGroup();
+            if (group) {
+                if (!group.groupMoments) group.groupMoments = [];
+                group.groupMoments.unshift(newMoment);
+
+                // 新增：当AI在群里发朋友圈，触发其他AI的互动
+                const otherMembers = group.memberIds.filter(id => id !== characterId && characterSets.some(c => c.id === id));
+                otherMembers.forEach((memberId, index) => {
+                    // 设置一个随机的延迟，让互动看起来更自然
+                    setTimeout(() => {
+                        if (Math.random() > 0.4) { // 60%的概率会去评论
                             triggerAiMomentComment(newMoment, memberId, 'group');
-                        }, (index + 1) * 4000); 
-                    });
+                        }
+                        triggerAiMomentLike(newMoment, memberId); // 总是会考虑要不要点赞
+                    }, (index + 1) * 5000 + Math.random() * 3000); // 5-8秒的随机延迟
+                });
+            }
+        }
+        saveAllData();
+        if(elements.momentsOverlay.classList.contains('show')) renderMoments();
+    };
+            const addMomentByUser = async (momentData) => { 
+        const newMoment = { id: generateId('moment'), senderId: 'user', timestamp: getFullTimestamp(), likes: [], comments: [], ...momentData }; 
+        userMomentsProfile.posts.unshift(newMoment); 
+        saveAllData();
+        openMoments(); 
+        
+        // 找出当前聊天中所有相关的AI角色
+        const relevantChars = currentChat.type === 'direct' 
+            ? [getCurrentCharacter()].filter(Boolean)
+            : (getCurrentGroup() ? getCurrentGroup().memberIds.map(id => characterSets.find(c => c.id === id)).filter(Boolean) : []);
+        
+        // 让AI们按顺序、有间隔地做出反应，防止拥挤
+        for (let i = 0; i < relevantChars.length; i++) {
+            const char = relevantChars[i];
+            // 设置不同的延迟，让反应看起来更自然
+            setTimeout(() => {
+                // 随机决定是只点赞，还是既点赞又评论
+                if (Math.random() > 0.4) { // 60%的概率会去评论
+                    triggerAiMomentComment(newMoment, char.id, currentChat.type);
                 }
-            }
-            saveAllData();
-            if(elements.momentsOverlay.classList.contains('show')) renderMoments();
-        };
+                triggerAiMomentLike(newMoment, char.id); // 总是会考虑要不要点赞
+            }, (i + 1) * 4000 + Math.random() * 2000); // 4-6秒的延迟
+        }
+    };
+            const triggerAiMomentComment = async (moment, commenterId, momentType) => {
+        const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
+        const apiKey = elements.apiKeyInput.value.trim();
+        const model = elements.modelSelect.value;
+        const commenterChar = characterSets.find(c => c.id === commenterId);
+        if (!apiBaseUrl || !apiKey || !model || !commenterChar) return;
+        
+        const postedBy = moment.senderId === 'user' ? (userMomentsProfile.name || '我') : (characterSets.find(c => c.id === moment.senderId)?.config.characterName || '一位朋友');
+        
+        // 新增：告诉AI这条朋友圈有没有图片，让它能更好地评论
+        const imageContext = moment.imageUrl ? "这条动态还配有一张图片。" : "这条动态没有配图。";
 
-        const addMomentByUser = async (momentData) => { 
-            const newMoment = { id: generateId('moment'), senderId: 'user', timestamp: getFullTimestamp(), likes: [], comments: [], ...momentData }; 
-            userMomentsProfile.posts.unshift(newMoment); 
-            saveAllData();
-            openMoments(); // This will re-render
-            
-            const relevantChars = currentChat.type === 'direct' 
-                ? [getCurrentCharacter()] 
-                : (getCurrentGroup() ? getCurrentGroup().memberIds.map(id => characterSets.find(c => c.id === id)).filter(Boolean) : []);
-            
-            // Trigger AI comments sequentially to avoid rate limits
-            for (let i = 0; i < relevantChars.length; i++) {
-                setTimeout(() => {
-                    triggerAiMomentComment(newMoment, relevantChars[i].id, currentChat.type);
-                }, (i + 1) * 3000);
-            }
-        };
-
-        const triggerAiMomentComment = async (moment, commenterId, momentType) => {
-            const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
-            const apiKey = elements.apiKeyInput.value.trim();
-            const model = elements.modelSelect.value;
-            const commenterChar = characterSets.find(c => c.id === commenterId);
-            if (!apiBaseUrl || !apiKey || !model || !commenterChar) return;
-            
-            const postedBy = moment.senderId === 'user' ? (userMomentsProfile.name || '我') : (characterSets.find(c => c.id === moment.senderId)?.config.characterName || '一位朋友');
-            
-            const prompt = `[Role]: You are ${commenterChar.config.characterName} (ID: ${commenterId}). Your personality is: ${commenterChar.config.characterPrompt}
-[Situation]: ${postedBy} just posted a new Moment: "${moment.content}".
-[Task]: Based on your personality and relationship with the poster, write a comment in Simplified Chinese. It MUST be natural, short, and without punctuation.
-[CRITICAL: Output Format]: Your response MUST be a JSON array containing a single object, like this:
-[{"type": "moment_comment", "momentId": "${moment.id}", "comment_text": "Your comment here."}]
-DO NOT add any text outside the JSON array.`;
-
+                    const prompt = `[角色]: 你是 ${commenterChar.config.characterName} (ID: ${commenterId})。你的性格是: ${commenterChar.config.characterPrompt}
+[情景]: ${postedBy} 刚刚发了条朋友圈，内容是: "${moment.content}"。${moment.imageUrl ? "这条动态还配有一张图片。" : "这条动态没有配图。"}
+[任务]: 根据你的性格、和发帖人的关系，以及帖子的图文内容，写一条自然的、口语化的中文评论。
+[输出格式]: 你的回复必须是JSON数组，里面只包含一个对象，像这样:
+[{"type": "moment_comment", "momentId": "${moment.id}", "comment_text": "你的评论内容"}]
+绝对不要在JSON数组前后添加任何多余的文字。`;
             const messages = [{ role: 'system', content: prompt }];
             try {
                 const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages }) });
@@ -2278,40 +2340,73 @@ DO NOT add any text outside the JSON array.`;
             } catch (error) { console.error("Moment comment AI trigger error:", error); }
         };
 
-        const triggerAiMomentReply = async (moment, comment, replierId, momentType) => {
-            const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
-            const apiKey = elements.apiKeyInput.value.trim();
-            const model = elements.modelSelect.value;
-            const replierChar = characterSets.find(c => c.id === replierId);
-            const commenterName = comment.sender === 'user' ? (userMomentsProfile.name || '我') : (characterSets.find(c => c.id === comment.sender)?.config.characterName || '一位朋友');
-            if (!apiBaseUrl || !apiKey || !model || !replierChar) return;
+            const triggerAiMomentReply = async (moment, commentToReply, replierId, momentType) => {
+        const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
+        const apiKey = elements.apiKeyInput.value.trim();
+        const model = elements.modelSelect.value;
+        const replierChar = characterSets.find(c => c.id === replierId);
+        if (!apiBaseUrl || !apiKey || !model || !replierChar) return;
 
-            const prompt = `[Role]: You are ${replierChar.config.characterName} (ID: ${replierId}). Your personality is: ${replierChar.config.characterPrompt}.
-[Situation]: On a Moment, ${commenterName} commented: "${comment.text}".
-[Task]: Based on your personality, reply to this comment in Simplified Chinese. It MUST be brief, natural, and without punctuation.
-[CRITICAL: Output Format]: Your response MUST be a JSON array containing a single object, like this:
-[{"type": "moment_reply", "momentId": "${moment.id}", "commentId": "${comment.id}", "reply_text": "Your reply here."}]
-DO NOT add any text outside the JSON array.`;
+        const originalPosterName = moment.senderId === 'user' ? (userMomentsProfile.name || '我') : (characterSets.find(c => c.id === moment.senderId)?.config.characterName || '一位朋友');
+        const personBeingRepliedToName = commentToReply.sender === 'user' ? (userMomentsProfile.name || '我') : (characterSets.find(c => c.id === commentToReply.sender)?.config.characterName || '一位朋友');
 
+        // 新增：把原帖内容也告诉AI，防止它回复时“失忆”
+         const prompt = `[角色]: 你是 ${replierChar.config.characterName} (ID: ${replierId})。你的性格是: ${replierChar.config.characterPrompt}。
+[情景]: 在 ${originalPosterName} 发表的朋友圈（内容为：“${moment.content}”）下方，${personBeingRepliedToName} 评论说：“${commentToReply.text}”。
+[任务]: 现在轮到你回复 ${personBeingRepliedToName} 的这条评论。你的回复必须自然、口语化，并要结合原帖和评论的内容。
+[输出格式]: 你的回复必须是JSON数组，里面只包含一个对象，像这样:
+[{"type": "moment_reply", "momentId": "${moment.id}", "commentId": "${commentToReply.id}", "reply_text": "你的回复内容"}]
+绝对不要在JSON数组前后添加任何多余的文字。`;
             const messages = [{ role: 'system', content: prompt }];
-            try {
-                const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model: model, messages }) });
-                if (!response.ok) { console.error("AI reply failed: ", await response.text()); return; }
-                const responseData = await response.json();
-                 if (responseData?.choices?.[0]?.message?.content) {
-                    let parsed;
-                    try { 
-                        const jsonMatch = responseData.choices[0].message.content.match(/\[\s*\{.*\}\s*\]/s);
-                        parsed = JSON.parse(jsonMatch ? jsonMatch[0] : responseData.choices[0].message.content);
-                    } catch (e) { console.error("Parsing moment reply failed:", e); return; }
-                    const action = parsed[0];
-                    if (action && action.type === 'moment_reply' && action.reply_text) {
-                        addCommentOrReplyByAI('reply', moment.id, action.reply_text, replierId, comment.id, momentType);
-                    }
-                }
-            } catch (error) { console.error("Moment reply AI trigger error:", error); }
-        };
-        
+        try {
+            const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model: model, messages }) });
+            if (!response.ok) { console.error("AI回复评论失败: ", await response.text()); return; }
+            const responseData = await response.json();
+             if (responseData?.choices?.[0]?.message?.content) {
+                processAiResponse(responseData.choices[0].message.content);
+            }
+        } catch (error) { console.error("AI触发回复时出错:", error); }
+    };
+            const handleAiLike = (momentId, likerId, momentType) => {
+        let momentSource;
+        if (momentType === 'direct') {
+            momentSource = [...userMomentsProfile.posts, ...characterSets.flatMap(c => c.moments || [])];
+        } else {
+            momentSource = (getCurrentGroup() || {}).groupMoments || [];
+        }
+        const moment = momentSource.find(m => m.id === momentId);
+        if (!moment || moment.likes.includes(likerId)) return; // 如果没找到或者已经赞过，就什么都不做
+
+        moment.likes.push(likerId);
+        saveAllData();
+        if (elements.momentsOverlay.classList.contains('show')) {
+            renderMoments();
+        }
+    };
+
+    const triggerAiMomentLike = async (moment, likerId) => {
+        const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
+        const apiKey = elements.apiKeyInput.value.trim();
+        const model = elements.modelSelect.value;
+        const likerChar = characterSets.find(c => c.id === likerId);
+        if (!apiBaseUrl || !apiKey || !model || !likerChar) return;
+
+                    const prompt = `[角色]: 你是 ${likerChar.config.characterName}。你的性格是: ${likerChar.config.characterPrompt}
+[情景]: 一位朋友刚刚发了条朋友圈: "${moment.content}"
+[任务]: 根据你的性格，你是否会为这条动态点赞？
+[输出格式]: 你的回复必须是JSON格式，只能包含一个键 "will_like"，值为 true 或 false。示例: [{"type": "moment_like", "momentId": "${moment.id}", "senderId": "${likerId}", "will_like": true}]`;
+      const messages = [{ role: 'system', content: prompt }];
+        try {
+            const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages }) });
+            if (!response.ok) return;
+            const responseData = await response.json();
+            if (responseData?.choices?.[0]?.message?.content) {
+                processAiResponse(responseData.choices[0].message.content);
+            }
+        } catch (error) {
+            console.error("AI点赞触发失败:", error);
+        }
+    };
         const openMoments = () => { renderMoments(); elements.momentsOverlay.classList.add('show'); };
         
         const openPostMomentModal = () => { let tempImage = null; const bodyHtml = ` <div class="form-group"> <textarea id="new-moment-text" rows="5" placeholder="在想些什么？"></textarea> </div> <div class="form-group"> <label for="moment-post-image-input" class="file-input-label">添加图片</label> <img id="new-moment-preview" src="" style="max-width: 100px; max-height: 100px; border-radius: 8px; margin-top: 10px; display: none;"> </div> `; openFeatureModal('发布新动态', bodyHtml, '发布', () => { const text = getEl('new-moment-text').value.trim(); if(text || tempImage) { addMomentByUser({ content: text, imageUrl: tempImage }); closeModal(elements.featureModal); } }); const preview = getEl('new-moment-preview'); getEl('feature-modal-body').querySelector('label').onclick = () => elements.momentPostImageInput.click(); elements.momentPostImageInput.onchange = e => handleFileUpload(e.target.files[0], (dataUrl) => { tempImage = dataUrl; preview.src = dataUrl; preview.style.display = 'block'; }); };
@@ -2580,23 +2675,21 @@ const handleAiVote_dataOnly = (voteAction) => {
             }
         };
 
-        const handleMomentsInteraction = (e) => {
+                const handleMomentsInteraction = (e) => {
             const postEl = e.target.closest('.moment-post');
             if (!postEl) return;
             
             const momentId = postEl.dataset.momentId;
-            const senderId = postEl.dataset.senderId;
             const momentType = postEl.dataset.momentType;
 
-            let postSource;
+            let allVisiblePosts = [];
             if (momentType === 'direct') {
-                 postSource = senderId === 'user' ? userMomentsProfile.posts : characterSets.find(c => c.id === senderId)?.moments;
+                allVisiblePosts = [...userMomentsProfile.posts, ...characterSets.flatMap(c => c.moments || [])];
             } else {
-                 postSource = getCurrentGroup()?.groupMoments;
+                const group = getCurrentGroup();
+                allVisiblePosts = group ? group.groupMoments || [] : [];
             }
-
-            if (!postSource) return;
-            const moment = postSource.find(m => m.id === momentId);
+            const moment = allVisiblePosts.find(m => m.id === momentId);
             if (!moment) return;
 
             const likeBtn = e.target.closest('.like-btn');
@@ -2638,17 +2731,15 @@ const handleAiVote_dataOnly = (voteAction) => {
                 const replyToCommentId = commentForm.dataset.replyTo;
 
                 if (text) {
-                    const newComment = { id: generateId('cmt'), sender: 'user', text, replies: [] };
-                    let repliedToAI = false;
-
-                    if (replyToCommentId) { // Reply
+                    const newCommentByUser = { id: generateId('cmt'), sender: 'user', text, replies: [] };
+                    
+                    if (replyToCommentId) { // 如果是“回复”
                          const findAndPushReply = (comments) => {
                             for (const c of comments) {
                                 if (c.id === replyToCommentId) {
-                                    newComment.replyTo = c.sender;
+                                    newCommentByUser.replyTo = c.sender;
                                     if(!c.replies) c.replies = [];
-                                    c.replies.push(newComment);
-                                    if(c.sender !== 'user') repliedToAI = {moment: moment, comment: c, replierId: c.sender};
+                                    c.replies.push(newCommentByUser);
                                     return true;
                                 }
                                 if (c.replies && findAndPushReply(c.replies)) return true;
@@ -2656,10 +2747,9 @@ const handleAiVote_dataOnly = (voteAction) => {
                             return false;
                         };
                         findAndPushReply(moment.comments);
-                    } else { // New comment
+                    } else { // 如果是新的“评论”
                         if (!moment.comments) moment.comments = [];
-                        moment.comments.push(newComment);
-                        if(moment.senderId !== 'user') repliedToAI = {moment: moment, comment: newComment, replierId: moment.senderId};
+                        moment.comments.push(newCommentByUser);
                     }
                     
                     input.value = '';
@@ -2667,8 +2757,12 @@ const handleAiVote_dataOnly = (voteAction) => {
                     saveAllData();
                     renderMoments();
                     
-                    if (repliedToAI) {
-                        setTimeout(() => triggerAiMomentReply(repliedToAI.moment, newComment, repliedToAI.replierId, momentType), 2000);
+                    // 最终修正逻辑：无论用户是评论还是回复，只要这条朋友圈是AI发的，就通知他来互动。
+                    if (moment.senderId !== 'user') {
+                        const aiWhoShouldReply = moment.senderId;
+                        const commentForAIToReplyTo = newCommentByUser;
+                        
+                        setTimeout(() => triggerAiMomentReply(moment, commentForAIToReplyTo, aiWhoShouldReply, momentType), 2500);
                     }
                 }
             }
@@ -2694,89 +2788,67 @@ const handleAiVote_dataOnly = (voteAction) => {
             }
         };
         
-                const triggerAiDiaryEntry = async (character) => {
-            const { config, chatHistory } = character;
-            const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
-            const apiKey = elements.apiKeyInput.value.trim();
-            const model = elements.modelSelect.value;
-            if (!apiBaseUrl || !apiKey || !model) return;
+                    const triggerAiDiaryEntry = async (character) => {
+        const { config, chatHistory } = character;
+        const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
+        const apiKey = elements.apiKeyInput.value.trim();
+        const model = elements.modelSelect.value;
+        if (!apiBaseUrl || !apiKey || !model) return;
 
-            const prompt = `[Role]: You are ${config.characterName}.
+        const prompt = `[Role]: You are ${config.characterName}.
 [Task]: It is the end of the day. Based on your conversations with the user today, write a short diary entry in Simplified Chinese, reflecting on your feelings and the day's events. Your personality must be consistent.
 [CRITICAL: Output Format]: Your response MUST be a JSON array containing a single object like this:
 [{"type": "diary_entry", "content": "Your diary content here."}]`;
 
-                       const formatDiaryMessage = (msg) => {
-                // 这个辅助函数的作用是，确保我们只打包有文字内容的消息。
-                const role = msg.sender === 'user' ? 'user' : 'assistant';
-                // 优先使用llmContent（给AI看的内容），其次是text（用户看到的内容）。
-                const content = msg.llmContent || msg.text;
-                
-                // 这是关键！如果一条消息没有文字内容（比如它是个表情），就返回null。
-                if (!content) {
-                    return null;
-                }
-
-                // 如果有内容，就打包成API要求的格式。
-                return { role, content };
-            };
-
-            const messages = [
-                { role: 'system', content: prompt },
-                // 这里是修改的核心：
-                // 1. .map(formatDiaryMessage) - 使用我们上面的辅助函数来打包每一条消息。
-                // 2. .filter(msg => msg !== null) - 把所有返回null的消息（也就是那些没内容的消息）过滤掉。
-                ...chatHistory.slice(-config.memorySize)
-                             .map(formatDiaryMessage)
-                             .filter(msg => msg !== null)
-            ];       
-            
-            try {
-                const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages }) });
-                
-                // --- 修改点 1: 更详细地处理服务器错误 ---
-                // 无论服务器返回什么错误，我们都确保把它包装成一个标准错误，这样程序就能读懂了。
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`服务器错误 (状态码: ${response.status}): ${errorText}`);
-                }
-
-                const data = await response.json();
-
-                if (data?.choices?.[0]?.message?.content) {
-                    let parsed;
-                    const rawContent = data.choices[0].message.content;
-                    try { 
-                        const jsonMatch = rawContent.match(/\[\s*\{.*\}\s*\]/s);
-                        parsed = JSON.parse(jsonMatch ? jsonMatch[0] : rawContent);
-                    } catch(e) {
-                        // 如果解析失败，抛出一个更清晰的错误信息
-                        throw new Error(`AI返回的内容不是有效的JSON格式。收到的内容是: ${rawContent}`);
-                    }
-                    
-                    const action = parsed[0];
-
-                    // --- 修改点 2: 严格检查AI返回的内容 ---
-                    // 我们要确保AI不仅返回了JSON，而且JSON里的内容也是我们想要的日记格式。
-                    if (action && action.type === 'diary_entry' && action.content) {
-                        addDiaryEntry(character.id, action.content);
-                    } else {
-                        // 如果格式不对，同样抛出一个清晰的错误
-                        throw new Error(`AI返回的不是有效的日记格式。收到的内容是: ${JSON.stringify(action)}`);
-                    }
-                } else if (data.error) {
-                    // 如果API本身就返回了错误信息
-                     throw new Error(`API返回错误: ${data.error.message}`);
-                } else {
-                    // 如果AI没有返回任何内容
-                    elements.diaryEntries.innerHTML = '<p>今天没什么特别的想写...</p>';
-                }
-            } catch (e) {
-                // 现在，无论上面哪个环节出错，这里的 e.message 都会有详细的内容
-                console.error("Failed to generate diary entry:", e);
-                elements.diaryEntries.innerHTML = `<p style="color: red; font-weight: bold;">写日记时出错了:</p><p style="word-break: break-all;">${e.message}</p>`;
+                      // 这个小程序同样负责“翻译”聊天记录
+        const formatDiaryMessage = (msg) => {
+            const role = msg.sender === 'user' ? 'user' : 'assistant';
+            const content = msg.llmContent || msg.text;
+            if (!content || msg.type === 'sticker') {
+                return null;
             }
+            return { role, content };
         };
+
+        const messages = [
+            { role: 'system', content: prompt },
+            ...chatHistory.slice(-config.memorySize)
+                         .map(formatDiaryMessage)
+                         .filter(msg => msg !== null)
+        ];
+        
+        try {
+            const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages }) });
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`服务器错误 (状态码: ${response.status}): ${errorText}`);
+            }
+            const data = await response.json();
+            if (data?.choices?.[0]?.message?.content) {
+                let parsed;
+                const rawContent = data.choices[0].message.content;
+                try {
+                    const jsonMatch = rawContent.match(/\[\s*\{.*\}\s*\]/s);
+                    parsed = JSON.parse(jsonMatch ? jsonMatch[0] : rawContent);
+                } catch (e) {
+                    throw new Error(`AI返回的内容不是有效的日记格式。收到的内容是: ${rawContent}`);
+                }
+                const action = parsed[0];
+                if (action && action.type === 'diary_entry' && action.content) {
+                    addDiaryEntry(character.id, action.content);
+                } else {
+                    throw new Error(`AI返回的不是有效的日记格式。收到的内容是: ${JSON.stringify(action)}`);
+                }
+            } else if (data.error) {
+                throw new Error(`API返回错误: ${data.error.message}`);
+            } else {
+                elements.diaryEntries.innerHTML = '<p>今天没什么特别的想写...</p>';
+            }
+        } catch (e) {
+            console.error("写日记失败:", e);
+            elements.diaryEntries.innerHTML = `<p style="color: red; font-weight: bold;">写日记时出错了:</p><p style="word-break: break-all;">${e.message}</p>`;
+        }
+    };
 
         const addDiaryEntry = (characterId, content) => {
             const character = characterSets.find(c => c.id === characterId);
@@ -2824,113 +2896,143 @@ const handleAiVote_dataOnly = (voteAction) => {
         const importData = () => { if(confirm('确定要导入数据吗？这会覆盖所有当前数据。')) { elements.importDataInput.click(); } };
         const handleDataImport = (event) => { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { try { const data = e.target.result; const parsed = JSON.parse(data); if (parsed.characterSets && parsed.currentChat) { localStorage.setItem('aiBoyfriendBackup_v6', data); alert('导入成功！页面即将刷新。'); location.reload(); } else { alert('无效的文件格式。'); } } catch (error) { alert(`错误: ${error.message}`); } }; reader.readAsText(file); elements.importDataInput.value = ''; };
 
-        const setupEventListeners = () => {
-            elements.settingsBtn.onclick = openSettingsModal;
-            elements.closeSettingsBtn.onclick = () => closeModal(elements.settingsModal);
-                        // 在 setupEventListeners 函数里找到这一行
-            elements.saveSettingsBtn.onclick = async () => { // 添加了 async
-                await saveCurrentSettings(); // 添加了 await
-                alert('设置已保存！'); 
-                closeModal(elements.settingsModal); 
-            };
+                const setupEventListeners = () => {
+        elements.settingsBtn.onclick = openSettingsModal;
+        elements.closeSettingsBtn.onclick = () => closeModal(elements.settingsModal);
+        
+        elements.saveSettingsBtn.onclick = async () => {
+            await saveCurrentSettings();
+            alert('设置已保存！'); 
+            closeModal(elements.settingsModal); 
+        };
+        
+        elements.sendBtn.onclick = () => { const text = elements.messageInput.value.trim(); if (!text) return; handleUserAction({ sender: 'user', type: 'text', text, llmContent: text }); elements.messageInput.value = ''; autoResizeTextarea(); };
+        elements.messageInput.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); elements.sendBtn.click(); } };
+        
+        elements.videoSendBtn.onclick = () => { const text = elements.videoMessageInput.value.trim(); if (!text) return; addVideoChatMessageToUI({ sender: 'user', text: text }); elements.videoMessageInput.value = ''; triggerVideoCallAIResponse(); };
+        elements.videoMessageInput.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); elements.videoSendBtn.click(); } };
+
+        elements.mindVoiceCloseBtn.onclick = () => elements.mindVoiceModal.classList.remove('show');
+        elements.diaryModalCloseBtn.onclick = () => closeModal(elements.diaryModal);
+
+        elements.actionBtn.onclick = () => toggleActionPanel();
+        elements.actionShowMoments.onclick = () => { openMoments(); toggleActionPanel(true); };
+        elements.actionShowDiary.onclick = () => { openDiaryModal(); toggleActionPanel(true); };
+        elements.actionSendTextImage.onclick = () => { handleTextImageSend(); toggleActionPanel(true); };
+        elements.actionSendRealImage.onclick = () => { elements.realImageUploadInput.click(); toggleActionPanel(true); };
+        elements.actionSendVoice.onclick = () => { handleVoiceSend(); toggleActionPanel(true); };
+        elements.actionSendTransfer.onclick = () => { handleTransferSend(); toggleActionPanel(true); };
+        elements.actionSendRedPacket.onclick = () => { openCreateRedPacketModal(); toggleActionPanel(true); };
+        elements.actionSendSticker.onclick = () => { handleStickerSend(); toggleActionPanel(true); };
+        elements.actionVideoCall.onclick = () => { startVideoCall(); toggleActionPanel(true); };
+        elements.actionCreatePoll.onclick = () => { openCreatePollModal(); toggleActionPanel(true); };
+
+        elements.fetchModelsBtn.onclick = async () => { const baseUrl = elements.apiBaseUrlInput.value.trim(); const apiKey = elements.apiKeyInput.value.trim(); if (!baseUrl || !apiKey) { alert('请输入API端点和API密钥'); return; } elements.fetchModelsBtn.textContent = '获取中...'; elements.fetchModelsBtn.disabled = true; try { const response = await fetch(`${baseUrl}/v1/models`, { headers: { 'Authorization': `Bearer ${apiKey}` } }); if (!response.ok) throw new Error(`获取模型列表失败, Status: ${response.status} ${await response.text()}`); const data = await response.json(); elements.modelSelect.innerHTML = ''; const models = data.data || data; if (!Array.isArray(models)) throw new Error('API返回的模型列表格式不正确'); models.sort((a, b) => a.id.localeCompare(b.id)).forEach(model => { if (model.id) elements.modelSelect.add(new Option(model.id, model.id)); }); const currentModel = elements.modelSelect.value; if(currentModel) elements.modelSelect.value = currentModel; } catch (error) { alert(`获取模型失败: ${error.message}`); } finally { elements.fetchModelsBtn.textContent = '获取模型列表'; elements.fetchModelsBtn.disabled = false; } };
+        elements.themeSelector.onclick = (e) => { const t = e.target.closest('.theme-option'); if (t) applyTheme(t.dataset.theme); };
+        
+        elements.fontSelect.addEventListener('change', () => applyFont(elements.fontSelect.value));   
+        
+        const avatarCompression = { compress: true, quality: 0.7, maxWidth: 300, maxHeight: 300 };
+        const backgroundCompression = { compress: true, quality: 0.8, maxWidth: 1280, maxHeight: 1280 };
+        const chatImageCompression = { compress: true, quality: 0.75, maxWidth: 600, maxHeight: 600 };
+
+        elements.backgroundUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.chatContainer.style.backgroundImage = `url(${d})`; }, backgroundCompression);
+        elements.aiAvatarUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.aiAvatarPreview.src = d; if(currentChat.type==='direct') elements.headerAvatar.src = d; }, avatarCompression);
+        elements.groupAvatarSettingsInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.groupAvatarPreview.src = d; }, avatarCompression);
+        elements.userAvatarUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.userAvatarPreview.src = d; }, avatarCompression);
+        elements.userMomentsAvatarInput.onchange = e => handleFileUpload(e.target.files[0], d => { elements.userMomentsAvatarPreview.src = d; }, avatarCompression);
+        elements.userMomentsCoverInput.onchange = e => handleFileUpload(e.target.files[0], d => { elements.userMomentsCoverPreview.src = d; }, backgroundCompression);
+        elements.realImageUploadInput.onchange = (e) => handleFileUpload(e.target.files[0], (d) => handleUserAction({ sender:'user', type:'image', imageUrl:d, llmContent:'[从相册发送了一张照片]' }), chatImageCompression);
+
+        elements.manageStickersBtn.onclick = () => openStickerManager('user');
+        elements.manageAiStickersBtn.onclick = () => openStickerManager('ai');
+        elements.clearHistoryBtn.onclick = clearChatHistory;
+        elements.deleteChatBtn.onclick = () => handleDeleteChat(currentChat.type, currentChat.id);
+        
+        elements.exportDataBtn.onclick = exportData;
+        elements.importDataBtn.onclick = importData;
+        elements.importDataInput.onchange = handleDataImport;
+        
+        elements.messageInput.addEventListener('input', autoResizeTextarea);
+        elements.featureModalCloseBtn.addEventListener('click', () => closeModal(elements.featureModal));
+        elements.featureModalSubmitBtn.addEventListener('click', () => { if (onFeatureModalSubmit) onFeatureModalSubmit(); });
+        
+        elements.chatManagerBtn.onclick = openChatManager;
+        elements.momentsCloseBtn.onclick = () => elements.momentsOverlay.classList.remove('show');
+        elements.postNewMomentBtn.onclick = openPostMomentModal;
+        elements.momentsFeed.addEventListener('click', handleMomentsInteraction);
+
+        elements.messagesContainer.addEventListener('click', e => {
+            const voteBtn = e.target.closest('.poll-vote-btn');
+            if (voteBtn && !voteBtn.disabled) {
+                handleUserVote(voteBtn.dataset.pollId, voteBtn.dataset.option);
+            }
+        });
+
+        window.addEventListener('click', (e) => { 
+            if (e.target === elements.settingsModal) closeModal(elements.settingsModal); 
+            if (e.target === elements.featureModal) closeModal(elements.featureModal);
+            if (e.target === elements.diaryModal) closeModal(elements.diaryModal);
+            if (e.target === elements.mindVoiceModal) elements.mindVoiceModal.classList.remove('show');
+        });
+        elements.chatNameHeader.addEventListener('blur', () => { 
+            const chatData = getCurrentChatData();
+            if(!chatData) return;
+            const newName = elements.chatNameHeader.textContent.trim(); 
+            const oldName = currentChat.type === 'direct' ? chatData.config.characterName : chatData.name;
+            if(newName && newName !== oldName){ 
+                if(currentChat.type === 'direct') chatData.config.characterName = newName;
+                else chatData.name = newName;
+                saveAllData();
+            } else { 
+                elements.chatNameHeader.textContent = oldName; 
+            }
+        });
+        elements.confirmDeleteBtn.onclick = deleteSelectedMessages;
+        elements.cancelDeleteBtn.onclick = () => toggleMultiSelectMode(false);
+
+        const populateCustomStyles = () => {
+            const advancedStylesText = getEl('advanced-bubble-styles').value;
+            const customSelect = getEl('custom-style-select');
+            const currentCustomVal = customSelect.value;
             
-            elements.sendBtn.onclick = () => { const text = elements.messageInput.value.trim(); if (!text) return; handleUserAction({ sender: 'user', type: 'text', text, llmContent: text }); elements.messageInput.value = ''; autoResizeTextarea(); };
-            elements.messageInput.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); elements.sendBtn.click(); } };
+            customSelect.innerHTML = '<option value="">无 (仅使用主题颜色)</option>';
             
-            elements.videoSendBtn.onclick = () => { const text = elements.videoMessageInput.value.trim(); if (!text) return; addVideoChatMessageToUI({ sender: 'user', text: text }); elements.videoMessageInput.value = ''; triggerVideoCallAIResponse(); };
-            elements.videoMessageInput.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); elements.videoSendBtn.click(); } };
-
-            elements.mindVoiceCloseBtn.onclick = () => elements.mindVoiceModal.classList.remove('show');
-            elements.diaryModalCloseBtn.onclick = () => closeModal(elements.diaryModal);
-
-            elements.actionBtn.onclick = () => toggleActionPanel();
-            elements.actionShowMoments.onclick = () => { openMoments(); toggleActionPanel(true); };
-            elements.actionShowDiary.onclick = () => { openDiaryModal(); toggleActionPanel(true); };
-            elements.actionSendTextImage.onclick = () => { handleTextImageSend(); toggleActionPanel(true); };
-            elements.actionSendRealImage.onclick = () => { elements.realImageUploadInput.click(); toggleActionPanel(true); };
-            elements.actionSendVoice.onclick = () => { handleVoiceSend(); toggleActionPanel(true); };
-            elements.actionSendTransfer.onclick = () => { handleTransferSend(); toggleActionPanel(true); };
-            elements.actionSendRedPacket.onclick = () => { openCreateRedPacketModal(); toggleActionPanel(true); };
-            elements.actionSendSticker.onclick = () => { handleStickerSend(); toggleActionPanel(true); };
-            elements.actionVideoCall.onclick = () => { startVideoCall(); toggleActionPanel(true); };
-            elements.actionCreatePoll.onclick = () => { openCreatePollModal(); toggleActionPanel(true); };
-
-            elements.fetchModelsBtn.onclick = async () => { const baseUrl = elements.apiBaseUrlInput.value.trim(); const apiKey = elements.apiKeyInput.value.trim(); if (!baseUrl || !apiKey) { alert('请输入API端点和API密钥'); return; } elements.fetchModelsBtn.textContent = '获取中...'; elements.fetchModelsBtn.disabled = true; try { const response = await fetch(`${baseUrl}/v1/models`, { headers: { 'Authorization': `Bearer ${apiKey}` } }); if (!response.ok) throw new Error(`获取模型列表失败, Status: ${response.status} ${await response.text()}`); const data = await response.json(); elements.modelSelect.innerHTML = ''; const models = data.data || data; if (!Array.isArray(models)) throw new Error('API返回的模型列表格式不正确'); models.sort((a, b) => a.id.localeCompare(b.id)).forEach(model => { if (model.id) elements.modelSelect.add(new Option(model.id, model.id)); }); const currentModel = elements.modelSelect.value; if(currentModel) elements.modelSelect.value = currentModel; } catch (error) { alert(`获取模型失败: ${error.message}`); } finally { elements.fetchModelsBtn.textContent = '获取模型列表'; elements.fetchModelsBtn.disabled = false; } };
-            elements.themeSelector.onclick = (e) => { const t = e.target.closest('.theme-option'); if (t) applyTheme(t.dataset.theme); };
-          elements.customBubbleCssInput.addEventListener('input', () => {
-    const customStyleTag = getEl('custom-bubble-style-tag');
-    customStyleTag.textContent = elements.customBubbleCssInput.value;
-    // 如果当前不是自定义主题，则自动切换到自定义主题
-    if (!elements.themeSelector.querySelector('.theme-option[data-theme="custom"]').classList.contains('active')) {
-        applyTheme('custom');
-    }
-});
-     elements.fontSelect.addEventListener('change', () => {
-    applyFont(elements.fontSelect.value);
-});   
-elements.bubbleStyleSelect.addEventListener('change', () => applyBubbleStyle(elements.bubbleStyleSelect.value));    
-            elements.backgroundUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.chatContainer.style.backgroundImage = `url(${d})`; });
-
-            elements.aiAvatarUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.aiAvatarPreview.src = d; if(currentChat.type==='direct') elements.headerAvatar.src = d; });
-            elements.backgroundUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.chatContainer.style.backgroundImage = `url(${d})`; }, { compress: true, quality: 0.8, maxWidth: 1280, maxHeight: 1280 });
-            const avatarCompression = { compress: true, quality: 0.7, maxWidth: 300, maxHeight: 300 };
-            elements.aiAvatarUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.aiAvatarPreview.src = d; if(currentChat.type==='direct') elements.headerAvatar.src = d; }, avatarCompression);
-            elements.groupAvatarSettingsInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.groupAvatarPreview.src = d; }, avatarCompression);
-            elements.userAvatarUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.userAvatarPreview.src = d; }, avatarCompression);
-            elements.userMomentsAvatarInput.onchange = e => handleFileUpload(e.target.files[0], d => { elements.userMomentsAvatarPreview.src = d; }, avatarCompression);
-          elements.userMomentsCoverInput.onchange = e => handleFileUpload(e.target.files[0], d => { elements.userMomentsCoverPreview.src = d; }, { compress: true, quality: 0.75, maxWidth: 800, maxHeight: 800 });
-
-            elements.manageStickersBtn.onclick = () => openStickerManager('user');
-            elements.manageAiStickersBtn.onclick = () => openStickerManager('ai');
-            elements.clearHistoryBtn.onclick = clearChatHistory;
-            elements.deleteChatBtn.onclick = () => handleDeleteChat(currentChat.type, currentChat.id);
-            
-            elements.exportDataBtn.onclick = exportData;
-            elements.importDataBtn.onclick = importData;
-            elements.importDataInput.onchange = handleDataImport;
-            
-            elements.realImageUploadInput.onchange = (e) => handleFileUpload(e.target.files[0], (d) => handleUserAction({ sender:'user', type:'image', imageUrl:d, llmContent:'[从相册发送了一张照片]' }));
-            elements.messageInput.addEventListener('input', autoResizeTextarea);
-            elements.featureModalCloseBtn.addEventListener('click', () => closeModal(elements.featureModal));
-            elements.featureModalSubmitBtn.addEventListener('click', () => { if (onFeatureModalSubmit) onFeatureModalSubmit(); });
-            
-            elements.chatManagerBtn.onclick = openChatManager;
-            elements.momentsCloseBtn.onclick = () => elements.momentsOverlay.classList.remove('show');
-            elements.postNewMomentBtn.onclick = openPostMomentModal;
-            elements.momentsFeed.addEventListener('click', handleMomentsInteraction);
-
-            elements.messagesContainer.addEventListener('click', e => {
-                const voteBtn = e.target.closest('.poll-vote-btn');
-                if (voteBtn && !voteBtn.disabled) {
-                    handleUserVote(voteBtn.dataset.pollId, voteBtn.dataset.option);
+            const regex = /\/\*\s*Style Name:\s*([^/]+?)\s*\*\//g;
+            let match;
+            while ((match = regex.exec(advancedStylesText)) !== null) {
+                const styleName = match[1].trim();
+                if (styleName) {
+                    const option = document.createElement('option');
+                    option.value = styleName;
+                    option.textContent = styleName;
+                    customSelect.appendChild(option);
                 }
-            });
-
-            window.addEventListener('click', (e) => { 
-                if (e.target === elements.settingsModal) closeModal(elements.settingsModal); 
-                if (e.target === elements.featureModal) closeModal(elements.featureModal);
-                if (e.target === elements.diaryModal) closeModal(elements.diaryModal);
-                if (e.target === elements.mindVoiceModal) elements.mindVoiceModal.classList.remove('show');
-            });
-            elements.chatNameHeader.addEventListener('blur', () => { 
-                const chatData = getCurrentChatData();
-                if(!chatData) return;
-                const newName = elements.chatNameHeader.textContent.trim(); 
-                const oldName = currentChat.type === 'direct' ? chatData.config.characterName : chatData.name;
-                if(newName && newName !== oldName){ 
-                    if(currentChat.type === 'direct') chatData.config.characterName = newName;
-                    else chatData.name = newName;
-                    saveAllData();
-                } else { 
-                    elements.chatNameHeader.textContent = oldName; 
-                }
-            });
-            elements.confirmDeleteBtn.onclick = deleteSelectedMessages;
-            elements.cancelDeleteBtn.onclick = () => toggleMultiSelectMode(false);
+            }
+            customSelect.value = currentCustomVal;
         };
 
+        const toggleCustomStyleSelector = (show) => {
+            getEl('custom-style-select-group').style.display = show ? 'flex' : 'none';
+        };
+
+        getEl('advanced-bubble-styles').addEventListener('input', populateCustomStyles);
+        getEl('bubble-style-select').addEventListener('change', (e) => {
+            const selectedValue = e.target.value;
+            toggleCustomStyleSelector(selectedValue === 'custom');
+            if (selectedValue !== 'custom') {
+                applyBubbleStyle(selectedValue);
+            } else {
+                applyBubbleStyle('custom:' + getEl('custom-style-select').value);
+            }
+        });
+        getEl('custom-style-select').addEventListener('change', (e) => {
+             applyBubbleStyle('custom:' + e.target.value);
+        });
+    };
         // --- Initialization ---
         loadAllData();
+      populateCustomStyles();
         setupEventListeners();
         autoResizeTextarea();
     });
