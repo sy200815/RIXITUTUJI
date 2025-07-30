@@ -428,11 +428,11 @@
     top: 14px;
 }
 .bubble-style-wechat .message.ai .bubble::before {
-    left: -10px;
+    left: -8px;
     border-right: 10px solid var(--ai-bubble-bg, #ffffff);
 }
 .bubble-style-wechat .message.user .bubble::before {
-    right: -10px;
+    right: -8px;
     border-left: 10px solid var(--user-bubble-bg, #95ec69);
 }
       /* =============================================================== */
@@ -760,7 +760,19 @@ input[type=range]::-webkit-slider-thumb {
                             </optgroup>
                         </select>
                     </div>
-
+<!-- ======================================================= -->
+<!-- ============ 新增的自定义字体URL功能开始 ============ -->
+<!-- ======================================================= -->
+<div class="form-group">
+    <label>自定义字体 (通过URL)</label>
+    <input type="text" id="custom-font-name" placeholder="为字体起个名字, 如: MyFont" style="margin-bottom: 5px;">
+    <small>给字体起一个简单的英文名，方便系统识别。</small>
+    <input type="url" id="custom-font-url" placeholder="粘贴字体文件链接 ( .ttf, .woff2 )" style="margin-top: 10px; margin-bottom: 5px;">
+    <button id="apply-custom-font-btn" style="padding: 8px; background: #67c23a; color: white; border: none; border-radius: 5px; cursor: pointer;">应用此自定义字体</button>
+</div>
+<!-- ======================================================= -->
+<!-- ============= 新增的自定义字体URL功能结束 ============= -->
+<!-- ======================================================= -->
                     <div class="form-group">
                         <label>聊天气泡主题 (颜色)</label>
                         <div class="theme-selector">
@@ -1057,6 +1069,11 @@ bubbleStyleSelect: getEl('bubble-style-select'),
         temperatureValue: getEl('temperature-value'),
         topPSlider: getEl('top-p-slider'),
         topPValue: getEl('top-p-value'),
+         // --- 新增代码开始 ---
+customFontNameInput: getEl('custom-font-name'),
+customFontUrlInput: getEl('custom-font-url'),
+applyCustomFontBtn: getEl('apply-custom-font-btn'),
+// --- 新增代码结束 --- 
     };
 
         // --- State Management ---
@@ -1314,7 +1331,11 @@ This is a strict format guide. You MUST follow it.
                         // --- 新增：保存模型参数和预设 ---
                         temperature: parseFloat(elements.temperatureSlider.value),
                         topP: parseFloat(elements.topPSlider.value),
-                        presets: globalPresets 
+                        // --- 新增代码开始 ---
+customFontName: elements.customFontNameInput.value,
+customFontUrl: elements.customFontUrlInput.value
+// --- 新增代码结束 --- ,
+                      
                         // --- 新增结束 ---
                     }
                 };
@@ -1427,7 +1448,15 @@ This is a strict format guide. You MUST follow it.
         getEl('custom-bubble-style-tag').textContent = elements.advancedBubbleStylesInput.value; // 新增这一行
         applyTheme(globalSettings.theme || '1');
       applyFont(globalSettings.fontFamily || "'Cubic 11', 'Noto Sans JP', sans-serif"); // 新增这一行
-      applyBubbleStyle(globalSettings.bubbleStyle || 'default');
+      // --- 新增代码开始 ---
+// 加载并应用保存的自定义字体URL
+if (globalSettings.customFontName && globalSettings.customFontUrl) {
+    elements.customFontNameInput.value = globalSettings.customFontName;
+    elements.customFontUrlInput.value = globalSettings.customFontUrl;
+    applyCustomFont(globalSettings.customFontName, globalSettings.customFontUrl);
+}
+// --- 新增代码结束 ---(globalSettings.bubbleStyle || 'default');
+      
 
         characterSets.forEach(c => {
             // --- 数据迁移逻辑 ---
@@ -1540,7 +1569,35 @@ This is a strict format guide. You MUST follow it.
     // 移除这里多余的保存操作，因为它可能导致错误的配置被意外保存
     // saveAllData(); // 这行被注释或删除了
 };
-                  const saveCurrentSettings = async () => {
+      // --- 新增代码开始 ---
+// 这个函数负责通过URL加载和应用自定义字体
+const applyCustomFont = (fontName, fontUrl) => {
+    if (!fontName || !fontUrl) return;
+
+    // 查找或创建一个专门用来放自定义字体样式的<style>标签
+    let styleTag = document.getElementById('runtime-custom-font-style');
+    if (!styleTag) {
+        styleTag = document.createElement('style');
+        styleTag.id = 'runtime-custom-font-style';
+        document.head.appendChild(styleTag);
+    }
+
+    // 创建 @font-face 规则，告诉浏览器去哪里下载字体，并给它命名
+    const fontFaceRule = `
+        @font-face {
+            font-family: '${fontName}';
+            src: url('${fontUrl}');
+        }
+    `;
+    styleTag.innerHTML = fontFaceRule;
+
+    // 应用这个刚刚定义好的字体
+    applyFont(`'${fontName}'`);
+    console.log(`已尝试应用自定义字体: ${fontName}`);
+};
+// --- 新增代码结束 ---
+      
+      const saveCurrentSettings = async () => {
         const chatData = getCurrentChatData();
         if (!chatData) return;
 
@@ -3322,6 +3379,9 @@ const handleAiVote_dataOnly = (voteAction) => {
         getEl('custom-style-select').addEventListener('change', (e) => {
              applyBubbleStyle('custom:' + e.target.value);
         });
+         // --- 新增代码开始 ---
+elements.applyCustomFontBtn.onclick = () => applyCustomFont(elements.customFontNameInput.value, elements.customFontUrlInput.value);
+// --- 新增代码结束 ---         
     };
           // --- 全新的预设功能和模型参数控制 ---
     const renderPresets = () => {
