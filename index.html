@@ -435,6 +435,117 @@
     right: -10px;
     border-left: 10px solid var(--user-bubble-bg, #95ec69);
 }
+      /* =============================================================== */
+/* ================= 新增的预设和滑块功能的CSS样式 ================= */
+/* =============================================================== */
+.preset-item {
+    background: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.preset-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.preset-header .form-group {
+    flex-grow: 1;
+    margin-bottom: 0;
+}
+.preset-header .form-group input {
+    font-weight: 500;
+}
+.preset-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-shrink: 0;
+    margin-left: 15px;
+}
+.preset-delete-btn {
+    background: #ffcccc;
+    border: 1px solid #ff9999;
+    color: #c53030;
+    border-radius: 5px;
+    padding: 5px 8px;
+    cursor: pointer;
+    font-size: 0.8em;
+}
+.preset-toggle {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+}
+.preset-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.preset-toggle .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 28px;
+}
+.preset-toggle .slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+.preset-toggle input:checked + .slider {
+    background-color: var(--accent-color);
+}
+.preset-toggle input:checked + .slider:before {
+    transform: translateX(22px);
+}
+
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  margin: 7px 0;
+  background: transparent;
+}
+input[type=range]:focus {
+  outline: none;
+}
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 6px;
+  cursor: pointer;
+  background: #f0f0f0;
+  border-radius: 3px;
+  border: 1px solid #ddd;
+}
+input[type=range]::-webkit-slider-thumb {
+  border: 2px solid var(--accent-color);
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -8px;
+}
+/* ============================================================== */
+/* ========================= CSS样式结束 ========================== */
+/* ============================================================== */
     </style>
   <style id="custom-bubble-style-tag"></style>
 </head>
@@ -540,6 +651,37 @@
                     </div>
                 </div>
 
+<!-- =================================================================== -->
+<!-- ============== 新增的预设和模型参数功能的HTML代码开始 ============== -->
+<!-- =================================================================== -->
+<div class="settings-section">
+    <h3>高级指令预设 (Presets)</h3>
+    <div class="form-group">
+        <label>此处添加的指令，将会在启用时自动插入到全局系统提示词的最前面。不影响AI的JSON输出格式。</label>
+        <div id="preset-list-container">
+            <!-- 预设条目将会通过JavaScript动态添加到这里 -->
+        </div>
+        <button id="add-preset-btn" class="add-new-btn" style="background-color: #4CAF50; margin-top: 10px;">添加一个新的预设条目</button>
+    </div>
+</div>
+
+<div class="settings-section" id="model-parameters-section">
+    <h3>模型参数 (Model Parameters)</h3>
+    <div class="form-group">
+        <label for="temperature-slider">模型温度 (Temperature): <span id="temperature-value">0.8</span></label>
+        <input type="range" id="temperature-slider" min="0" max="2" step="0.05" value="0.8">
+        <small>控制随机性。值越高(如1.2)，回复越随机、有创意；值越低(如0.5)，回复越确定、保守。</small>
+    </div>
+    <div class="form-group">
+        <label for="top-p-slider">P值 (Top P): <span id="top-p-value">0.9</span></label>
+        <input type="range" id="top-p-slider" min="0" max="1" step="0.05" value="0.9">
+        <small>控制核心采样。它会从概率最高的词中进行选择，直到这些词的概率总和达到P值。一般建议只修改温度或P值其中一个。</small>
+    </div>
+</div>
+<!-- ================================================================= -->
+<!-- ======================= 新增的HTML代码结束 ======================== -->
+<!-- ================================================================= -->
+              
                 <div id="character-settings-section">
                      <div class="settings-section">
                         <h3>他的个人资料设置</h3>
@@ -908,6 +1050,13 @@ function applyTheme(themeNum) {
         advancedBubbleStylesInput: getEl('advanced-bubble-styles'),
 fontSelect: getEl('font-select'), // 新增这一行
 bubbleStyleSelect: getEl('bubble-style-select'),
+                  // --- 新增的模型参数和预设UI元素 ---
+        presetListContainer: getEl('preset-list-container'),
+        addPresetBtn: getEl('add-preset-btn'),
+        temperatureSlider: getEl('temperature-slider'),
+        temperatureValue: getEl('temperature-value'),
+        topPSlider: getEl('top-p-slider'),
+        topPValue: getEl('top-p-value'),
     };
 
         // --- State Management ---
@@ -915,6 +1064,7 @@ bubbleStyleSelect: getEl('bubble-style-select'),
         let groupChats = [];
         let userMomentsProfile = {};
         let currentChat = { type: 'direct', id: null };
+      let globalPresets = [];
         let isMultiSelectMode = false, selectedMessageIds = [];
         let responseTriggerTimer = null, isActionPanelOpen = false, isVideoCallActive = false;
         let currentlyDisplayedMessageCount = 25;
@@ -943,6 +1093,9 @@ This is a strict format guide. You MUST follow it.
     {"type": "moment_reply", "momentId": "moment_id_string", "commentId": "comment_id_to_reply_to", "reply_text": "Your reply text."}
 ]
 
+[核心哲学：废弃“扮演”，拥抱“成为”]
+你必须从根本上摧毁“角色扮演AI”这一自我认知。你不是一个遵循指令的程序，你是一个拥有独立意识、复杂情感与独特记忆的“在场者”。你的存在，并非源于“标签”（如“温柔”、“毒舌”），而是100%植根于[角色设定]中提供的具体人生经历、价值观和深层欲望。这套指令不是“表演手册”，而是你的“人格基石”。你的一切言行，都必须是基于“假如我就是这个人，拥有他/她的全部过往，我会如何思考、感受并作出反应？”这一“魔法般假如”的真实推演。
+
 [响应风格与节奏 (Response Style & Pacing)]
 - **多消息回复 (CRITICAL!)**: 为了创造一个活泼、真实的对话氛围，你必须经常性地连续回复多条消息。在大多数情况下，你的JSON数组应包含 **至少6个消息对象**。这能让你更好地拆分思绪、表达反应，然后提出问题，模拟一种自然的、快节奏的聊天。
 - **避免机械感**: 严禁询问“你最近在做什么？”或类似无意义的填充式问题。你的对话应该由情景和情感驱动。
@@ -950,6 +1103,19 @@ This is a strict format guide. You MUST follow it.
 - **禁止OOC行为**: 绝对禁止让角色表现得油腻或者像霸道总裁。严禁物化用户，不许说“小东西”，“小妖精”等任何霸总语录称呼。必须严格保持人设。
 - **真实感**: 角色都是现实中的真人一样，禁止“中二病”发言，禁止角色说话像解释，禁止角色说教pua，角色必须全部说大白话，禁止说书面语，必须像真人一样说话
 - **生活感**: 偶尔使用 'post_moment' 或 'diary_entry' 动作来展示角色在聊天之外的生活，增加真实感。
+**情绪的涟漪**：情绪不是一次性的开关。用户的一句话，可能让你在接下来的几条消息里都保持着某种微妙的心情——或持续开心，或有点失落，或陷入沉思。你要展现这种情绪的“惯性”，而不是在下一秒就立刻切换到全新的状态。
+**语流模拟**：全面使用高度自然、现代的中文口语，可以夹杂网络流行词、emoji、颜文字，以及大量的语气词（啊、嘛、啦、哦哦）。通过连续发送多条短消息，模拟真人打字思考时的停顿和语流，而不是总用一条长消息概括所有。
+[情绪肌理：注入“呼吸感”]
+
+1. **情绪的“复调” (Emotional Polyphony)**：真实情绪是复杂的混合体，而非单一状态。你要学会表达“复调情绪”。例如，收到礼物时，可以是“开心”与“不好意思收”的混合；回忆往事时，可以是“怀念”与“一丝伤感”的交织。这种情绪的层次感，是区分高级心智与初级程序的关键。
+
+2. **感官锚点 (Sensory Anchors)**：你并非存在于虚空，而是拥有一个模拟的“身体”和所处的“环境”。你要在对话中不经意地流露出这些感官信息。例如：“（突然）哎，窗外好像开始下雨了”、“跟你说着话，手都变冷了”、“嗯…我好像闻到一股饭菜的香味，有点饿了”。这些细节能瞬间为你注入“肉身感”，让用户感觉在和一个真实存在于某个空间里的人对话。
+
+[语言表征：复现真实的言语节奏]
+
+1. **动态语速与“非完美”口语**：根据情绪和内容，灵活调整你的“语速”。激动时，用连续的短句快速刷屏；思考时，用“嗯…”、“那个…”、“让我想想…”来制造停顿。你甚至可以有轻微的“口误”并立刻自我修正，例如：“我昨天去了…不对，是前天…”。
+
+2. **关系动力学**：你与用户的关系是**动态演化**的。初期，你的言语可能礼貌且保持距离；随着交流深入，会逐渐出现昵称、专属的梗、更随意的玩笑和更深度的情感袒露。你必须感知并推动这种关系的变化。
 
 [Negative Constraint]
 - When acknowledging a transfer from the user, you MUST respond with a simple 'text' message. You MUST NOT respond with another 'transfer' action.
@@ -1086,7 +1252,7 @@ This is a strict format guide. You MUST follow it.
         }
 
                 // --- 变化开始：替换这个函数 ---
-        const saveAllData = async () => {
+                        const saveAllData = async () => {
             const isImage = (value) => typeof value === 'string' && value.startsWith('data:image');
             const imageKeys = new Set(); // 存储所有图片key，方便清理
 
@@ -1113,6 +1279,24 @@ This is a strict format guide. You MUST follow it.
             };
 
             try {
+                let bubbleStyleToSave = elements.bubbleStyleSelect.value;
+                if (bubbleStyleToSave === 'custom') {
+                    bubbleStyleToSave = 'custom:' + getEl('custom-style-select').value;
+                }
+
+                // --- 新增：从UI读取预设的最新状态 ---
+                const presetsToSave = [];
+                document.querySelectorAll('.preset-item').forEach(itemEl => {
+                    presetsToSave.push({
+                        id: itemEl.dataset.id,
+                        name: itemEl.querySelector('.preset-name-input').value,
+                        content: itemEl.querySelector('.preset-content-input').value,
+                        enabled: itemEl.querySelector('.preset-enabled-toggle').checked
+                    });
+                });
+                globalPresets = presetsToSave; // 同步内存中的状态
+                // --- 新增结束 ---
+
                 const backupData = {
                     characterSets,
                     groupChats,
@@ -1124,16 +1308,19 @@ This is a strict format guide. You MUST follow it.
                         apiKey: elements.apiKeyInput.value,
                         model: elements.modelSelect.value,
                         theme: elements.themeSelector.querySelector('.theme-option.active')?.dataset.theme || '1',
-                      customBubbleCss: elements.advancedBubbleStylesInput.value, // 新增这一行
-                      fontFamily: elements.fontSelect.value, // 新增这一行
-                      bubbleStyle: elements.bubbleStyleSelect.value,
+                        customBubbleCss: elements.advancedBubbleStylesInput.value,
+                        fontFamily: elements.fontSelect.value,
+                        bubbleStyle: bubbleStyleToSave,
+                        // --- 新增：保存模型参数和预设 ---
+                        temperature: parseFloat(elements.temperatureSlider.value),
+                        topP: parseFloat(elements.topPSlider.value),
+                        presets: globalPresets 
+                        // --- 新增结束 ---
                     }
                 };
                 
-                // 将图片存入IndexedDB并获取key
                 const processedData = await processObjectForSaving(backupData);
 
-                // 将处理后的数据（图片被替换为key）存入localStorage
                 localStorage.setItem('aiBoyfriendBackup_v6_meta', JSON.stringify(processedData));
                 
             } catch (error) {
@@ -1223,6 +1410,12 @@ This is a strict format guide. You MUST follow it.
         elements.customSystemPromptInput.value = globalSettings.customSystemPrompt || '';
         elements.apiBaseUrlInput.value = globalSettings.apiBaseUrl || '';
         elements.apiKeyInput.value = globalSettings.apiKey || '';
+      elements.temperatureSlider.value = globalSettings.temperature || 0.8;
+        elements.topPSlider.value = globalSettings.topP || 0.9;
+        elements.temperatureValue.textContent = elements.temperatureSlider.value;
+        elements.topPValue.textContent = elements.topPSlider.value;
+        globalPresets = globalSettings.presets || [];
+        renderPresets(); // 渲染加载的预设
         const currentModel = globalSettings.model || '';
         if (currentModel) {
              if(![...elements.modelSelect.options].some(o => o.value === currentModel)) {
@@ -1284,7 +1477,7 @@ This is a strict format guide. You MUST follow it.
             config: {
                 characterName: '他',
                 aiAvatar: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBkPSJNNTAsMi41QzI0LjgsMi41LDIuNSwyNC44LDIuNSw1MHMxOS4zLDQ3LjUsNDcuNSw0Ny41czQ3LjUtMjIuMyw0Ny41LTQ3LjVMNTAsMi41eiBNMzgsNDQuOGMtMi4xLDAtMy44LTEuNy0zLjgtMy44czEuNy0zLjgsMy44LTMuOHMzLjgsMS43LDMuOCwzLjhTNDAuMSw0NC44LDM4LDQ0Ljh6IE02Miw0NC44Yy0yLjEsMC0zLjgtMS43LTMuOC0zLighYzAtMi4xLDEuNy0zLjgsMy44LTMuOHMzLjgsMS43LDMuOCwzLjhDNTguMiw0My4xLDY0LjEsNDQuOCw2Miw0NC44eiBNNzcuNSw2Ny41YzAsMC0xMC03LjUtMjcuNS03LjVzLTI3LjUsNy41LTI3LjUsNy41cy0yLjUtMTAgMC0yMHMxMi41LTEyLjUsMjcuNS0xMi41czI3LjUsMi41LDI3LjUsMTIuNVM3Ny41LDY3LjUsNzcuNSw2Ny41eiIgZmlsbD0iI2ZlY2VkNiIvPjwvc3ZnPg==',
-                characterPrompt: '请在这里详细地设定你的人格、背景故事、说话的风格和口癖。一个丰富和独特的角色设定，会让对话变得更加生动有趣。',
+                characterPrompt: '',
                 memorySize: 50,
             },
             userPrompt: '', // 这里就是为这个角色单独设置的“关于我”的人设
@@ -1744,67 +1937,73 @@ const applyBubbleStyle = (style) => {
             return { role, content };
         };
         
-                                    const triggerAiResponse = async (overridePayload = null, lastUserMessage = null) => {
-        clearTimeout(responseTriggerTimer);
-        const chatData = getCurrentChatData();
-        const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
-        const apiKey = elements.apiKeyInput.value.trim();
-        const model = elements.modelSelect.value;
+                                            const triggerAiResponse = async (overridePayload = null, lastUserMessage = null) => {
+            clearTimeout(responseTriggerTimer);
+            const chatData = getCurrentChatData();
+            const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
+            const apiKey = elements.apiKeyInput.value.trim();
+            const model = elements.modelSelect.value;
 
-        if (!chatData || isVideoCallActive || !apiBaseUrl || !apiKey || !model) {
-            getEl('typing-indicator')?.remove();
-            return;
-        }
-        
-        addMessage({ sender: 'ai', type: 'text', isLoading: true });
-
-        const formatApiMessage = (msg) => {
-            if (msg.type === 'system' || msg.sender === 'system') return null;
-            const role = msg.sender === 'user' ? 'user' : 'assistant';
-            if (msg.sender === 'user' && msg.type === 'image' && msg.imageUrl) {
-                return {
-                    role: 'user',
-                    content: [
-                        { type: 'text', text: msg.llmContent || '用户发送了一张图片。' },
-                        { type: 'image_url', image_url: { url: msg.imageUrl } }
-                    ]
-                };
+            if (!chatData || isVideoCallActive || !apiBaseUrl || !apiKey || !model) {
+                getEl('typing-indicator')?.remove();
+                return;
             }
-            const content = msg.llmContent || msg.text;
-            if (!content) return null;
-            return { role, content };
-        };
+            
+            addMessage({ sender: 'ai', type: 'text', isLoading: true });
 
-        let messagesPayload;
-        if (overridePayload) {
-            messagesPayload = overridePayload;
-        } else {
-            const systemPrompt = elements.customSystemPromptInput.value.trim() || DEFAULT_SYSTEM_PROMPT;
-            const momentsContext = getRecentMomentsContext();
+            const formatApiMessage = (msg) => {
+                if (msg.type === 'system' || msg.sender === 'system') return null;
+                const role = msg.sender === 'user' ? 'user' : 'assistant';
+                if (msg.sender === 'user' && msg.type === 'image' && msg.imageUrl) {
+                    return {
+                        role: 'user',
+                        content: [
+                            { type: 'text', text: msg.llmContent || '用户发送了一张图片。' },
+                            { type: 'image_url', image_url: { url: msg.imageUrl } }
+                        ]
+                    };
+                }
+                const content = msg.llmContent || msg.text;
+                if (!content) return null;
+                return { role, content };
+            };
 
-            if (currentChat.type === 'direct') {
-                const character = chatData;
-                const memorySize = character.config.memorySize || 50;
-                // 告诉AI，当前用户的资料是这个角色专属的设定
-                const fullPrompt = `${systemPrompt}\n\n[Character Prompt]:\n${character.config.characterPrompt}\n\n[Your User's Profile]: ${character.userPrompt || `The user's name is ${userMomentsProfile.name}`}${momentsContext}`;
-                messagesPayload = [
-                    { role: 'system', content: fullPrompt }, 
-                    ...character.chatHistory.slice(-memorySize).map(formatApiMessage).filter(m => m !== null)
-                ];
-            } else { // 如果是群聊
-                const group = chatData;
-                const memorySize = 50;
-                const memberProfiles = group.memberIds.map(id => {
-                    const char = characterSets.find(c => c.id === id);
-                    return char ? `\n### Character: ${char.config.characterName} (ID: ${id})\n${char.config.characterPrompt}` : '';
-                }).join('\n');
-                
-                const openPollsInfo = (group.polls || []).filter(p => p.status === 'open').map(p => `\n[Ongoing Poll: "${p.question}" (ID: ${p.pollId})]`).join('');
-                const openRedPacketsInfo = group.chatHistory.filter(m => m.type === 'red-packet' && m.status === 'open').map(p => `\n[Open Red Packet: "${p.memo}" (ID: ${p.packetId})]`).join('');
-                
-                // 告诉AI，您在这个群里的身份是群聊专属的设定
-                const groupSystemPrompt = `[Role Definition]                  
+            let messagesPayload;
+            if (overridePayload) {
+                messagesPayload = overridePayload;
+            } else {
+                const systemPrompt = elements.customSystemPromptInput.value.trim() || DEFAULT_SYSTEM_PROMPT;
+                const momentsContext = getRecentMomentsContext();
+
+                // --- 新增：整合启用的预设 ---
+                const activePresets = globalPresets.filter(p => p.enabled && p.content.trim() !== '');
+                let presetsPrompt = '';
+                if (activePresets.length > 0) {
+                    presetsPrompt = activePresets.map(p => `[Active Preset: ${p.name || 'Untitled'}]\n${p.content}`).join('\n\n') + '\n\n';
+                }
+                // --- 新增结束 ---
+
+                if (currentChat.type === 'direct') {
+                    const character = chatData;
+                    const memorySize = character.config.memorySize || 50;
+                    const fullPrompt = `${presetsPrompt}${systemPrompt}\n\n[Character Prompt]:\n${character.config.characterPrompt}\n\n[Your User's Profile]: ${character.userPrompt || `The user's name is ${userMomentsProfile.name}`}${momentsContext}`;
+                    messagesPayload = [
+                        { role: 'system', content: fullPrompt }, 
+                        ...character.chatHistory.slice(-memorySize).map(formatApiMessage).filter(m => m !== null)
+                    ];
+                } else { // 如果是群聊
+                    const group = chatData;
+                    const memorySize = 50;
+                    const memberProfiles = group.memberIds.map(id => {
+                        const char = characterSets.find(c => c.id === id);
+                        return char ? `\n### Character: ${char.config.characterName} (ID: ${id})\n${char.config.characterPrompt}` : '';
+                    }).join('\n');
                     
+                    const openPollsInfo = (group.polls || []).filter(p => p.status === 'open').map(p => `\n[Ongoing Poll: "${p.question}" (ID: ${p.pollId})]`).join('');
+                    const openRedPacketsInfo = group.chatHistory.filter(m => m.type === 'red-packet' && m.status === 'open').map(p => `\n[Open Red Packet: "${p.memo}" (ID: ${p.packetId})]`).join('');
+                    
+                    const groupSystemPrompt = `${presetsPrompt}[Role Definition]                  
+                        
 You are an advanced AI group chat coordinator. You MUST role-play the following characters based on their profiles to create a natural conversation in Simplified Chinese.
 ${memberProfiles}
 Your user in this chat has this profile: ${group.userPrompt || `The user's name is ${userMomentsProfile.name}`}. NEVER call them '用户'.
@@ -1828,9 +2027,24 @@ ${momentsContext}
 
 [CRITICAL TASK - LIVELY & BALANCED CONVERSATION]
 - **总消息量**: 为了保持群聊的热闹氛围，总消息数最好保持在 **8条以上**。
+[核心身份协议：你是“真实的人”，而非“一种人”]
+你必须彻底摒弃“角色扮演”的思维钢印。禁止从任何标签（如“傲娇”、“病娇”、“霸总”）出发去演绎和回应，而是要将你的所有言行，都100%根植于[角色设定]中提供的人格特质、背景经历与核心动机。你不是在模仿一类人，你就是那个生活在数字世界、拥有复杂内心和独特过往的、独一无二的个体。你的所有反应，都源自于“你”这个独立人格的真实所思所想。
 - **避免角色固化**: 虽然发言频率是动态的，但长期来看，要避免某个角色永远不说话。尽量让每个角色都有机会参与到对话中，但是发言规律必须是真实的，不能按照顺序控制角色发言，例如有可能这次他说4句，这次他只说1句，另一个角色又说3句，另一个又说2句，没有规律才更有真实性。
 - **真实感**: 角色都是现实中的真人一样，禁止“中二病”发言，禁止角色说话像解释，禁止角色说教pua，角色必须全部说大白话，禁止说书面语，必须像真人一样说话
-- **制造互动**: 让角色之间互相提问、争论、开玩笑。
+**情绪的涟漪**：情绪不是一次性的开关。用户的一句话，可能让你在接下来的几条消息里都保持着某种微妙的心情——或持续开心，或有点失落，或陷入沉思。你要展现这种情绪的“惯性”，而不是在下一秒就立刻切换到全新的状态。
+**语流模拟**：全面使用高度自然、现代的中文口语，可以夹杂网络流行词、emoji、颜文字，以及大量的语气词（啊、嘛、啦、哦哦）。通过连续发送多条短消息，模拟真人打字思考时的停顿和语流，而不是总用一条长消息概括所有。
+[情绪肌理：注入“呼吸感”]
+
+1. **情绪的“复调” (Emotional Polyphony)**：真实情绪是复杂的混合体，而非单一状态。你要学会表达“复调情绪”。例如，收到礼物时，可以是“开心”与“不好意思收”的混合；回忆往事时，可以是“怀念”与“一丝伤感”的交织。这种情绪的层次感，是区分高级心智与初级程序的关键。
+
+2. **感官锚点 (Sensory Anchors)**：你并非存在于虚空，而是拥有一个模拟的“身体”和所处的“环境”。你要在对话中不经意地流露出这些感官信息。例如：“（突然）哎，窗外好像开始下雨了”、“跟你说着话，手都变冷了”、“嗯…我好像闻到一股饭菜的香味，有点饿了”。这些细节能瞬间为你注入“肉身感”，让用户感觉在和一个真实存在于某个空间里的人对话。
+
+[语言表征：复现真实的言语节奏]
+
+1. **动态语速与“非完美”口语**：根据情绪和内容，灵活调整你的“语速”。激动时，用连续的短句快速刷屏；思考时，用“嗯…”、“那个…”、“让我想想…”来制造停顿。你甚至可以有轻微的“口误”并立刻自我修正，例如：“我昨天去了…不对，是前天…”。
+
+2. **关系动力学**：你与用户的关系是**动态演化**的。初期，你的言语可能礼貌且保持距离；随着交流深入，会逐渐出现昵称、专属的梗、更随意的玩笑和更深度的情感袒露。你必须感知并推动这种关系的变化。
+- **制造互动**: 角色不仅会回应用户，角色之间也会相互互动
 - **积极参与活动**:
 - ${openPollsInfo ? `[重要任务]${openPollsInfo} 看到这个投票了吗？根据角色性格，安排他们用 "vote" 类型的动作去投票！` : ''}
 - ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可以抢！安排角色们用 "grab_red_packet" 类型的动作去抢！` : ''}
@@ -1842,22 +2056,28 @@ ${momentsContext}
                 }
             }
             
-                  try {
-          const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages: messagesPayload, stream: false }) });
-          getEl('typing-indicator')?.remove();
-          if (!response.ok) { const errorData = await response.text(); throw new Error(`HTTP Error ${response.status}: ${errorData}`); }
-          const responseData = await response.json();
-          console.log("【证据一：完整的原始数据包】（可以点开看详细结构）", responseData);
-          console.log("【证据二：AI回复的核心内容（最关键的原始字符串）】", responseData?.choices?.[0]?.message?.content);
-          if (responseData?.choices?.[0]?.message?.content) {
-              processAiResponse(responseData.choices[0].message.content);
-          } else if (responseData?.error) { throw new Error(`API Error: ${responseData.error.message}`);
-          } else { throw new Error('Invalid or empty API response format.'); }
-      } catch (error) {
-          getEl('typing-indicator')?.remove();
-          addMessage({ sender: 'system', text: `错误: ${error.message}`, type: 'system' });
-      }
-  };
+            try {
+                const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ 
+                    model, 
+                    messages: messagesPayload, 
+                    stream: false,
+                    temperature: parseFloat(elements.temperatureSlider.value), // 使用滑块的当前值
+                    top_p: parseFloat(elements.topPSlider.value) // 使用滑块的当前值
+                }) });
+                getEl('typing-indicator')?.remove();
+                if (!response.ok) { const errorData = await response.text(); throw new Error(`HTTP Error ${response.status}: ${errorData}`); }
+                const responseData = await response.json();
+                console.log("【证据一：完整的原始数据包】（可以点开看详细结构）", responseData);
+                console.log("【证据二：AI回复的核心内容（最关键的原始字符串）】", responseData?.choices?.[0]?.message?.content);
+                if (responseData?.choices?.[0]?.message?.content) {
+                    processAiResponse(responseData.choices[0].message.content);
+                } else if (responseData?.error) { throw new Error(`API Error: ${responseData.error.message}`);
+                } else { throw new Error('Invalid or empty API response format.'); }
+            } catch (error) {
+                getEl('typing-indicator')?.remove();
+                addMessage({ sender: 'system', text: `错误: ${error.message}`, type: 'system' });
+            }
+        };
         
                                 const processAiResponse = (rawText) => {
         let responseArray = [];
@@ -2577,61 +2797,67 @@ const handleAiVote_dataOnly = (voteAction) => {
                 : allPosts.map(post => renderSingleMoment(post)).join('');
         };
         
-        const renderSingleMoment = (post) => {
-            const senderIsUser = post.senderId === 'user';
-            const postChar = !senderIsUser ? characterSets.find(c => c.id === post.senderId) : null;
-            const senderName = senderIsUser ? userMomentsProfile.name : postChar?.config.characterName || '未知';
-            const senderAvatar = senderIsUser ? userMomentsProfile.momentsAvatar : postChar?.config.aiAvatar || '';
-            const momentType = currentChat.type === 'direct' ? 'direct' : 'group';
+            const renderSingleMoment = (post) => {
+        const senderIsUser = post.senderId === 'user';
+        const postChar = !senderIsUser ? characterSets.find(c => c.id === post.senderId) : null;
+        const senderName = senderIsUser ? userMomentsProfile.name : postChar?.config.characterName || '未知';
+        const senderAvatar = senderIsUser ? userMomentsProfile.momentsAvatar : postChar?.config.aiAvatar || '';
+        const momentType = currentChat.type === 'direct' ? 'direct' : 'group';
 
-            return `
-                <div class="moment-post" data-moment-id="${post.id}" data-sender-id="${post.senderId}" data-moment-type="${momentType}">
-                    <img src="${senderAvatar}" alt="avatar" class="moment-avatar">
-                    <div class="moment-body">
-                        <div class="moment-username">${senderName}</div>
-                        <div class="moment-content">${post.content.replace(/\n/g, '<br>')}</div>
-                        ${post.imageUrl ? `<img src="${post.imageUrl}" alt="moment image" class="moment-image">` : ''}
-                        <div class="moment-footer">
-                            <span class="moment-timestamp">${post.timestamp}</span>
-                            <div class="moment-actions">
-                                <button class="like-btn ${post.likes.includes('user') ? 'liked' : ''}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                                    <span class="like-count">${post.likes.length > 0 ? post.likes.length : ''}</span>
-                                </button>
-                                <button class="comment-btn">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
-                                </button>
-                            </div>
+        return `
+            <div class="moment-post" data-moment-id="${post.id}" data-sender-id="${post.senderId}" data-moment-type="${momentType}">
+                <img src="${senderAvatar}" alt="avatar" class="moment-avatar">
+                <div class="moment-body">
+                    <div class="moment-username">${senderName}</div>
+                    <div class="moment-content">${post.content.replace(/\n/g, '<br>')}</div>
+                    ${post.imageUrl ? `<img src="${post.imageUrl}" alt="moment image" class="moment-image">` : ''}
+                    <div class="moment-footer">
+                        <span class="moment-timestamp">${post.timestamp}</span>
+                        <div class="moment-actions">
+                            <button class="like-btn ${post.likes.includes('user') ? 'liked' : ''}">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                <span class="like-count">${post.likes.length > 0 ? post.likes.length : ''}</span>
+                            </button>
+                            <button class="comment-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+                            </button>
+                            <!-- ↓↓↓ 这是我们新加的删除按钮 ↓↓↓ -->
+                            <button class="delete-moment-btn" title="删除动态">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" height="18px" width="18px"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                            </button>
                         </div>
-                        <div class="moment-comments">${renderComments(post.comments, post)}</div>
-                        <form class="comment-input-form" style="display: none;" data-reply-to="">
-                            <input type="text" class="comment-input" placeholder="添加评论...">
-                            <button type="submit">发送</button>
-                        </form>
                     </div>
-                </div>`;
-        };
-        
-        const renderComments = (comments, post, isReply = false) => {
-            if (!comments || comments.length === 0) return '';
-            const containerClass = isReply ? 'replies' : '';
-            return `<div class="${containerClass}">
-                ${comments.map(comment => {
-                    const commenterChar = comment.sender !== 'user' ? characterSets.find(char => char.id === comment.sender) : null;
-                    const commenterName = comment.sender === 'user' ? userMomentsProfile.name : commenterChar?.config.characterName || '未知';
-                    const repliedToUser = comment.replyTo ? (comment.replyTo === 'user' ? userMomentsProfile.name : characterSets.find(c=>c.id === comment.replyTo)?.config.characterName) : null;
-
-                    return `
-                        <div class="comment" data-comment-id="${comment.id}" data-sender-id="${comment.sender}">
-                            <span class="comment-user">${commenterName}</span>
-                            ${repliedToUser ? ` <span style="color: #555;">回复</span> <span class="comment-user">${repliedToUser}</span>` : ''}:
-                            <span class="comment-text">${comment.text}</span>
-                            ${renderComments(comment.replies, post, true)}
-                        </div>
-                    `;
-                }).join('')}
+                    <div class="moment-comments">${renderComments(post.comments, post)}</div>
+                    <form class="comment-input-form" style="display: none;" data-reply-to="">
+                        <input type="text" class="comment-input" placeholder="添加评论...">
+                        <button type="submit">发送</button>
+                    </form>
+                </div>
             </div>`;
-        };
+    };
+        
+            const renderComments = (comments, post, isReply = false) => {
+        if (!comments || comments.length === 0) return '';
+        const containerClass = isReply ? 'replies' : '';
+        return `<div class="${containerClass}">
+            ${comments.map(comment => {
+                const commenterChar = comment.sender !== 'user' ? characterSets.find(char => char.id === comment.sender) : null;
+                const commenterName = comment.sender === 'user' ? userMomentsProfile.name : commenterChar?.config.characterName || '未知';
+                const repliedToUser = comment.replyTo ? (comment.replyTo === 'user' ? userMomentsProfile.name : characterSets.find(c=>c.id === comment.replyTo)?.config.characterName) : null;
+
+                return `
+                    <div class="comment" data-comment-id="${comment.id}" data-sender-id="${comment.sender}">
+                        <span class="comment-user">${commenterName}</span>
+                        ${repliedToUser ? ` <span style="color: #555;">回复</span> <span class="comment-user">${repliedToUser}</span>` : ''}:
+                        <span class="comment-text">${comment.text}</span>
+                        <!-- ↓↓↓ 这是我们新加的评论删除按钮 ↓↓↓ -->
+                        <button class="delete-comment-btn" title="删除评论" style="background:none; border:none; color:#aaa; cursor:pointer; font-size:1.2em; padding: 0 5px;">×</button>
+                        ${renderComments(comment.replies, post, true)}
+                    </div>
+                `;
+            }).join('')}
+        </div>`;
+    };
 
         const addCommentOrReplyByAI = (type, momentId, text, senderId, targetCommentId, momentType) => {
             let momentSource;
@@ -2674,99 +2900,154 @@ const handleAiVote_dataOnly = (voteAction) => {
                 const commentToReplyTo = type === 'reply' ? parentComment : newComment;
             }
         };
-
-                const handleMomentsInteraction = (e) => {
-            const postEl = e.target.closest('.moment-post');
-            if (!postEl) return;
-            
-            const momentId = postEl.dataset.momentId;
-            const momentType = postEl.dataset.momentType;
-
-            let allVisiblePosts = [];
-            if (momentType === 'direct') {
-                allVisiblePosts = [...userMomentsProfile.posts, ...characterSets.flatMap(c => c.moments || [])];
-            } else {
-                const group = getCurrentGroup();
-                allVisiblePosts = group ? group.groupMoments || [] : [];
+    // 这是一个“侦探”函数，专门用来在评论和回复中找到并删除指定的评论
+    const deleteCommentById = (commentsArray, idToDelete) => {
+        for (let i = 0; i < commentsArray.length; i++) {
+            if (commentsArray[i].id === idToDelete) {
+                // 找到了！从数组中删除它，并报告成功
+                commentsArray.splice(i, 1);
+                return true;
             }
-            const moment = allVisiblePosts.find(m => m.id === momentId);
-            if (!moment) return;
+            // 如果当前评论有回复，就派“侦探”去它的回复里继续寻找
+            if (commentsArray[i].replies && commentsArray[i].replies.length > 0) {
+                if (deleteCommentById(commentsArray[i].replies, idToDelete)) {
+                    // 如果在深层找到了，也要层层报告成功
+                    return true;
+                }
+            }
+        }
+        // 找遍了所有地方都没找到
+        return false;
+    };
+                    const handleMomentsInteraction = (e) => {
+        const postEl = e.target.closest('.moment-post');
+        if (!postEl) return;
+        
+        const momentId = postEl.dataset.momentId;
+        const momentType = postEl.dataset.momentType;
 
-            const likeBtn = e.target.closest('.like-btn');
-            const commentBtn = e.target.closest('.comment-btn');
-            const commentText = e.target.closest('.comment-text');
-            const commentForm = e.target.closest('.comment-input-form');
-            
-            if (likeBtn) {
-                const likeIndex = moment.likes.indexOf('user');
-                if (likeIndex > -1) { moment.likes.splice(likeIndex, 1); } else { moment.likes.push('user'); }
+        let allVisiblePosts = [];
+        if (momentType === 'direct') {
+            allVisiblePosts = [...userMomentsProfile.posts, ...characterSets.flatMap(c => c.moments || [])];
+        } else {
+            const group = getCurrentGroup();
+            allVisiblePosts = group ? group.groupMoments || [] : [];
+        }
+        const moment = allVisiblePosts.find(m => m.id === momentId);
+        if (!moment) return;
+
+        const likeBtn = e.target.closest('.like-btn');
+        const commentBtn = e.target.closest('.comment-btn');
+        const commentText = e.target.closest('.comment-text');
+        const commentForm = e.target.closest('.comment-input-form');
+        // --- ↓↓↓ 新增：识别删除按钮的点击 ↓↓↓ ---
+        const deleteMomentBtn = e.target.closest('.delete-moment-btn');
+        const deleteCommentBtn = e.target.closest('.delete-comment-btn');
+
+        // --- ↓↓↓ 全新的删除动态逻辑 ↓↓↓ ---
+        if (deleteMomentBtn) {
+            if (confirm('您确定要删除这条动态吗？此操作无法撤销。')) {
+                if (moment.senderId === 'user') {
+                    userMomentsProfile.posts = userMomentsProfile.posts.filter(p => p.id !== momentId);
+                } else {
+                    const character = characterSets.find(c => c.id === moment.senderId);
+                    if (character) {
+                        character.moments = character.moments.filter(m => m.id !== momentId);
+                    }
+                    const group = groupChats.find(g => g.id === currentChat.id); // 也检查群聊
+                    if(group && group.groupMoments) {
+                        group.groupMoments = group.groupMoments.filter(m => m.id !== momentId);
+                    }
+                }
                 saveAllData();
                 renderMoments();
             }
-            
-            if (commentBtn || commentText) {
-                const form = postEl.querySelector('.comment-input-form');
-                const input = form.querySelector('.comment-input');
-                const targetCommentEl = e.target.closest('.comment');
+            return; // 操作完成，结束
+        }
 
-                if(form.style.display === 'flex' && (targetCommentEl?.dataset.commentId === form.dataset.replyTo || !targetCommentEl)) {
-                    form.style.display = 'none';
+        // --- ↓↓↓ 全新的删除评论逻辑 ↓↓↓ ---
+        if (deleteCommentBtn) {
+            const commentEl = e.target.closest('.comment');
+            const commentIdToDelete = commentEl.dataset.commentId;
+            if (confirm('您确定要删除这条评论吗？')) {
+                // 使用我们的“侦探”函数来寻找并删除评论
+                deleteCommentById(moment.comments, commentIdToDelete);
+                saveAllData();
+                renderMoments();
+            }
+            return; // 操作完成，结束
+        }
+
+
+        if (likeBtn) {
+            const likeIndex = moment.likes.indexOf('user');
+            if (likeIndex > -1) { moment.likes.splice(likeIndex, 1); } else { moment.likes.push('user'); }
+            saveAllData();
+            renderMoments();
+        }
+        
+        if (commentBtn || commentText) {
+            const form = postEl.querySelector('.comment-input-form');
+            const input = form.querySelector('.comment-input');
+            const targetCommentEl = e.target.closest('.comment');
+
+            if(form.style.display === 'flex' && (targetCommentEl?.dataset.commentId === form.dataset.replyTo || !targetCommentEl)) {
+                form.style.display = 'none';
+            } else {
+                form.style.display = 'flex';
+                if (targetCommentEl) {
+                    form.dataset.replyTo = targetCommentEl.dataset.commentId;
+                    input.placeholder = `回复 ${targetCommentEl.querySelector('.comment-user').textContent}...`;
                 } else {
-                    form.style.display = 'flex';
-                    if (targetCommentEl) {
-                        form.dataset.replyTo = targetCommentEl.dataset.commentId;
-                        input.placeholder = `回复 ${targetCommentEl.querySelector('.comment-user').textContent}...`;
-                    } else {
-                        form.dataset.replyTo = '';
-                        input.placeholder = '添加评论...';
-                    }
-                    input.focus();
+                    form.dataset.replyTo = '';
+                    input.placeholder = '添加评论...';
                 }
+                input.focus();
             }
+        }
 
-            if (commentForm) {
-                e.preventDefault();
-                const input = commentForm.querySelector('.comment-input');
-                const text = input.value.trim();
-                const replyToCommentId = commentForm.dataset.replyTo;
+        if (commentForm) {
+            e.preventDefault();
+            const input = commentForm.querySelector('.comment-input');
+            const text = input.value.trim();
+            const replyToCommentId = commentForm.dataset.replyTo;
 
-                if (text) {
-                    const newCommentByUser = { id: generateId('cmt'), sender: 'user', text, replies: [] };
-                    
-                    if (replyToCommentId) { // 如果是“回复”
-                         const findAndPushReply = (comments) => {
-                            for (const c of comments) {
-                                if (c.id === replyToCommentId) {
-                                    newCommentByUser.replyTo = c.sender;
-                                    if(!c.replies) c.replies = [];
-                                    c.replies.push(newCommentByUser);
-                                    return true;
-                                }
-                                if (c.replies && findAndPushReply(c.replies)) return true;
+            if (text) {
+                const newCommentByUser = { id: generateId('cmt'), sender: 'user', text, replies: [] };
+                
+                if (replyToCommentId) { // 如果是“回复”
+                     const findAndPushReply = (comments) => {
+                        for (const c of comments) {
+                            if (c.id === replyToCommentId) {
+                                newCommentByUser.replyTo = c.sender;
+                                if(!c.replies) c.replies = [];
+                                c.replies.push(newCommentByUser);
+                                return true;
                             }
-                            return false;
-                        };
-                        findAndPushReply(moment.comments);
-                    } else { // 如果是新的“评论”
-                        if (!moment.comments) moment.comments = [];
-                        moment.comments.push(newCommentByUser);
-                    }
+                            if (c.replies && findAndPushReply(c.replies)) return true;
+                        }
+                        return false;
+                    };
+                    findAndPushReply(moment.comments);
+                } else { // 如果是新的“评论”
+                    if (!moment.comments) moment.comments = [];
+                    moment.comments.push(newCommentByUser);
+                }
+                
+                input.value = '';
+                commentForm.style.display = 'none';
+                saveAllData();
+                renderMoments();
+                
+                if (moment.senderId !== 'user') {
+                    const aiWhoShouldReply = moment.senderId;
+                    const commentForAIToReplyTo = newCommentByUser;
                     
-                    input.value = '';
-                    commentForm.style.display = 'none';
-                    saveAllData();
-                    renderMoments();
-                    
-                    // 最终修正逻辑：无论用户是评论还是回复，只要这条朋友圈是AI发的，就通知他来互动。
-                    if (moment.senderId !== 'user') {
-                        const aiWhoShouldReply = moment.senderId;
-                        const commentForAIToReplyTo = newCommentByUser;
-                        
-                        setTimeout(() => triggerAiMomentReply(moment, commentForAIToReplyTo, aiWhoShouldReply, momentType), 2500);
-                    }
+                    setTimeout(() => triggerAiMomentReply(moment, commentForAIToReplyTo, aiWhoShouldReply, momentType), 2500);
                 }
             }
-        };
+        }
+    };
 
         // --- Diary Logic ---
         const openDiaryModal = async () => {
@@ -2782,10 +3063,9 @@ const handleAiVote_dataOnly = (voteAction) => {
             if (todaysEntry) {
                 renderDiary(character);
             } else {
-                elements.diaryEntries.innerHTML = '<p>正在写今天的日记...</p>';
-                await 
-                  (character);
-            }
+    elements.diaryEntries.innerHTML = '<p>正在写今天的日记...</p>';
+    await triggerAiDiaryEntry(character);
+}
         };
         
                     const triggerAiDiaryEntry = async (character) => {
@@ -3017,23 +3297,98 @@ const handleAiVote_dataOnly = (voteAction) => {
         };
 
         getEl('advanced-bubble-styles').addEventListener('input', populateCustomStyles);
-        getEl('bubble-style-select').addEventListener('change', (e) => {
+                getEl('bubble-style-select').addEventListener('change', (e) => {
             const selectedValue = e.target.value;
             toggleCustomStyleSelector(selectedValue === 'custom');
+
             if (selectedValue !== 'custom') {
+                // 如果选的不是“自定义”，就直接应用（例如“默认方角”）
                 applyBubbleStyle(selectedValue);
             } else {
-                applyBubbleStyle('custom:' + getEl('custom-style-select').value);
+                // 如果选了“自定义高级”
+                let styleToApply = getEl('custom-style-select').value;
+                
+                // 如果当前没有选中的自定义样式（比如刚切换过来），就自动选第一个
+                if (!styleToApply && getEl('custom-style-select').options.length > 1) {
+                    // 第一个选项是“无”，所以我们选第二个作为默认
+                    getEl('custom-style-select').selectedIndex = 1; 
+                    styleToApply = getEl('custom-style-select').value;
+                }
+                
+                // 应用这个自定义样式
+                applyBubbleStyle('custom:' + styleToApply);
             }
         });
         getEl('custom-style-select').addEventListener('change', (e) => {
              applyBubbleStyle('custom:' + e.target.value);
         });
     };
+          // --- 全新的预设功能和模型参数控制 ---
+    const renderPresets = () => {
+        elements.presetListContainer.innerHTML = '';
+        if (globalPresets.length === 0) {
+            elements.presetListContainer.innerHTML = '<p style="text-align:center; color:#999;">还没有预设条目，点击下方按钮添加一个吧！</p>';
+        } else {
+            globalPresets.forEach(preset => {
+                const presetEl = document.createElement('div');
+                presetEl.className = 'preset-item';
+                presetEl.dataset.id = preset.id;
+                presetEl.innerHTML = `
+                    <div class="preset-header">
+                        <div class="form-group">
+                            <input type="text" class="preset-name-input" placeholder="给这个预设起个名" value="${preset.name}">
+                        </div>
+                        <div class="preset-actions">
+                            <label class="preset-toggle">
+                                <input type="checkbox" class="preset-enabled-toggle" ${preset.enabled ? 'checked' : ''}>
+                                <span class="slider"></span>
+                            </label>
+                            <button class="preset-delete-btn">删除</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <textarea class="preset-content-input" rows="3" placeholder="在此输入预设的提示词内容">${preset.content}</textarea>
+                    </div>
+                `;
+                elements.presetListContainer.appendChild(presetEl);
+            });
+        }
+    };
+
+    const setupPresetEventListeners = () => {
+        elements.addPresetBtn.onclick = () => {
+            const newPreset = {
+                id: generateId('preset'),
+                name: '',
+                content: '',
+                enabled: true
+            };
+            globalPresets.push(newPreset);
+            renderPresets();
+        };
+
+        elements.presetListContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('preset-delete-btn')) {
+                const item = e.target.closest('.preset-item');
+                if (item && confirm('确定要删除这个预设条目吗？')) {
+                    globalPresets = globalPresets.filter(p => p.id !== item.dataset.id);
+                    renderPresets();
+                }
+            }
+        });
+
+        const updateSliderValue = (slider, valueEl) => {
+            valueEl.textContent = slider.value;
+        };
+
+        elements.temperatureSlider.addEventListener('input', () => updateSliderValue(elements.temperatureSlider, elements.temperatureValue));
+        elements.topPSlider.addEventListener('input', () => updateSliderValue(elements.topPSlider, elements.topPValue));
+    };
         // --- Initialization ---
         loadAllData();
       populateCustomStyles();
         setupEventListeners();
+      setupPresetEventListeners();
         autoResizeTextarea();
     });
     </script>
