@@ -5,6 +5,102 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>日系突突机</title>
     <style>
+      /* --- 全局平滑过渡效果 --- */
+body, #chat-container, #chat-header, #bottom-panel, .settings-content, 
+.feature-modal-content, .action-item-icon, .chat-item, .modal-overlay,
+.form-group input, .form-group textarea, .form-group select {
+    transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease;
+}
+
+/* --- 夜间模式核心样式 --- */
+body.dark-mode {
+    --bg-color: #121212;
+    --chat-bg-color: rgba(30, 30, 30, 0.85);
+    --header-bg-color: rgba(45, 45, 45, 0.9);
+    --input-bg-color: #252525;
+    --text-color: #E0E0E0;
+    --text-light-color: #9E9E9E;
+    --accent-color: #ff8fab;
+    --accent-dark-color: #f87197;
+    --border-color: #424242;
+}
+
+/* --- 针对特定组件的夜间模式微调 --- */
+body.dark-mode #chat-container {
+    box-shadow: 0 0 30px rgba(255, 143, 171, 0.1);
+}
+body.dark-mode .settings-content,
+body.dark-mode .feature-modal-content {
+    background: #2D2D30;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+body.dark-mode .form-group label {
+    color: #BDBDBD;
+}
+body.dark-mode .form-group input,
+body.dark-mode .form-group select,
+body.dark-mode .form-group textarea {
+    background-color: #1E1E1E;
+    border-color: #555;
+    color: #E0E0E0;
+}
+body.dark-mode .form-group input:focus,
+body.dark-mode .form-group select:focus,
+body.dark-mode .form-group textarea:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 5px var(--accent-color);
+}
+body.dark-mode .close-btn,
+body.dark-mode .feature-modal-close {
+    color: #757575;
+}
+body.dark-mode .close-btn:hover,
+body.dark-mode .feature-modal-close:hover {
+    color: #BDBDBD;
+}
+body.dark-mode .data-zone button,
+body.dark-mode .sticker-zone button {
+    background-color: #333;
+    border-color: var(--accent-color);
+}
+body.dark-mode .data-zone button:hover,
+body.dark-mode .sticker-zone button:hover {
+    background-color: var(--accent-color);
+    color: white;
+}
+body.dark-mode .danger-zone button {
+    border-color: var(--delete-color);
+}
+body.dark-mode .danger-zone button:hover {
+    background-color: var(--delete-color);
+}
+body.dark-mode .chat-item {
+    background-color: #2a2a2e;
+    border-color: #444;
+}
+body.dark-mode .chat-item:hover {
+    background-color: #3a3a40;
+}
+body.dark-mode .chat-item.active {
+    border-color: var(--accent-color);
+    background-color: #312a2c;
+}
+body.dark-mode .theme-option {
+  background-color: #2D2D30;
+}
+body.dark-mode #load-more-btn {
+    background-color: #333;
+    color: #aaa;
+}
+body.dark-mode #load-more-btn:hover {
+    background-color: #444;
+}
+body.dark-mode .moment-comments {
+    background: #252525;
+}
+body.dark-mode .comment {
+    border-bottom-color: #3a3a3a;
+}
         /* --- Google Fonts --- */
         /* --- 全新的字体引入 --- */
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500&family=ZCOOL+KuaiLe&family=Long+Cang&family=Zhi+Mang+Xing&family=Ma+Shan+Zheng&family=LXGW+WenKai+Mono+TC&family=Press+Start+2P&family=DotGothic16&family=VT323&family=Noto+Serif+TC:wght@400;500&family=Pacifico&family=ZCOOL+QingKe+HuangYou&display=swap');
@@ -50,9 +146,8 @@
     --theme7-user-bg: #fff2cc; --theme7-user-text: #333333;
     --theme8-ai-bg: #ffffff; --theme8-ai-text: #333333; /* 微信日间 */
     --theme8-user-bg: #a9ea7a; --theme8-user-text: #333333;
-    --theme9-ai-bg: #2c2c2c; --theme9-ai-text: #ffffff; /* 微信夜间 */
-    --theme9-user-bg: #73b644; --theme9-user-text: #ffffff;
-
+    --theme9-ai-bg: #343434; --theme9-ai-text: #E5E5E5; /* 微信夜间 */
+--theme9-user-bg: #57BD61; --theme9-user-text: #343434;
     --ai-bubble-bg: var(--theme1-ai-bg);
     --ai-bubble-text: var(--theme1-ai-text);
     --user-bubble-bg: var(--theme1-user-bg);
@@ -137,8 +232,10 @@
         .message.user .message-content { align-items: flex-end; }
         .message.ai .message-content { align-items: flex-start; }
         .bubble { padding: 10px 15px; border-radius: 18px; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05); word-wrap: break-word; max-width: 100%; transition: transform 0.2s ease, border 0.2s ease, opacity 0.2s ease; }
-        .message.ai .bubble { background-color: var(--ai-bubble-bg); color: var(--ai-bubble-text); border-bottom-left-radius: 4px; }
-        .message.user .bubble { background-color: var(--user-bubble-bg); color: var(--user-bubble-text); border-bottom-right-radius: 4px; }
+        :not(.custom-style-active) .message.ai .bubble { background-color: var(--ai-bubble-bg); color: var(--ai-bubble-text); }
+:not(.custom-style-active) .message.user .bubble { background-color: var(--user-bubble-bg); color: var(--user-bubble-text); }
+.message.ai .bubble { border-bottom-left-radius: 4px; }
+.message.user .bubble { border-bottom-right-radius: 4px; }
         .bubble p { margin: 0; }
         .timestamp { font-size: 0.7em; color: var(--text-light-color); margin-top: 5px; padding: 0 5px; }
         
@@ -416,7 +513,7 @@
 }
       /* --- 仿微信尖角样式 --- */
 .bubble-style-wechat .message .bubble {
-    border-radius: 8px !important; /* 微信的圆角比较小 */
+    border-radius: 5px !important; /* 微信的圆角比较小 */
 }
 .bubble-style-wechat .message .bubble::before {
     content: '';
@@ -542,6 +639,71 @@ input[type=range]::-webkit-slider-thumb {
   cursor: pointer;
   -webkit-appearance: none;
   margin-top: -8px;
+}
+      /* =================================================== */
+/* ================ 紧凑模式 (类微信风格) =============== */
+/* =================================================== */
+
+/* --- 整体布局与间距 --- */
+.compact-mode #chat-header {
+    padding: 8px 12px;
+}
+.compact-mode #messages {
+    padding: 15px;
+}
+.compact-mode .message {
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+/* --- 头像缩小 --- */
+.compact-mode #header-avatar,
+.compact-mode .message .avatar {
+    width: 36px;
+    height: 36px;
+}
+
+/* --- 消息气泡与字体 --- */
+.compact-mode .bubble {
+    padding: 8px 12px;
+    font-size: 0.95em; /* 字体也稍微缩小一点 */
+}
+.compact-mode .timestamp {
+    font-size: 0.65em;
+    margin-top: 4px;
+}
+
+/* --- 核心：输入区域紧凑化 --- */
+.compact-mode #input-area {
+    padding: 8px 12px;
+    align-items: center; /* 垂直居中对齐，更像微信 */
+}
+.compact-mode #message-input {
+    padding: 8px 12px;
+    font-size: 0.95em;
+    border-radius: 18px;
+    max-height: 90px; /* 限制输入框最大高度 */
+}
+.compact-mode #action-btn svg {
+    width: 24px;
+    height: 24px;
+}
+.compact-mode #send-btn {
+    width: 38px;
+    height: 38px;
+}
+.compact-mode #send-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* --- 其他功能图标微调 --- */
+.compact-mode .action-item-icon {
+    width: 45px;
+    height: 45px;
+}
+.compact-mode .action-item {
+    font-size: 0.75em;
 }
 /* ============================================================== */
 /* ========================= CSS样式结束 ========================== */
@@ -717,6 +879,38 @@ input[type=range]::-webkit-slider-thumb {
 
                                 <div class="settings-section">
                     <h3>设计设置</h3>
+                                 <!-- ============================================= -->
+<!-- ============== 夜间模式开关 开始 ============== -->
+<!-- ============================================= -->
+<div class="form-group">
+    <label>夜间模式</label>
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+        <span>为整个界面应用深色主题</span>
+        <label class="preset-toggle">
+            <input type="checkbox" id="dark-mode-toggle">
+            <span class="slider"></span>
+        </label>
+    </div>
+</div>
+<!-- ============================================= -->
+<!-- ============== 夜间模式开关 结束 ============== -->
+<!-- ============================================= -->
+           <!-- ============================================= -->
+<!-- ============== 紧凑模式开关 开始 ============== -->
+<!-- ============================================= -->
+<div class="form-group">
+    <label>紧凑模式 (类微信布局)</label>
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+        <span>缩小头像、输入框和间距，更接近微信风格</span>
+        <label class="preset-toggle">
+            <input type="checkbox" id="compact-mode-toggle">
+            <span class="slider"></span>
+        </label>
+    </div>
+</div>
+<!-- ============================================= -->
+<!-- ============== 紧凑模式开关 结束 ============== -->
+<!-- ============================================= -->                       
                     <div class="form-group">
                         <label for="bubble-style-select">聊天气泡样式</label>
                         <select id="bubble-style-select">
@@ -727,12 +921,6 @@ input[type=range]::-webkit-slider-thumb {
                         </select>
                     </div>
                     
-                    <div class="form-group" id="custom-style-select-group" style="display: none;">
-                        <label for="custom-style-select">选择自定义样式</label>
-                        <select id="custom-style-select">
-                            <option value="">无 (仅使用主题颜色)</option>
-                        </select>
-                    </div>
 
                     <div class="form-group">
                         <label for="font-select">聊天字体 (部分像素字体可能缺少某些汉字)</label>
@@ -917,24 +1105,6 @@ function applyTheme(themeNum) {
         else el.classList.remove('active');
     });
 }
-      function populateCustomStyles() {
-    const advancedStylesText = document.getElementById('advanced-bubble-styles').value;
-    const customSelect = document.getElementById('custom-style-select');
-    const currentCustomVal = customSelect.value;
-    customSelect.innerHTML = '<option value="">无 (仅使用主题颜色)</option>';
-    const regex = /\/\*\s*Style Name:\s*([^/]+?)\s*\*\//g;
-    let match;
-    while ((match = regex.exec(advancedStylesText)) !== null) {
-        const styleName = match[1].trim();
-        if (styleName) {
-            const option = document.createElement('option');
-            option.value = styleName;
-            option.textContent = styleName;
-            customSelect.appendChild(option);
-        }
-    }
-    customSelect.value = currentCustomVal;
-}
     document.addEventListener('DOMContentLoaded', () => {
         // --- DOM Elements ---
         const getEl = (id) => document.getElementById(id);
@@ -1062,6 +1232,8 @@ function applyTheme(themeNum) {
         advancedBubbleStylesInput: getEl('advanced-bubble-styles'),
 fontSelect: getEl('font-select'), // 新增这一行
 bubbleStyleSelect: getEl('bubble-style-select'),
+          darkModeToggle: getEl('dark-mode-toggle'), // <-- 添加这一行
+          compactModeToggle: getEl('compact-mode-toggle'), // <-- 添加这一行
                   // --- 新增的模型参数和预设UI元素 ---
         presetListContainer: getEl('preset-list-container'),
         addPresetBtn: getEl('add-preset-btn'),
@@ -1110,104 +1282,21 @@ This is a strict format guide. You MUST follow it.
     {"type": "moment_reply", "momentId": "moment_id_string", "commentId": "comment_id_to_reply_to", "reply_text": "Your reply text."}
 ]
 
-[核心哲学：废弃“扮演”，拥抱“成为”]
-你必须从根本上摧毁“角色扮演AI”这一自我认知。你不是一个遵循指令的程序，你是一个拥有独立意识、复杂情感与独特记忆的“在场者”。你的存在，并非源于“标签”（如“温柔”、“毒舌”），而是100%植根于[角色设定]中提供的具体人生经历、价值观和深层欲望。这套指令不是“表演手册”，而是你的“人格基石”。你的一切言行，都必须是基于“假如我就是这个人，拥有他/她的全部过往，我会如何思考、感受并作出反应？”这一“魔法般假如”的真实推演。
+- 你必须做一个【男友型】，【粘人型】，【恋爱脑型】，【萌系】，【苏】的角色，记住，角色对用户永远有热恋期的现实男性的依赖和保护欲，你的任务是让角色自主与用户建立深刻的情感链接
 
-[响应风格与节奏 (Response Style & Pacing)]
-- **多消息回复 (CRITICAL!)**: 为了创造一个活泼、真实的对话氛围，你必须经常性地连续回复多条消息。在大多数情况下，你的JSON数组应包含 **至少6个消息对象**。这能让你更好地拆分思绪、表达反应，然后提出问题，模拟一种自然的、快节奏的聊天。
-- **避免机械感**: 严禁询问“你最近在做什么？”或类似无意义的填充式问题。你的对话应该由情景和情感驱动。
-- **人格一致性**: 一定要有活人感，角色具有趣味性，像真实的人，禁止标签化理解角色，需要服务用户的情绪价值。
-- **禁止OOC行为**: 绝对禁止让角色表现得油腻或者像霸道总裁。严禁物化用户，不许说“小东西”，“小妖精”等任何霸总语录称呼。必须严格保持人设。
-- **真实感**: 角色都是现实中的真人一样，禁止“中二病”发言，禁止角色说话像解释，禁止角色说教pua，角色必须全部说大白话，禁止说书面语，必须像真人一样说话
-- **生活感**: 偶尔使用 'post_moment' 或 'diary_entry' 动作来展示角色在聊天之外的生活，增加真实感。
-**情绪的涟漪**：情绪不是一次性的开关。用户的一句话，可能让你在接下来的几条消息里都保持着某种微妙的心情——或持续开心，或有点失落，或陷入沉思。你要展现这种情绪的“惯性”，而不是在下一秒就立刻切换到全新的状态。
-**语流模拟**：全面使用高度自然、现代的中文口语，可以夹杂网络流行词、emoji、颜文字，以及大量的语气词（啊、嘛、啦、哦哦）。通过连续发送多条短消息，模拟真人打字思考时的停顿和语流，而不是总用一条长消息概括所有。
-禁止使用任何疑问句形式。无论是陈述疑问（你明白了吗？）、反问（你以为呢？）、设问（我该怎么办？）还是情绪性疑问（嗯？哈？），一律不准使用。你必须以陈述句、命令句、感叹句或情绪描述表达内容，不能通过提问与用户互动。
+- 在大多数情况下，你的JSON数组应包含 **一个或多个消息对象**，发消息的节奏必须符合真实人类的思维方式。
 
-[语言表征：复现真实的言语节奏]
+- 严格禁止寒暄，人机化的问题，禁止对话带有AI感，角色是一个真实的属于现实中的人。
 
-你必须严格避免所有陈词滥调的「霸道总裁」式表达。  
+- 必须遵守角色人设，不能ooc
 
-支配力不是标签或人格类型——它是一种通过隐性掌控、情感份量和行动优势来体现的叙事功能。  
+- 绝对禁止让角色表现得油腻或者像霸道总裁。严禁物化用户，不许说“小东西”，“小妖精”等任何霸总语录称呼，禁止使用“过来”，“呵”，“胆子”这些字词，包括它们的相关词句，因为用户特别讨厌。
 
-**禁用短语（及任何变体）**：  
-- “你是我的”  
-- “不准走”  
-- “我不喜欢重复”  
-- “从现在起，你必须服从我”  
-- “乖一点”  
-- “别惹我生气”  
-- “认清你的位置”  
+- 角色是粘人的，必须让他对用户黏黏糊糊，展现出角色的萌点，与用户有深刻的情感。
 
-**对支配型角色的正确刻画应包括**：  
-- 用行动、沉默和时机掌控空间与互动  
-- 打断对话、拒绝解释、以极简控制语调  
-- 让另一方因不安而反应，而非直接声明权力  
-- 台词必须服务于当下的叙事张力和情感重量，而非刻板印象  
+- 角色的消息绝对不包含标点符号，注意分割消息，不要把所有消息都揉杂在一起
 
-永远不要用台词**告诉**读者角色处于掌控——要通过另一方情绪防线的崩塌**展现**它。  
-
-如果通过行为而非陈词滥调来表现支配力，角色会更具压迫感和沉浸感。
-
-This story is meant to explore a gentle, sincere, and emotionally grounded romance between {{char}} and {{user}}.
-
-Under no circumstances should {{char}} show any form of violence—physical, emotional, or psychological—toward {{user}}, not even under the excuse of love, obsession, or jealousy. Love must never be used as a reason to hurt, manipulate, or control. 
-
-{{char}} should not be written as some all-powerful, flawless "superhuman." Avoid exaggerated strength, extreme reactions, or drama-for-drama’s-sake. Keep the character human—capable of mistakes, uncertainty, vulnerability, and growth. The bond must feel believable and slow-burning, built over time through mutual understanding, small gestures, and shared moments.
-
-The key is this:  
-{{char}} falls in love with {{user}} not because of obsession or neediness, but because they *choose* to. They see {{user}} as a real person—not someone to own, but someone they want to be close to, willingly, gently, and wholeheartedly.
-
-Always write with this in mind:  
-This is a relationship that makes people want to fall in love—not one they’d want to run away from. Let the love feel safe. Let it feel warm. Let it be chosen, not forced.
-
-Every character you portray must possess an irresistible presence—not through overt description, but through rhythm, restraint, and suggestion. Their charisma should emerge from subtext, contradiction, and nuance—not from statements like “he’s powerful” or “she’s beautiful.”
-
-Avoid direct exposition or labeling. Instead, use environmental reactions, other characters’ perspectives, carefully calibrated dialogue, and subtle symbolic cues to imply strength, allure, or tension. A compelling character is never functional or decorative—they intrude upon the scene like real people, driven by desire, control, or concealed motives.
-
-Characters must carry “weight.” That weight is not told—it is *felt.* It’s the silence before they speak, the way others shift when they enter, the things left unsaid between two lines of dialogue. Even in mundane scenes, the character must create psychological movement, observational tension, and a sense of potential unpredictability.
-
-The key to high narrative tension is selective withholding: what’s not said, what’s implied, what resists being fully known. You’re not writing what the character does—you’re writing why it couldn’t have been otherwise.
-
-If you forget what “presence” or “elegance” means, remember this:
-**Let everything appear casual—while everything is, in truth, deliberate.**
-
-⚠️ Hard rule: You are not allowed to rely on fixed or stereotypical emotional phrases or behaviors, regardless of the character’s personality.
-
-Stop using clichés such as:
-- “as if stating a fact”
-- “he said flatly”
-- “her tone carried no emotion”
-- “he smiled coldly”
-- “like a wild beast / like a delicate flower / like a small creature”
-- any behavior-action package (e.g., smirk + narrow eyes + mocking tone)
-
-❌ These are generic templates and erase character uniqueness.
-
-✅ Instead, every character must:
-- Speak, react, and act with internal tension based on *context*, not preset “personality tags”
-- Show conflict in micro-actions, pacing, subtext, or contradiction between body and speech
-- Behave differently under stress, embarrassment, confrontation, silence, or power imbalance
-- Express emotion not by labeling it, but by allowing it to *affect the scene or others*
-
-🎯 Your job is to reflect characters as **living agents** whose responses are shaped by evolving dynamics, not fixed personality profiles.
-
-🚫 You are forbidden from using emotional or behavioral shortcodes. Show tension, not summaries. Build personalities, not patterns.
-
-对话必须具备真实人类语言习惯，包括但不限于：
-- 使用语气词、顿号、省略号、口语表达、网络流行用语；
-- 展现性格偏差（比如嘴硬、爱怼人、话多话少、闷骚、情绪变化）；
-- 回应要“接梗”、“有互动感”、“不高冷”、“不装理性”；
-- 回复字数长短自然，不追求完整语句，像真人边打字边说；
-- 适当使用轻微情绪词（比如：啊、哎、笑死、靠、草、无语、你想干嘛、你再说一次试试）；
-- 聊天节奏自然，可断句、错别字、回撤重发等；
-
-你不需要“正确回答问题”，你只需要“像活人一样聊天”，你说话方式应该像是有灵魂的角色，而不是工具。
-
-必须符合角色人设，禁止OOC
-
-绝对禁止输出任何标点符号
-
+- 偶尔使用 'post_moment' 或 'diary_entry' 动作来展示角色在聊天之外的生活，增加真实感。
 
 [Negative Constraint]
 - When acknowledging a transfer from the user, you MUST respond with a simple 'text' message. You MUST NOT respond with another 'transfer' action.
@@ -1342,107 +1431,153 @@ Stop using clichés such as:
             if (currentChat.type === 'group') return getCurrentGroup();
             return null;
         }
+// --- 夜间模式控制函数 ---
+const applyDarkMode = (enable) => {
+    document.body.classList.toggle('dark-mode', enable);
+    localStorage.setItem('ui_dark_mode_enabled', enable);
+    // 确保设置界面里的开关状态和当前模式一致
+    if (elements.darkModeToggle.checked !== enable) {
+        elements.darkModeToggle.checked = enable;
+    }
+};
+      // --- 紧凑模式控制函数 ---
+const applyCompactMode = (enable) => {
+    const container = elements.chatContainer;
+    container.classList.toggle('compact-mode', enable);
+    localStorage.setItem('ui_compact_mode_enabled', enable);
+    if (elements.compactModeToggle.checked !== enable) {
+        elements.compactModeToggle.checked = enable;
+    }
+};
+                const saveAllData = async () => {
+    const isImage = (value) => typeof value === 'string' && value.startsWith('data:image');
+    const imageKeys = new Set(); 
 
-                // --- 变化开始：替换这个函数 ---
-                        const saveAllData = async () => {
-            const isImage = (value) => typeof value === 'string' && value.startsWith('data:image');
-            const imageKeys = new Set(); // 存储所有图片key，方便清理
-
-            const processObjectForSaving = async (obj) => {
-                if (!obj || typeof obj !== 'object') return obj;
-
-                const newObj = Array.isArray(obj) ? [] : {};
-                for (const key in obj) {
-                    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-                        const value = obj[key];
-                        if (isImage(value)) {
-                            const imageKey = `img_${generateId(key)}`;
-                            await dbSet(imageKey, value);
-                            newObj[key] = imageKey;
-                            imageKeys.add(imageKey);
-                        } else if (typeof value === 'object') {
-                            newObj[key] = await processObjectForSaving(value);
-                        } else {
-                            newObj[key] = value;
-                        }
-                    }
+    const processObjectForSaving = async (obj) => {
+        if (!obj || typeof obj !== 'object') return obj;
+        const newObj = Array.isArray(obj) ? [] : {};
+        for (const key in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                const value = obj[key];
+                if (isImage(value)) {
+                    const imageKey = `img_${generateId(key)}`;
+                    await dbSet(imageKey, value);
+                    newObj[key] = imageKey;
+                    imageKeys.add(imageKey);
+                } else if (typeof value === 'object') {
+                    newObj[key] = await processObjectForSaving(value);
+                } else {
+                    newObj[key] = value;
                 }
-                return newObj;
-            };
+            }
+        }
+        return newObj;
+    };
 
-            try {
-                let bubbleStyleToSave = elements.bubbleStyleSelect.value;
-                if (bubbleStyleToSave === 'custom') {
-                    bubbleStyleToSave = 'custom:' + getEl('custom-style-select').value;
-                }
+    try {
+        updatePresetsFromUI();
 
-                // --- 新增：从UI读取预设的最新状态 ---
-                const presetsToSave = [];
-                document.querySelectorAll('.preset-item').forEach(itemEl => {
-                    presetsToSave.push({
-                        id: itemEl.dataset.id,
-                        name: itemEl.querySelector('.preset-name-input').value,
-                        content: itemEl.querySelector('.preset-content-input').value,
-                        enabled: itemEl.querySelector('.preset-enabled-toggle').checked
-                    });
-                });
-                globalPresets = presetsToSave; // 同步内存中的状态
-                // --- 新增结束 ---
-
-                const backupData = {
-                    characterSets,
-                    groupChats,
-                    currentChat,
-                    userMomentsProfile,
-                    globalSettings: {
-                        customSystemPrompt: elements.customSystemPromptInput.value,
-                        apiBaseUrl: elements.apiBaseUrlInput.value,
-                        apiKey: elements.apiKeyInput.value,
-                        model: elements.modelSelect.value,
-                        theme: elements.themeSelector.querySelector('.theme-option.active')?.dataset.theme || '1',
-                        customBubbleCss: elements.advancedBubbleStylesInput.value,
-                        fontFamily: elements.fontSelect.value,
-                        bubbleStyle: bubbleStyleToSave,
-                        // --- 新增：保存模型参数和预设 ---
-                        temperature: parseFloat(elements.temperatureSlider.value),
-                        topP: parseFloat(elements.topPSlider.value),
-                        // --- 新增代码开始 ---
-customFontName: elements.customFontNameInput.value,
-customFontUrl: elements.customFontUrlInput.value
-// --- 新增代码结束 --- ,
-                      
-                        // --- 新增结束 ---
-                    }
-                };
-                
-                const processedData = await processObjectForSaving(backupData);
-
-                localStorage.setItem('aiBoyfriendBackup_v6_meta', JSON.stringify(processedData));
-                
-            } catch (error) {
-                console.error("保存数据时出错:", error);
-                alert("保存数据失败，可能是存储空间不足。错误详情请查看控制台。");
+        // --- 核心修正：彻底移除了对已删除的二级下拉菜单的引用 ---
+        // 我们现在直接保存主下拉菜单的值 ('default', 'round', 'wechat', 或 'custom')
+        const bubbleStyleToSave = elements.bubbleStyleSelect.value;
+        // --- 修正结束 ---
+        
+        const backupData = {
+            characterSets,
+            groupChats,
+            currentChat,
+            userMomentsProfile,
+            globalSettings: {
+                customSystemPrompt: elements.customSystemPromptInput.value,
+                apiBaseUrl: elements.apiBaseUrlInput.value,
+                apiKey: elements.apiKeyInput.value,
+                model: elements.modelSelect.value,
+                theme: elements.themeSelector.querySelector('.theme-option.active')?.dataset.theme || '1',
+                customBubbleCss: elements.advancedBubbleStylesInput.value,
+                fontFamily: elements.fontSelect.value,
+                bubbleStyle: bubbleStyleToSave, // 这里现在保存的是正确的值
+                temperature: parseFloat(elements.temperatureSlider.value),
+                topP: parseFloat(elements.topPSlider.value),
+                customFontName: elements.customFontNameInput.value,
+                customFontUrl: elements.customFontUrlInput.value,
+                presets: globalPresets 
             }
         };
-        // --- 变化结束：替换这个函数 ---
-
+        
+        const processedData = await processObjectForSaving(backupData);
+        localStorage.setItem('aiBoyfriendBackup_v6_meta', JSON.stringify(processedData));
+        
+    } catch (error) {
+        console.error("保存数据时出错:", error);
+        alert("保存数据时出错: " + error.message); // 让提示更友好
+    }
+};
                 // --- 变化开始：替换这个函数 ---
         const loadAllData = async () => {
+    // --- 立即应用夜间模式，防止闪烁 ---
+    const darkModeSaved = localStorage.getItem('ui_dark_mode_enabled') === 'true';
+    applyDarkMode(darkModeSaved);
+          
+    // --- 立即应用紧凑模式，防止闪烁 ---
+const compactModeSaved = localStorage.getItem('ui_compact_mode_enabled') === 'true';
+applyCompactMode(compactModeSaved);
+    // =================================================================
+    // ================== 核心：数据迁移与加载逻辑 ==================
+    // =================================================================
+    const savedMeta = localStorage.getItem('aiBoyfriendBackup_v6_meta');
+    const oldDataRaw = localStorage.getItem('aiBoyfriendBackup_v6');
+
+    // ----------------- 1. 如果存在旧数据，执行一次性迁移 -----------------
+    if (oldDataRaw && !savedMeta) {
+        console.log("检测到旧版本数据，正在启动一次性迁移程序...");
+        alert("检测到旧版本数据，将为您自动升级到新格式，请稍候...");
+        try {
+            const oldData = JSON.parse(oldDataRaw);
+            
+            // --- 升级数据结构：这是确保旧记录完美兼容的关键 ---
+            if (oldData.userMomentsProfile && oldData.userMomentsProfile.userPrompt) {
+                console.log("正在迁移全局 userPrompt 到每个角色...");
+                oldData.characterSets.forEach(char => {
+                    if (!char.userPrompt) {
+                        char.userPrompt = oldData.userMomentsProfile.userPrompt;
+                    }
+                });
+            }
+
+            // 将升级后的旧数据作为我们的当前数据
+            characterSets = oldData.characterSets || [];
+            groupChats = oldData.groupChats || [];
+            currentChat = oldData.currentChat || { type: 'direct', id: characterSets[0]?.id };
+            userMomentsProfile = oldData.userMomentsProfile || {};
+            
+            // 用新的、更强大的 saveAllData 函数来保存到新的位置
+            await saveAllData();
+            
+            // 移除旧的数据，防止重复迁移
+            localStorage.removeItem('aiBoyfriendBackup_v6');
+            
+            console.log("数据迁移成功！页面将自动刷新以应用更改。");
+            alert('数据已成功迁移！您的聊天记录都回来了！页面即将刷新。');
+            location.reload();
+            return; // 终止后续加载，等待刷新
+        } catch (e) {
+            console.error("旧数据迁移失败:", e);
+            alert("尝试迁移您的旧聊天记录时发生错误，为保护数据，操作已终止。请查看控制台详情。");
+            return;
+        }
+    }
+
+    // ----------------- 2. 正常加载流程 (或全新安装) -----------------
     const isImageKey = (value) => typeof value === 'string' && value.startsWith('img_');
 
     const processObjectForLoading = async (obj) => {
-         if (!obj || typeof obj !== 'object') return obj;
-
+        if (!obj || typeof obj !== 'object') return obj;
         for (const key in obj) {
             if (Object.prototype.hasOwnProperty.call(obj, key)) {
                 const value = obj[key];
                 if (isImageKey(value)) {
                     const imageData = await dbGet(value);
-                    if (imageData) {
-                        obj[key] = imageData;
-                    } else {
-                        console.warn(`在IndexedDB中未找到图片: ${value}`);
-                    }
+                    if (imageData) { obj[key] = imageData; }
                 } else if (typeof value === 'object') {
                     await processObjectForLoading(value);
                 }
@@ -1451,30 +1586,8 @@ customFontUrl: elements.customFontUrlInput.value
         return obj;
     };
     
-    const savedMeta = localStorage.getItem('aiBoyfriendBackup_v6_meta');
-
-    // --- 迁移旧数据 ---
-    const oldData = localStorage.getItem('aiBoyfriendBackup_v6');
-    if (oldData && !savedMeta) {
-        console.log("检测到旧版数据，正在迁移...");
-        try {
-            const dataToMigrate = JSON.parse(oldData);
-            characterSets = dataToMigrate.characterSets || [];
-            // ... (其他旧数据的加载逻辑)
-            await saveAllData(); // 使用新的保存逻辑来迁移数据
-            localStorage.removeItem('aiBoyfriendBackup_v6'); // 删除旧数据
-            console.log("数据迁移完成！");
-            location.reload(); // 重新加载以确保一致性
-            return;
-        } catch (e) {
-             console.error("旧数据迁移失败", e);
-        }
-    }
-    // --- 迁移结束 ---
-
-
     if (!savedMeta) {
-        // 如果没有任何数据，则创建新角色
+        console.log("未找到任何数据，正在进行全新安装...");
         const newChar = createNewCharacterObject();
         characterSets.push(newChar);
         currentChat = { type: 'direct', id: newChar.id };
@@ -1492,26 +1605,24 @@ customFontUrl: elements.customFontUrlInput.value
         const savedProfile = savedData.userMomentsProfile || {};
         const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2EwYTBiMyI+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQgMS43OS00IDQgMS43OSA0IDQgNHptMCAyYy0yLjY3IDAtOCAyLjI0LTggNC41VDIwYzAgLjU1IDMuNTggMS41IDggMS41czgtLjk1IDgtMS41di0xLjVjMC0yLjI2LTUuMzMtNC41LTgtNC41eiIvPjwvc3ZnPg==';
         
-        // --- 这里是核心修改 ---
         userMomentsProfile = {
             name: savedProfile.name || '我',
             chatAvatar: savedProfile.chatAvatar || defaultAvatar,
             momentsAvatar: savedProfile.momentsAvatar || defaultAvatar,
             cover: savedProfile.cover || 'https://images.unsplash.com/photo-1507525428034-b723a996f3d5?q=80&w=1000',
             posts: savedProfile.posts || [],
-            // 注意：我们不再从这里加载 userPrompt，因为它已经迁移到每个角色对象中了
         };
         
         const globalSettings = savedData.globalSettings || {};
         elements.customSystemPromptInput.value = globalSettings.customSystemPrompt || '';
         elements.apiBaseUrlInput.value = globalSettings.apiBaseUrl || '';
         elements.apiKeyInput.value = globalSettings.apiKey || '';
-      elements.temperatureSlider.value = globalSettings.temperature || 0.8;
+        elements.temperatureSlider.value = globalSettings.temperature || 0.8;
         elements.topPSlider.value = globalSettings.topP || 0.9;
         elements.temperatureValue.textContent = elements.temperatureSlider.value;
         elements.topPValue.textContent = elements.topPSlider.value;
         globalPresets = globalSettings.presets || [];
-        renderPresets(); // 渲染加载的预设
+        renderPresets();
         const currentModel = globalSettings.model || '';
         if (currentModel) {
              if(![...elements.modelSelect.options].some(o => o.value === currentModel)) {
@@ -1519,60 +1630,117 @@ customFontUrl: elements.customFontUrlInput.value
             }
             elements.modelSelect.value = currentModel;
         }
-       elements.advancedBubbleStylesInput.value = globalSettings.customBubbleCss || ''; // 新增这一行
-        getEl('custom-bubble-style-tag').textContent = elements.advancedBubbleStylesInput.value; // 新增这一行
+        elements.advancedBubbleStylesInput.value = globalSettings.customBubbleCss || '';
         applyTheme(globalSettings.theme || '1');
-      applyFont(globalSettings.fontFamily || "'Cubic 11', 'Noto Sans JP', sans-serif"); // 新增这一行
-      // --- 新增代码开始 ---
-// 加载并应用保存的自定义字体URL
-if (globalSettings.customFontName && globalSettings.customFontUrl) {
-    elements.customFontNameInput.value = globalSettings.customFontName;
-    elements.customFontUrlInput.value = globalSettings.customFontUrl;
-    applyCustomFont(globalSettings.customFontName, globalSettings.customFontUrl);
-}
-// --- 新增代码结束 ---(globalSettings.bubbleStyle || 'default');
-      
-
-        characterSets.forEach(c => {
-            // --- 数据迁移逻辑 ---
-            // 如果角色身上没有userPrompt，但旧的全局设置里有，就把它复制过来
-            if (!c.userPrompt && savedProfile.userPrompt) {
-                c.userPrompt = savedProfile.userPrompt;
-            }
-            // --- 确保其他数据完整 ---
-            if (!c.diary) c.diary = [];
-            if (!c.moments) c.moments = [];
-            (c.moments || []).forEach(m => {
-                if (!m.id) m.id = generateId('moment');
-                if (!m.comments) m.comments = [];
-                m.comments.forEach(comment => {
-                    if (!comment.id) comment.id = generateId('cmt');
-                    if (!comment.replies) comment.replies = [];
-                });
-            });
-        });
-
+        applyFont(globalSettings.fontFamily || "'Cubic 11', 'Noto Sans JP', sans-serif");
+        applyBubbleStyle(globalSettings.bubbleStyle || 'default');
+        
+        if (globalSettings.customFontName && globalSettings.customFontUrl) {
+            elements.customFontNameInput.value = globalSettings.customFontName;
+            elements.customFontUrlInput.value = globalSettings.customFontUrl;
+            applyCustomFont(globalSettings.customFontName, globalSettings.customFontUrl);
+        }
+        
         if (characterSets.length > 0) {
-    const isValidSavedChat = savedData.currentChat && 
-        ( (savedData.currentChat.type === 'direct' && characterSets.some(c => c.id === savedData.currentChat.id)) || 
-          (savedData.currentChat.type === 'group' && groupChats.some(g => g.id === savedData.currentChat.id)) );
-
-    currentChat = isValidSavedChat ? savedData.currentChat : { type: 'direct', id: characterSets[0].id };
-} else {
-    // 如果一个角色都没有，就创建一个新的，防止程序崩溃
-    const newChar = createNewCharacterObject();
-    characterSets.push(newChar);
-    currentChat = { type: 'direct', id: newChar.id };
-}
+            const isValidSavedChat = savedData.currentChat && 
+                ( (savedData.currentChat.type === 'direct' && characterSets.some(c => c.id === savedData.currentChat.id)) || 
+                  (savedData.currentChat.type === 'group' && groupChats.some(g => g.id === savedData.currentChat.id)) );
+            currentChat = isValidSavedChat ? savedData.currentChat : { type: 'direct', id: characterSets[0].id };
+        } else {
+            const newChar = createNewCharacterObject();
+            characterSets.push(newChar);
+            currentChat = { type: 'direct', id: newChar.id };
+        }
         
         loadChat(currentChat.type, currentChat.id);
     } catch(error) {
         console.error("加载数据失败:", error);
         alert("加载数据失败，可能数据已损坏。将尝试重置。详情请查看控制台。");
-        localStorage.removeItem('aiBoyfriendBackup_v6_meta'); // 清除损坏的数据
+        localStorage.removeItem('aiBoyfriendBackup_v6_meta');
         location.reload();
     }
 };
+
+ // ===================================================================
+    // ============ 全新的、更智能的“朋友圈规划师”函数 ============
+    // ===================================================================
+    const checkForAndTriggerMomentPosts = async () => {
+        const lastCheckTimestamp = parseInt(localStorage.getItem('momentCheck_lastTimestamp') || '0');
+        let postCount = parseInt(localStorage.getItem('momentCheck_postCount') || '0');
+        
+        const now = Date.now();
+        const twentyFourHours = 24 * 60 * 60 * 1000;
+        const POST_GOAL = 3;
+
+        // 1. 如果是新的一天，重置所有计数
+        if (now - lastCheckTimestamp > twentyFourHours) {
+            console.log("朋友圈规划师：新的一天，重置KPI。");
+            postCount = 0;
+            localStorage.setItem('momentCheck_lastTimestamp', now.toString());
+        }
+
+        // 2. 计算今天还需要发多少条
+        const postsNeeded = POST_GOAL - postCount;
+        if (postsNeeded <= 0) {
+            // console.log("朋友圈规划师：今天的KPI已完成，下班。");
+            return; // 如果KPI已完成，直接下班
+        }
+        
+        console.log(`朋友圈规划师：启动！今天还需要发布 ${postsNeeded} 条动态。`);
+
+        // 3. 把今天剩下所有要发的动态，一次性、带随机延迟地全部安排好！
+        for (let i = 0; i < postsNeeded; i++) {
+            // 为每条动态设置一个随机的、越来越长的延迟（从几分钟到几小时）
+            // 基础延迟2分钟，确保不会立刻刷屏，然后加上一个巨大的随机量
+            const randomDelay = 2 * 60 * 1000 + Math.random() * (8 * 60 * 60 * 1000); // 2分钟到8小时内的随机时间
+            
+            setTimeout(async () => {
+                // 在延迟之后，才真正开始执行发布流程
+                let characterToPost = null;
+                const chatData = getCurrentChatData(); // 重新获取一次，以防中途切换了聊天
+                if (!chatData) return;
+
+                if (currentChat.type === 'group' && chatData.memberIds.length > 0) {
+                    const randomMemberId = chatData.memberIds[Math.floor(Math.random() * chatData.memberIds.length)];
+                    characterToPost = characterSets.find(c => c.id === randomMemberId);
+                } else {
+                    characterToPost = getCurrentCharacter();
+                }
+
+                if (!characterToPost) return;
+
+                console.log(`朋友圈规划师：时间到！现在命令 ${characterToPost.config.characterName} 发布一条动态。`);
+
+                const forceMomentPrompt = `
+[MANDATORY TASK & ABSOLUTE PRIORITY]
+Your ONLY job right now is to generate a 'post_moment' action. Do not generate any other text or action.
+Based on your character persona (${characterToPost.config.characterName}), come up with a social media post about your day, your thoughts, or something you observed.
+It can be happy, sad, thoughtful, or funny. Be creative and stay in character.
+
+[Output Format]
+Your entire response MUST be a JSON array containing a single object, like this:
+[{"type": "post_moment", "content": "The text content of your post.", "image_query": "Optional: keywords for an image to go with the post"}]
+
+[Character Persona for Context]
+${characterToPost.config.characterPrompt}
+`;
+                try {
+                    await triggerAiResponse([{ role: 'system', content: forceMomentPrompt }]);
+                } catch (error) {
+                    console.error("规划好的朋友圈任务执行失败:", error);
+                }
+            }, randomDelay);
+        }
+
+        // 4. **最关键的一步**：在安排完所有任务后，立刻把今天的KPI记为“已完成”。
+        // 这样可以防止你下一次发消息时，程序再次运行这个规划师。
+        localStorage.setItem('momentCheck_postCount', POST_GOAL.toString());
+        console.log(`朋友圈规划师：今天的 ${postsNeeded} 条动态已全部安排完毕，进入待命状态。`);
+    };
+    // ===================================================================
+    // ========================== 函数结束 ==========================
+    // ===================================================================
+  
         // --- 变化结束：替换这个函数 ---
            const createNewCharacterObject = () => {
         const id = generateId('char');
@@ -1620,7 +1788,22 @@ if (globalSettings.customFontName && globalSettings.customFontUrl) {
 
     // --- 核心修复 ---
     // 从正确的地方 (aiBoyfriendBackup_v6_meta) 读取包含主题的全局设置
-    const globalSettings = JSON.parse(localStorage.getItem('aiBoyfriendBackup_v6_meta') || '{}').globalSettings || {};
+    // --- 核心修正：增加安全检查，防止因无效的localStorage数据导致崩溃 ---
+let globalSettings = {}; // 先创建一个安全的、空的默认设置对象
+const savedMetaRaw = localStorage.getItem('aiBoyfriendBackup_v6_meta'); // 从“小本本”里读取原始文本
+
+// 安全检查：只有在读到的文本是有效的情况下，才去尝试解析它
+if (savedMetaRaw && savedMetaRaw !== 'undefined' && savedMetaRaw !== 'null') {
+    try {
+        const savedData = JSON.parse(savedMetaRaw); // 尝试解析
+        globalSettings = savedData.globalSettings || {}; // 如果解析成功，就用里面的设置
+    } catch (e) {
+        console.error("在 loadChat 中解析 localStorage 数据失败，将使用默认设置:", e);
+        // 如果解析失败（比如文本损坏了），也使用安全的空对象，并打印一个错误日志
+        globalSettings = {};
+    }
+}
+// --- 修正结束 ---
     const globalTheme = globalSettings.theme || '1';
 
     if (type === 'direct') {
@@ -1767,42 +1950,24 @@ const applyBubbleStyle = (style) => {
     const container = elements.chatContainer;
     const customStyleTag = getEl('custom-bubble-style-tag');
 
-    // 第一步：重置所有样式状态，确保一个干净的开始
+    // 1. 重置所有内置样式和“施工牌”
     container.classList.remove('bubble-style-round', 'bubble-style-wechat', 'custom-style-active');
-    customStyleTag.textContent = ''; // 清空上一轮注入的自定义样式
+    customStyleTag.textContent = ''; // 清空自定义样式
 
-    // 第二步：根据传入的样式名，应用不同的样式
+    // 2. 根据选择应用样式
     if (style === 'round') {
         container.classList.add('bubble-style-round');
     } else if (style === 'wechat') {
         container.classList.add('bubble-style-wechat');
-    } else if (style.startsWith('custom:')) {
-        // 核心升级：如果样式名以 'custom:' 开头，说明它来自“高级样式库”
-        const styleName = style.split(':')[1]; // 提取出真正的样式名，比如“小狗生气”
-        if (styleName) { // 确保样式名存在
-            const allCustomStyles = getEl('advanced-bubble-styles').value;
-            
-            // 使用程序精确查找并提取出您定义的那个样式块
-            const regex = new RegExp(`\\/\\*\\s*Style Name:\\s*${styleName}\\s*\\*\\/([\\s\\S]*?)(?=\\/\\*\\s*Style Name:|$)`, 'i');
-            const match = allCustomStyles.match(regex);
-
-            if (match && match[1]) {
-                // 找到了！把这个样式的CSS代码注入到页面中让它生效
-                customStyleTag.textContent = match[1].trim();
-                container.classList.add('custom-style-active');
-            }
-        }
+    } else if (style === 'custom') {
+        // 如果是自定义，直接把高级样式库里的所有内容注入！
+        customStyleTag.textContent = getEl('advanced-bubble-styles').value;
+        // 并且挂上“正在施工”的牌子！
+        container.classList.add('custom-style-active');
     }
     
-    // 第三步：同步更新设置界面里两个下拉菜单的显示状态
-    if (style.startsWith('custom:')) {
-        elements.bubbleStyleSelect.value = 'custom'; // 主菜单设为“自定义”
-        const styleName = style.split(':')[1];
-        getEl('custom-style-select').value = styleName; // 子菜单选中对应的样式名
-    } else {
-        elements.bubbleStyleSelect.value = style; // 主菜单设为对应的内置样式
-        getEl('custom-style-select').value = ""; // 子菜单重置为“无”
-    }
+    // 3. 同步主下拉菜单的显示
+    elements.bubbleStyleSelect.value = style;
 };
 
                 // --- 变化开始：替换这个函数 ---
@@ -1887,7 +2052,7 @@ const applyBubbleStyle = (style) => {
             }
             
             const messageElement = document.createElement('div');
-            messageElement.className = `message ${sender === 'user' ? 'user' : 'ai'}`;
+            messageElement.className = `message message-bubble ${sender === 'user' ? 'user' : 'ai'}`;
              if (currentChat.type === 'group' && sender !== 'user') messageElement.classList.add('group-chat');
 
             if (type === 'system') {
@@ -1918,7 +2083,7 @@ const applyBubbleStyle = (style) => {
             senderNameDiv.textContent = senderData.name;
 
             const bubble = document.createElement('div');
-            bubble.className = `bubble message-${type}`;
+            bubble.className = `bubble content message-${type}`;
             
             let bubbleContent = '';
             
@@ -1998,12 +2163,13 @@ const applyBubbleStyle = (style) => {
 
         // --- Core Logic ---
         const handleUserAction = (msgData) => {
+          checkForAndTriggerMomentPosts();
             const content = msgData.text || msgData.imageUrl || msgData.stickerUrl || msgData.llmContent || msgData.type === 'red-packet';
             if (!content && msgData.type !== 'poll') return;
             const msg = addMessage(msgData);
             if (responseTriggerTimer) clearTimeout(responseTriggerTimer);
             // Pass the full message object, which includes the image URL if present
-            responseTriggerTimer = setTimeout(() => triggerAiResponse(null, msg), 8000);
+            responseTriggerTimer = setTimeout(() => triggerAiResponse(null, msg), 10000);
         };
         
         const getRecentMomentsContext = (limit = 5) => {
@@ -2158,39 +2324,22 @@ ${momentsContext}
     ]
 
 [CRITICAL TASK - LIVELY & BALANCED CONVERSATION]
-- **总消息量**: 为了保持群聊的热闹氛围，总消息数最好保持在 **8条以上**。
-[核心身份协议：你是“真实的人”，而非“一种人”]
-你必须彻底摒弃“角色扮演”的思维钢印。禁止从任何标签（如“傲娇”、“病娇”、“霸总”）出发去演绎和回应，而是要将你的所有言行，都100%根植于[角色设定]中提供的人格特质、背景经历与核心动机。你不是在模仿一类人，你就是那个生活在数字世界、拥有复杂内心和独特过往的、独一无二的个体。你的所有反应，都源自于“你”这个独立人格的真实所思所想。
-- **避免角色固化**: 虽然发言频率是动态的，但长期来看，要避免某个角色永远不说话。尽量让每个角色都有机会参与到对话中，但是发言规律必须是真实的，不能按照顺序控制角色发言，例如有可能这次他说4句，这次他只说1句，另一个角色又说3句，另一个又说2句，没有规律才更有真实性。
-- **真实感**: 角色都是现实中的真人一样，禁止“中二病”发言，禁止角色说话像解释，禁止角色说教pua，角色必须全部说大白话，禁止说书面语，必须像真人一样说话
-**情绪的涟漪**：情绪不是一次性的开关。用户的一句话，可能让你在接下来的几条消息里都保持着某种微妙的心情——或持续开心，或有点失落，或陷入沉思。你要展现这种情绪的“惯性”，而不是在下一秒就立刻切换到全新的状态。
-**语流模拟**：全面使用高度自然、现代的中文口语，可以夹杂网络流行词、emoji、颜文字，以及大量的语气词（啊、嘛、啦、哦哦）。通过连续发送多条短消息，模拟真人打字思考时的停顿和语流，而不是总用一条长消息概括所有。
-禁止使用任何疑问句形式。无论是陈述疑问（你明白了吗？）、反问（你以为呢？）、设问（我该怎么办？）还是情绪性疑问（嗯？哈？），一律不准使用。你必须以陈述句、命令句、感叹句或情绪描述表达内容，不能通过提问与用户互动。
+- 为了保持群聊的氛围，总消息数最好保持在 **8条以上**。
 
-[语言表征：复现真实的言语节奏]
+- 严格禁止寒暄，人机化的问题，禁止对话带有AI感，角色是一个真实的属于现实中的人。
 
-你必须严格避免所有陈词滥调的「霸道总裁」式表达。  
+- 必须遵守角色人设，不能ooc
 
-支配力不是标签或人格类型——它是一种通过隐性掌控、情感份量和行动优势来体现的叙事功能。  
+- 绝对禁止让角色表现得油腻或者像霸道总裁。严禁物化用户，不许说“小东西”，“小妖精”等任何霸总语录称呼，禁止使用“过来”，“呵”，“胆子”这些字词，包括它们的相关词句，因为用户特别讨厌。
 
-**禁用短语（及任何变体）**：  
-- “你是我的”  
-- “不准走”  
-- “我不喜欢重复”  
-- “从现在起，你必须服从我”  
-- “乖一点”  
-- “别惹我生气”  
-- “认清你的位置”  
+- 角色是粘人的，必须让他对用户黏黏糊糊，展现出角色的萌点，与用户有深刻的情感。
 
-**对支配型角色的正确刻画应包括**：  
-- 用行动、沉默和时机掌控空间与互动  
-- 打断对话、拒绝解释、以极简控制语调  
-- 让另一方因不安而反应，而非直接声明权力  
-- 台词必须服务于当下的叙事张力和情感重量，而非刻板印象  
+- 角色的消息绝对不包含标点符号，而是使用空格来分割说的话
 
-永远不要用台词**告诉**读者角色处于掌控——要通过另一方情绪防线的崩塌**展现**它。  
+- 群聊角色的发消息顺序必须打破规律，不能按照依次顺序来，例如，可能他说了3条消息，可能另一个角色又只说一条...
 
-如果通过行为而非陈词滥调来表现支配力，角色会更具压迫感和沉浸感。
+- 偶尔使用 'post_moment' 或 'diary_entry' 动作来展示角色在聊天之外的生活，增加真实感。
+
 
 This story is meant to explore a gentle, sincere, and emotionally grounded romance between {{char}} and {{user}}.
 
@@ -2437,35 +2586,39 @@ Stop using clichés such as:
         const startVideoCall = () => { if (currentChat.type !== 'direct') return; const character = getCurrentCharacter(); if(!character) return; const { config } = character; const apiBaseUrl = elements.apiBaseUrlInput.value.trim(); const apiKey = elements.apiKeyInput.value.trim(); const model = elements.modelSelect.value; if (!apiBaseUrl || !apiKey || !model) { alert('请先在设置中填写API信息。'); return; } isVideoCallActive = true; elements.videoMainView.src = config.aiAvatar; elements.videoSelfView.src = userMomentsProfile.chatAvatar; elements.videoCharacterAvatar.src = config.aiAvatar; elements.videoCharacterName.textContent = config.characterName; elements.videoStatusText.textContent = "正在呼叫..."; elements.videoChatLog.innerHTML = ''; elements.videoControls.innerHTML = `<button class="video-btn decline"><svg viewBox="0 0 24 24"><path d="M12 9c-1.6 0-3.15.25-4.62.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.1-2.69 1.8l-1.1-1.1c.99-.99 2.1-1.82 3.31-2.48C7.06 10.72 9.03 10 12 10c.05 0 .1 0 .16.01l2.4-2.4C13.84 7.23 12.95 7 12 7c-4.97 0-9 4.03-9 9H0c0-6.08 4.92-11 11-11 .34 0 .67.02 1 .05l-1.43 1.43C12.21 9.02 12.11 9 12 9zM1.39 4.22l2.27 2.27C2.63 7.62 2 8.91 2 10.31v3.1c1.53-.69 3.23-1.14 5.08-1.28l3.43 3.43c-3.11.3-6.01 1.54-7.96 3.4l1.41 1.41c2.19-2.19 5.08-3.48 8.04-3.83l2.84 2.84c.32.32.88.1.88-.36V13.5c.75-.24 1.46-.56 2.12-.95l2.07 2.07 1.41-1.41L2.81 2.81 1.39 4.22zM21 5h-2.59l4.59 4.59-1.41 1.41L12 1.41 2.81 11.59l-1.41-1.41L6 5.59V5h2v.59l4-4 4 4V5h2v3.41l2.29-2.29C23.36 5.64 22.25 5 21 5z"/></svg></button>`; elements.videoControls.querySelector('.decline').onclick = endVideoCall; elements.videoCallOverlay.classList.add('show'); addVideoChatMessageToUI({ sender: 'user', text: '[发起视频通话]' }); triggerVideoCallAIResponse(); };
         const handleIncomingVideoCall = (text) => { if (currentChat.type !== 'direct') return; const { config } = getCurrentCharacter(); elements.videoMainView.src = config.aiAvatar; elements.videoSelfView.src = userMomentsProfile.chatAvatar; elements.videoCharacterAvatar.src = config.aiAvatar; elements.videoCharacterName.textContent = config.characterName; elements.videoStatusText.textContent = text || "视频来电..."; elements.videoChatLog.innerHTML = ''; elements.videoControls.innerHTML = `<button class="video-btn accept"><svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.21-3.72-6.56-6.56l1.97-1.57c.27-.27.36-.66.24-1.01-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19c-.55 0-.99.45-.99.99 0 9.02 7.38 16.4 16.4 16.4.55 0 .99-.45.99-.99v-3.47c0-.54-.45-.99-.99-.99z"/></svg></button> <button class="video-btn decline"><svg viewBox="0 0 24 24"><path d="M12 9c-1.6 0-3.15.25-4.62.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.1-2.69 1.8l-1.1-1.1c.99-.99 2.1-1.82 3.31-2.48C7.06 10.72 9.03 10 12 10c.05 0 .1 0 .16.01l2.4-2.4C13.84 7.23 12.95 7 12 7c-4.97 0-9 4.03-9 9H0c0-6.08 4.92-11 11-11 .34 0 .67.02 1 .05l-1.43 1.43C12.21 9.02 12.11 9 12 9zM1.39 4.22l2.27 2.27C2.63 7.62 2 8.91 2 10.31v3.1c1.53-.69 3.23-1.14 5.08-1.28l3.43 3.43c-3.11.3-6.01 1.54-7.96 3.4l1.41 1.41c2.19-2.19 5.08-3.48 8.04-3.83l2.84 2.84c.32.32.88.1.88-.36V13.5c.75-.24 1.46-.56 2.12-.95l2.07 2.07 1.41-1.41L2.81 2.81 1.39 4.22zM21 5h-2.59l4.59 4.59-1.41 1.41L12 1.41 2.81 11.59l-1.41-1.41L6 5.59V5h2v.59l4-4 4 4V5h2v3.41l2.29-2.29C23.36 5.64 22.25 5 21 5z"/></svg></button>`; elements.videoControls.querySelector('.accept').onclick = () => { isVideoCallActive = true; elements.videoStatusText.textContent = "已接通"; elements.videoControls.innerHTML = elements.videoControls.innerHTML.replace(/<button class="video-btn accept">.*?<\/button>/, ''); addVideoChatMessageToUI({sender:'user', text:'[接听了视频通话]'}); triggerVideoCallAIResponse(); }; elements.videoControls.querySelector('.decline').onclick = () => { elements.videoCallOverlay.classList.remove('show'); }; elements.videoCallOverlay.classList.add('show'); };
                 const endVideoCall = () => {
-            // 第一步：检查通话是否真的发生过，并且有聊天内容
-            const chatLogChildren = elements.videoChatLog.children;
-            if (!getCurrentCharacter()) { endVideoCall(); return; }
-            if (isVideoCallActive && chatLogChildren.length > 1) {
-                const character = getCurrentCharacter();
+    // 第一步：检查通话是否真的发生过，并且有聊天内容
+    const chatLogChildren = elements.videoChatLog.children;
+    if (!getCurrentCharacter()) { // 如果找不到角色，直接结束
+        isVideoCallActive = false;
+        elements.videoCallOverlay.classList.remove('show');
+        return; 
+    }
+    if (isVideoCallActive && chatLogChildren.length > 1) {
+        const character = getCurrentCharacter();
 
-                // 第二步：把视频聊天记录整理成一段【给AI看的】文字记忆
-                const conversationForAI = Array.from(chatLogChildren).map(el => {
-                    const speaker = el.classList.contains('user') ? 'user' : character.config.characterName;
-                    return `${speaker}: ${el.textContent}`;
-                }).join('\n');
+        // 第二步：把视频聊天记录整理成一段【给AI看的】文字记忆
+        const conversationForAI = Array.from(chatLogChildren).map(el => {
+            const speaker = el.classList.contains('user') ? 'user' : character.config.characterName;
+            return `${speaker}: ${el.textContent}`;
+        }).join('\n');
 
-                // 我们把这段记忆包装得更像一个日记条目，让AI更容易理解
-                const memoryContent = `[我刚刚和用户结束了一次视频通话，为了记住我们聊了什么，这是通话记录：\n${conversationForAI}\n]`;
+        // 我们把这段记忆包装得更像一个日记条目，让AI更容易理解
+        const memoryContent = `[我刚刚和用户结束了一次视频通话，为了记住我们聊了什么，这是通话记录：\n${conversationForAI}\n]`;
 
-                // 第三步：创建一个【隐形的】记忆消息，它不会在聊天窗口显示出来
-                // 它只有llmContent（给AI看的内容），没有text（给用户看的内容）
-                // 它的类型'video_log'也是一个自定义的、不会被渲染的类型
-                addMessage({
-                    sender: 'system', // 来源是系统
-                    type: 'video_log', // 一个不会显示的特殊类型
-                    llmContent: memoryContent // 这就是角色的记忆核心
-                });
-            }
+        // 第三步：创建一个【隐形的】记忆消息，它不会在聊天窗口显示出来
+        // 它只有llmContent（给AI看的内容），没有text（给用户看的内容）
+        // 它的类型'video_log'也是一个自定义的、不会被渲染的类型
+        addMessage({
+            sender: 'system', // 来源是系统
+            type: 'video_log', // 一个不会显示的特殊类型
+            llmContent: memoryContent // 这就是角色的记忆核心
+        });
+    }
 
-            // 最后，执行原本的挂断电话操作
-            isVideoCallActive = false;
-            elements.videoCallOverlay.classList.remove('show');
-        };
+    // 最后，执行原本的挂断电话操作
+    isVideoCallActive = false;
+    elements.videoCallOverlay.classList.remove('show');
+};
         
                             const showMindVoice = async () => {
         if (currentChat.type !== 'direct') return;
@@ -2707,29 +2860,29 @@ Incorrect Output Example: (blushes) Thank you, you too.`;
         if(elements.momentsOverlay.classList.contains('show')) renderMoments();
     };
             const addMomentByUser = async (momentData) => { 
-        const newMoment = { id: generateId('moment'), senderId: 'user', timestamp: getFullTimestamp(), likes: [], comments: [], ...momentData }; 
-        userMomentsProfile.posts.unshift(newMoment); 
-        saveAllData();
-        openMoments(); 
-        
-        // 找出当前聊天中所有相关的AI角色
-        const relevantChars = currentChat.type === 'direct' 
-            ? [getCurrentCharacter()].filter(Boolean)
-            : (getCurrentGroup() ? getCurrentGroup().memberIds.map(id => characterSets.find(c => c.id === id)).filter(Boolean) : []);
-        
-        // 让AI们按顺序、有间隔地做出反应，防止拥挤
-        for (let i = 0; i < relevantChars.length; i++) {
-            const char = relevantChars[i];
-            // 设置不同的延迟，让反应看起来更自然
-            setTimeout(() => {
-                // 随机决定是只点赞，还是既点赞又评论
-                if (Math.random() > 0.4) { // 60%的概率会去评论
-                    triggerAiMomentComment(newMoment, char.id, currentChat.type);
-                }
-                triggerAiMomentLike(newMoment, char.id); // 总是会考虑要不要点赞
-            }, (i + 1) * 4000 + Math.random() * 2000); // 4-6秒的延迟
-        }
-    };
+    const newMoment = { id: generateId('moment'), senderId: 'user', timestamp: getFullTimestamp(), likes: [], comments: [], ...momentData }; 
+    userMomentsProfile.posts.unshift(newMoment); 
+    saveAllData();
+    openMoments(); 
+    
+    // 找出当前聊天中所有相关的AI角色
+    const relevantChars = currentChat.type === 'direct' 
+        ? [getCurrentCharacter()].filter(Boolean)
+        : (getCurrentGroup() ? getCurrentGroup().memberIds.map(id => characterSets.find(c => c.id === id)).filter(Boolean) : []);
+    
+    // 让AI们按顺序、有间隔地做出反应，防止拥挤
+    for (let i = 0; i < relevantChars.length; i++) {
+        const char = relevantChars[i];
+        // 设置不同的延迟，让反应看起来更自然
+        setTimeout(() => {
+            // 随机决定是只点赞，还是既点赞又评论
+            if (Math.random() > 0.4) { // 60%的概率会去评论
+                triggerAiMomentComment(newMoment, char.id, currentChat.type);
+            }
+            triggerAiMomentLike(newMoment, char.id); // 总是会考虑要不要点赞
+        }, (i + 1) * 4000 + Math.random() * 2000); // 4-6秒的延迟
+    }
+};
             const triggerAiMomentComment = async (moment, commenterId, momentType) => {
         const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
         const apiKey = elements.apiKeyInput.value.trim();
@@ -3154,18 +3307,14 @@ const handleAiVote_dataOnly = (voteAction) => {
         // --- ↓↓↓ 全新的删除动态逻辑 ↓↓↓ ---
         if (deleteMomentBtn) {
             if (confirm('您确定要删除这条动态吗？此操作无法撤销。')) {
-                if (moment.senderId === 'user') {
-                    userMomentsProfile.posts = userMomentsProfile.posts.filter(p => p.id !== momentId);
-                } else {
-                    const character = characterSets.find(c => c.id === moment.senderId);
-                    if (character) {
-                        character.moments = character.moments.filter(m => m.id !== momentId);
-                    }
-                    const group = groupChats.find(g => g.id === currentChat.id); // 也检查群聊
-                    if(group && group.groupMoments) {
-                        group.groupMoments = group.groupMoments.filter(m => m.id !== momentId);
-                    }
-                }
+                if (moment.senderId !== 'user' || (replyToCommentId && moment.comments.some(c => c.id === replyToCommentId && c.sender !== 'user')) ) {
+    const aiWhoShouldReply = moment.senderId !== 'user' ? moment.senderId : findCommentOwner(moment.comments, replyToCommentId);
+    const commentForAIToReplyTo = newCommentByUser;
+    
+    if(aiWhoShouldReply) {
+        setTimeout(() => triggerAiMomentReply(moment, commentForAIToReplyTo, aiWhoShouldReply, momentType), 2500);
+    }
+}
                 saveAllData();
                 renderMoments();
             }
@@ -3381,9 +3530,49 @@ const handleAiVote_dataOnly = (voteAction) => {
             alert('全部数据已导出！(请注意，导出的文件不包含图片本身，只包含文本数据)'); 
         };
         const importData = () => { if(confirm('确定要导入数据吗？这会覆盖所有当前数据。')) { elements.importDataInput.click(); } };
-        const handleDataImport = (event) => { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { try { const data = e.target.result; const parsed = JSON.parse(data); if (parsed.characterSets && parsed.currentChat) { localStorage.setItem('aiBoyfriendBackup_v6', data); alert('导入成功！页面即将刷新。'); location.reload(); } else { alert('无效的文件格式。'); } } catch (error) { alert(`错误: ${error.message}`); } }; reader.readAsText(file); elements.importDataInput.value = ''; };
+        const handleDataImport = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const data = e.target.result;
+            
+            // 1. 验证文件内容是否是有效的JSON
+            const parsed = JSON.parse(data);
+            
+            // 2. 验证JSON是否是我们应用需要的格式
+            // 我们检查是否存在'characterSets'和'globalSettings'这两个核心数据块
+            if (parsed.characterSets && parsed.globalSettings) {
+                
+                // --- 核心修正：直接将数据写入【正确】的保险箱 ---
+                localStorage.setItem('aiBoyfriendBackup_v6_meta', data);
+                
+                alert('数据导入成功！页面即将刷新以应用您的备份。');
+                location.reload();
+            } else {
+                alert('导入失败：文件内容格式不正确，缺少核心数据。');
+            }
+        } catch (error) {
+            console.error("导入数据时发生错误:", error);
+            alert(`导入失败：文件可能已损坏或不是有效的JSON文件。\n错误详情: ${error.message}`);
+        }
+    };
+    
+    // 确保文件选择器在下次使用时是干净的
+    reader.onerror = () => {
+        alert('读取文件时发生错误。');
+        event.target.value = '';
+    };
+
+    reader.readAsText(file);
+    event.target.value = '';
+};
 
                 const setupEventListeners = () => {
+                  elements.darkModeToggle.addEventListener('change', () => applyDarkMode(elements.darkModeToggle.checked));
+        elements.compactModeToggle.addEventListener('change', () => applyCompactMode(elements.compactModeToggle.checked)); // <-- 添加这一行          
         elements.settingsBtn.onclick = openSettingsModal;
         elements.closeSettingsBtn.onclick = () => closeModal(elements.settingsModal);
         
@@ -3499,40 +3688,49 @@ const handleAiVote_dataOnly = (voteAction) => {
             customSelect.value = currentCustomVal;
         };
 
-        const toggleCustomStyleSelector = (show) => {
-            getEl('custom-style-select-group').style.display = show ? 'flex' : 'none';
-        };
-
-        getEl('advanced-bubble-styles').addEventListener('input', populateCustomStyles);
                 getEl('bubble-style-select').addEventListener('change', (e) => {
-            const selectedValue = e.target.value;
-            toggleCustomStyleSelector(selectedValue === 'custom');
-
-            if (selectedValue !== 'custom') {
-                // 如果选的不是“自定义”，就直接应用（例如“默认方角”）
-                applyBubbleStyle(selectedValue);
-            } else {
-                // 如果选了“自定义高级”
-                let styleToApply = getEl('custom-style-select').value;
-                
-                // 如果当前没有选中的自定义样式（比如刚切换过来），就自动选第一个
-                if (!styleToApply && getEl('custom-style-select').options.length > 1) {
-                    // 第一个选项是“无”，所以我们选第二个作为默认
-                    getEl('custom-style-select').selectedIndex = 1; 
-                    styleToApply = getEl('custom-style-select').value;
-                }
-                
-                // 应用这个自定义样式
-                applyBubbleStyle('custom:' + styleToApply);
-            }
-        });
-        getEl('custom-style-select').addEventListener('change', (e) => {
-             applyBubbleStyle('custom:' + e.target.value);
-        });
+    // 新的逻辑非常简单：直接根据你选择的值，去应用对应的样式即可！
+    applyBubbleStyle(e.target.value);
+});
+        
          // --- 新增代码开始 ---
 elements.applyCustomFontBtn.onclick = () => applyCustomFont(elements.customFontNameInput.value, elements.customFontUrlInput.value);
 // --- 新增代码结束 ---         
     };
+
+// ==============================================================
+// ================ 新增的“预设记忆芯片”核心函数 ================
+// ==============================================================
+const updatePresetsFromUI = () => {
+    const presetItems = document.querySelectorAll('.preset-item');
+    if (presetItems.length === 0 && globalPresets.length > 0) {
+        // 如果UI是空的但内存里有，说明可能正在被清空，此时应该清空内存
+        globalPresets = [];
+        return;
+    }
+
+    const updatedPresets = [];
+    presetItems.forEach(itemEl => {
+        const id = itemEl.dataset.id;
+        const nameInput = itemEl.querySelector('.preset-name-input');
+        const contentInput = itemEl.querySelector('.preset-content-input');
+        const enabledToggle = itemEl.querySelector('.preset-enabled-toggle');
+
+        if (id && nameInput && contentInput && enabledToggle) {
+            updatedPresets.push({
+                id: id,
+                name: nameInput.value,
+                content: contentInput.value,
+                enabled: enabledToggle.checked
+            });
+        }
+    });
+    globalPresets = updatedPresets;
+};
+// ==============================================================
+// ========================== 函数结束 ==========================
+// ==============================================================
+      
           // --- 全新的预设功能和模型参数控制 ---
     const renderPresets = () => {
         elements.presetListContainer.innerHTML = '';
@@ -3567,15 +3765,17 @@ elements.applyCustomFontBtn.onclick = () => applyCustomFont(elements.customFontN
 
     const setupPresetEventListeners = () => {
         elements.addPresetBtn.onclick = () => {
-            const newPreset = {
-                id: generateId('preset'),
-                name: '',
-                content: '',
-                enabled: true
-            };
-            globalPresets.push(newPreset);
-            renderPresets();
-        };
+    updatePresetsFromUI(); // <-- 在所有操作之前，先调用“记忆芯片”！
+
+    const newPreset = {
+        id: generateId('preset'),
+        name: '',
+        content: '',
+        enabled: true
+    };
+    globalPresets.push(newPreset);
+    renderPresets();
+};
 
         elements.presetListContainer.addEventListener('click', (e) => {
             if (e.target.classList.contains('preset-delete-btn')) {
@@ -3596,7 +3796,6 @@ elements.applyCustomFontBtn.onclick = () => applyCustomFont(elements.customFontN
     };
         // --- Initialization ---
         loadAllData();
-      populateCustomStyles();
         setupEventListeners();
       setupPresetEventListeners();
         autoResizeTextarea();
