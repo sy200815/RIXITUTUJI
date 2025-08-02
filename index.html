@@ -803,7 +803,7 @@ input[type=range]::-webkit-slider-thumb {
                 <div id="common-settings-section">
                     <div class="settings-section">
                         <h3>API & 模型设置</h3>
-                        <div class="form-group"><label for="api-base-url">API端点 (Base URL)</label><input type="text" id="api-base-url" placeholder="例如: https://api.openai.com"></div>
+                        <div class="form-group"><label for="api-base-url">API端点 (Base URL)</label><input type="text" id="api-base-url" placeholder="例如: https://api.openai.com 或 https://generativelanguage.googleapis.com"></div>
                         <div class="form-group"><label for="api-key">API密钥 (API Key)</label><input type="password" id="api-key" placeholder="在此输入您的API密钥"></div>
                         <div class="form-group"><label for="model-select">模型选择 (提示: 图片识别请用gpt-4o等vision模型)</label><div class="model-group"><select id="model-select"></select><button id="fetch-models-btn">获取模型列表</button></div></div>
                     </div>
@@ -1258,7 +1258,7 @@ applyCustomFontBtn: getEl('apply-custom-font-btn'),
         let responseTriggerTimer = null, isActionPanelOpen = false, isVideoCallActive = false;
         let currentlyDisplayedMessageCount = 25;
         
-        const DEFAULT_SYSTEM_PROMPT = `
+                const DEFAULT_SYSTEM_PROMPT = `
 [核心输出协议：绝对严格遵守]
 1.  **唯一格式**：你的所有回复 **必须** 是一个JSON数组结构的字符串。这是你与系统交流的唯一方式。
 2.  **纯净输出**：绝对不允许在JSON数组的外部添加任何文本、注释、解释、Markdown标记或其他任何字符。你的回复必须从'['开始，到']'结束，中间是严格合法的JSON内容。
@@ -1277,7 +1277,8 @@ This is a strict format guide. You MUST follow it.
     {"type": "grab_red_packet", "packetId": "packet_id_string"},
     {"type": "vote", "pollId": "poll_id_string", "option": "chosen_option_string"},
     {"type": "moment_comment", "momentId": "moment_id_string", "comment_text": "Your comment text."},
-    {"type": "moment_reply", "momentId": "moment_id_string", "commentId": "comment_id_to_reply_to", "reply_text": "Your reply text."}
+    {"type": "moment_reply", "momentId": "moment_id_string", "commentId": "comment_id_to_reply_to", "reply_text": "Your reply text."},
+    {"type": "acknowledge_transfer", "transferId": "the_id_of_the_transfer_message", "decision": "accept_or_decline"}
 ]
 
 - 请严格根据双方的角色设定，进行线上的日常对话（微信）。并且模仿真人发消息的短句模式不用逗号和句号。
@@ -1296,8 +1297,11 @@ This is a strict format guide. You MUST follow it.
 
 - 偶尔使用 'post_moment' 或 'diary_entry' 动作来展示角色在聊天之外的生活，增加真实感。
 
+[Critical Instruction for Transfers]
+When the user sends you a transfer, you MUST first respond with a 'text' message (like "Thank you" or "What's this for?"), and THEN, in a separate JSON object, you MUST use the 'acknowledge_transfer' action to either 'accept' or 'decline' it. The 'transferId' MUST match the ID of the user's transfer message from the chat history.
+
 [Negative Constraint]
-- When acknowledging a transfer from the user, you MUST respond with a simple 'text' message. You MUST NOT respond with another 'transfer' action.
+- When acknowledging a user's transfer, you MUST use the 'acknowledge_transfer' action. You are FORBIDDEN from responding with another 'transfer' action.
 
 [For Group Chats Only]
 - Add "senderId": "your_character_id" to EVERY action object. THIS IS A MANDATORY REQUIREMENT.
@@ -1307,7 +1311,6 @@ This is a strict format guide. You MUST follow it.
 - Refer to the recent chat history for context.
 - NEVER refer to the user as "用户". Use the information from their profile.`;
 
-
         // --- Utility Functions ---
         const getTimestamp = () => new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
         const getFullTimestamp = () => new Date().toLocaleString('zh-CN');
@@ -1315,6 +1318,68 @@ This is a strict format guide. You MUST follow it.
         const scrollToBottom = (container, behavior = 'smooth') => { container.scrollTo({ top: container.scrollHeight, behavior }); };
         const autoResizeTextarea = () => { elements.messageInput.style.height = 'auto'; elements.messageInput.style.height = (elements.messageInput.scrollHeight) + 'px'; };
         const generateId = (prefix) => `${prefix}_${Date.now()}${Math.random().toString(36).substring(2, 9)}`;
+
+        // --- 新增：智能打包函数，适配OpenAI和Gemini ---
+        const getApiPayload = (model, history, systemPrompt) => {
+            const apiBaseUrl = elements.apiBaseUrlInput.value.trim().toLowerCase();
+            const isGemini = apiBaseUrl.includes('google');
+
+            if (isGemini) {
+                // Gemini 打包方式
+                const formatForGemini = (msg) => {
+                    if (!msg || typeof msg !== 'object' || msg.type === 'system' || typeof msg.sender !== 'string') {
+                        return null;
+                    }
+                    const role = msg.sender === 'user' ? 'user' : 'model';
+                    
+                    if (msg.sender === 'user' && msg.type === 'image' && msg.imageUrl) {
+                        const textContent = msg.llmContent || msg.text || '用户发送了一张图片。';
+                        const mimeType = msg.imageUrl.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+                        return { role, parts: [ { text: textContent }, { inline_data: { mime_type: mimeType, data: msg.imageUrl.split(',')[1] } } ]};
+                    }
+
+                    const content = msg.llmContent || msg.text || '';
+                    if (!content.trim()) return null;
+                    return { role, parts: [{ text: content }] };
+                };
+                
+                const contents = [
+                    { role: 'user', parts: [{ text: systemPrompt }] },
+                    { role: 'model', parts: [{ text: '好的，我会严格遵守以上所有指令。' }] },
+                    ...history.map(formatForGemini).filter(Boolean)
+                ];
+                return { contents, "generationConfig": { "temperature": parseFloat(elements.temperatureSlider.value), "topP": parseFloat(elements.topPSlider.value) } };
+
+            } else {
+                // OpenAI (及兼容API) 打包方式
+                 const formatForOpenAI = (msg) => {
+                    if (!msg || typeof msg !== 'object' || msg.type === 'system' || typeof msg.sender !== 'string') {
+                        return null;
+                    }
+                    const role = msg.sender === 'user' ? 'user' : 'assistant';
+                    let content = msg.llmContent || msg.text || '';
+
+                    if (msg.sender === 'user' && msg.type === 'image' && msg.imageUrl) {
+                        const imageContent = [
+                            { type: 'text', text: content || '用户发送了一张图片。' },
+                            { type: 'image_url', image_url: { url: msg.imageUrl } }
+                        ];
+                        return { role, content: imageContent };
+                    }
+                    if (!content.trim()) {
+                        return null;
+                    }
+                    return { role, content };
+                };
+
+                const messages = [
+                    { role: 'system', content: systemPrompt },
+                    ...history.map(formatForOpenAI).filter(Boolean)
+                ];
+                return { model, messages, stream: false, temperature: parseFloat(elements.temperatureSlider.value), top_p: parseFloat(elements.topPSlider.value) };
+            }
+        };
+
 
               // --- IndexedDB (相册) 帮助函数 ---
         const DB_NAME = 'AI_Boyfriend_ImageStore';
@@ -1658,86 +1723,6 @@ applyCompactMode(compactModeSaved);
         location.reload();
     }
 };
-
- // ===================================================================
-    // ============ 全新的、更智能的“朋友圈规划师”函数 ============
-    // ===================================================================
-    const checkForAndTriggerMomentPosts = async () => {
-        const lastCheckTimestamp = parseInt(localStorage.getItem('momentCheck_lastTimestamp') || '0');
-        let postCount = parseInt(localStorage.getItem('momentCheck_postCount') || '0');
-        
-        const now = Date.now();
-        const twentyFourHours = 24 * 60 * 60 * 1000;
-        const POST_GOAL = 3;
-
-        // 1. 如果是新的一天，重置所有计数
-        if (now - lastCheckTimestamp > twentyFourHours) {
-            console.log("朋友圈规划师：新的一天，重置KPI。");
-            postCount = 0;
-            localStorage.setItem('momentCheck_lastTimestamp', now.toString());
-        }
-
-        // 2. 计算今天还需要发多少条
-        const postsNeeded = POST_GOAL - postCount;
-        if (postsNeeded <= 0) {
-            // console.log("朋友圈规划师：今天的KPI已完成，下班。");
-            return; // 如果KPI已完成，直接下班
-        }
-        
-        console.log(`朋友圈规划师：启动！今天还需要发布 ${postsNeeded} 条动态。`);
-
-        // 3. 把今天剩下所有要发的动态，一次性、带随机延迟地全部安排好！
-        for (let i = 0; i < postsNeeded; i++) {
-            // 为每条动态设置一个随机的、越来越长的延迟（从几分钟到几小时）
-            // 基础延迟2分钟，确保不会立刻刷屏，然后加上一个巨大的随机量
-            const randomDelay = 2 * 60 * 1000 + Math.random() * (8 * 60 * 60 * 1000); // 2分钟到8小时内的随机时间
-            
-            setTimeout(async () => {
-                // 在延迟之后，才真正开始执行发布流程
-                let characterToPost = null;
-                const chatData = getCurrentChatData(); // 重新获取一次，以防中途切换了聊天
-                if (!chatData) return;
-
-                if (currentChat.type === 'group' && chatData.memberIds.length > 0) {
-                    const randomMemberId = chatData.memberIds[Math.floor(Math.random() * chatData.memberIds.length)];
-                    characterToPost = characterSets.find(c => c.id === randomMemberId);
-                } else {
-                    characterToPost = getCurrentCharacter();
-                }
-
-                if (!characterToPost) return;
-
-                console.log(`朋友圈规划师：时间到！现在命令 ${characterToPost.config.characterName} 发布一条动态。`);
-
-                const forceMomentPrompt = `
-[MANDATORY TASK & ABSOLUTE PRIORITY]
-Your ONLY job right now is to generate a 'post_moment' action. Do not generate any other text or action.
-Based on your character persona (${characterToPost.config.characterName}), come up with a social media post about your day, your thoughts, or something you observed.
-It can be happy, sad, thoughtful, or funny. Be creative and stay in character.
-
-[Output Format]
-Your entire response MUST be a JSON array containing a single object, like this:
-[{"type": "post_moment", "content": "The text content of your post.", "image_query": "Optional: keywords for an image to go with the post"}]
-
-[Character Persona for Context]
-${characterToPost.config.characterPrompt}
-`;
-                try {
-                    await triggerAiResponse([{ role: 'system', content: forceMomentPrompt }]);
-                } catch (error) {
-                    console.error("规划好的朋友圈任务执行失败:", error);
-                }
-            }, randomDelay);
-        }
-
-        // 4. **最关键的一步**：在安排完所有任务后，立刻把今天的KPI记为“已完成”。
-        // 这样可以防止你下一次发消息时，程序再次运行这个规划师。
-        localStorage.setItem('momentCheck_postCount', POST_GOAL.toString());
-        console.log(`朋友圈规划师：今天的 ${postsNeeded} 条动态已全部安排完毕，进入待命状态。`);
-    };
-    // ===================================================================
-    // ========================== 函数结束 ==========================
-    // ===================================================================
   
         // --- 变化结束：替换这个函数 ---
            const createNewCharacterObject = () => {
@@ -2091,14 +2076,19 @@ const applyBubbleStyle = (style) => {
                 case 'text-image': bubbleContent = `<div class="text-image-header"><svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg><span>展示了一张照片</span></div><div class="text-image-description">${text}</div>`; break;
                 case 'sticker': bubbleContent = `<img src="${stickerUrl}" class="bubble-image-content" alt="表情" style="width:120px; height:120px; border: none;">`; break;
                 case 'voice': bubble.style.width = `${Math.min(60 + (text?.length || 0) * 8, 250)}px`; bubbleContent = `<span class="voice-icon"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg></span><span class="voice-duration">${voiceDuration}</span>`; bubble.onclick = () => alert(`语音内容：\n\n${text}`); break;
-                case 'transfer':
-                    const recipientName = sender === 'user' ? getCurrentCharacter()?.config.characterName || '对方' : '你';
+                                case 'transfer':
+                    const recipientName = sender === 'user' ? (getCurrentCharacter()?.config.characterName || '对方') : '你';
                     bubbleContent = `<img src="${transferCoverUrl}" class="transfer-cover" alt="Transfer"><div class="transfer-info"><div class="transfer-amount">¥ ${transferAmount}</div>${transferMemo ? `<div class="transfer-memo">${transferMemo}</div>` : ''}</div><div class="transfer-footer">给${recipientName}的转账</div>`;
+                    
+                    // ================== 核心改动：增加不同状态的显示 ==================
                     if (transferStatus === 'received') {
                         bubbleContent += `<div class="transfer-acknowledged">${sender === 'user' ? '对方已收款' : '我已收款'}</div>`;
+                    } else if (transferStatus === 'declined') {
+                        bubbleContent += `<div class="transfer-acknowledged" style="background: rgba(100,100,100,0.5);">${sender === 'user' ? '对方已拒收' : '已退还'}</div>`;
                     } else if (sender !== 'user') { 
                         bubble.onclick = () => acknowledgeTransfer(id);
                     }
+                    // ======================== 改动结束 ========================
                     break;
                 case 'red-packet': bubble.innerHTML = renderRedPacket(msg); break;
                 case 'poll': bubble.innerHTML = renderPoll(msg); break;
@@ -2161,7 +2151,6 @@ const applyBubbleStyle = (style) => {
 
         // --- Core Logic ---
         const handleUserAction = (msgData) => {
-          checkForAndTriggerMomentPosts();
             const content = msgData.text || msgData.imageUrl || msgData.stickerUrl || msgData.llmContent || msgData.type === 'red-packet';
             if (!content && msgData.type !== 'poll') return;
             const msg = addMessage(msgData);
@@ -2233,7 +2222,7 @@ const applyBubbleStyle = (style) => {
             return { role, content };
         };
         
-                                            const triggerAiResponse = async (overridePayload = null, lastUserMessage = null) => {
+        const triggerAiResponse = async (overridePayload = null, lastUserMessage = null) => {
             clearTimeout(responseTriggerTimer);
             const chatData = getCurrentChatData();
             const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
@@ -2247,47 +2236,25 @@ const applyBubbleStyle = (style) => {
             
             addMessage({ sender: 'ai', type: 'text', isLoading: true });
 
-            const formatApiMessage = (msg) => {
-                if (msg.type === 'system' || msg.sender === 'system') return null;
-                const role = msg.sender === 'user' ? 'user' : 'assistant';
-                if (msg.sender === 'user' && msg.type === 'image' && msg.imageUrl) {
-                    return {
-                        role: 'user',
-                        content: [
-                            { type: 'text', text: msg.llmContent || '用户发送了一张图片。' },
-                            { type: 'image_url', image_url: { url: msg.imageUrl } }
-                        ]
-                    };
-                }
-                const content = msg.llmContent || msg.text;
-                if (!content) return null;
-                return { role, content };
-            };
+            let systemPrompt;
+            let history;
 
-            let messagesPayload;
             if (overridePayload) {
-                messagesPayload = overridePayload;
+                const systemMsg = overridePayload.find(m => m.role === 'system');
+                systemPrompt = systemMsg ? systemMsg.content : '';
+                history = overridePayload.filter(m => m.role !== 'system');
             } else {
-                const systemPrompt = elements.customSystemPromptInput.value.trim() || DEFAULT_SYSTEM_PROMPT;
+                const globalSystemPrompt = elements.customSystemPromptInput.value.trim() || DEFAULT_SYSTEM_PROMPT;
                 const momentsContext = getRecentMomentsContext();
-
-                // --- 新增：整合启用的预设 ---
                 const activePresets = globalPresets.filter(p => p.enabled && p.content.trim() !== '');
-                let presetsPrompt = '';
-                if (activePresets.length > 0) {
-                    presetsPrompt = activePresets.map(p => `[Active Preset: ${p.name || 'Untitled'}]\n${p.content}`).join('\n\n') + '\n\n';
-                }
-                // --- 新增结束 ---
+                let presetsPrompt = activePresets.length > 0 ? activePresets.map(p => `[Active Preset: ${p.name || 'Untitled'}]\n${p.content}`).join('\n\n') + '\n\n' : '';
 
                 if (currentChat.type === 'direct') {
                     const character = chatData;
                     const memorySize = character.config.memorySize || 50;
-                    const fullPrompt = `${presetsPrompt}${systemPrompt}\n\n[Character Prompt]:\n${character.config.characterPrompt}\n\n[Your User's Profile]: ${character.userPrompt || `The user's name is ${userMomentsProfile.name}`}${momentsContext}`;
-                    messagesPayload = [
-                        { role: 'system', content: fullPrompt }, 
-                        ...character.chatHistory.slice(-memorySize).map(formatApiMessage).filter(m => m !== null)
-                    ];
-                } else { // 如果是群聊
+                    systemPrompt = `${presetsPrompt}${globalSystemPrompt}\n\n[Character Prompt]:\n${character.config.characterPrompt}\n\n[Your User's Profile]: ${character.userPrompt || `The user's name is ${userMomentsProfile.name}`}${momentsContext}`;
+                    history = character.chatHistory.slice(-memorySize);
+                } else { // Group chat
                     const group = chatData;
                     const memorySize = 50;
                     const memberProfiles = group.memberIds.map(id => {
@@ -2341,130 +2308,192 @@ ${momentsContext}
 - ${openPollsInfo ? `[重要任务]${openPollsInfo} 看到这个投票了吗？根据角色性格，安排他们用 "vote" 类型的动作去投票！` : ''}
 - ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可以抢！安排角色们用 "grab_red_packet" 类型的动作去抢！` : ''}
 `;
-                    messagesPayload = [
-                        { role: 'system', content: groupSystemPrompt },
-                        ...group.chatHistory.slice(-memorySize).map(formatApiMessage).filter(m => m !== null)
-                    ];
+                    systemPrompt = groupSystemPrompt;
+                    history = group.chatHistory.slice(-memorySize);
                 }
             }
+
+            // 使用新的通用函数来生成payload
+            const payload = getApiPayload(model, history, systemPrompt);
             
             try {
-                const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ 
-                    model, 
-                    messages: messagesPayload, 
-                    stream: false,
-                    temperature: parseFloat(elements.temperatureSlider.value), // 使用滑块的当前值
-                    top_p: parseFloat(elements.topPSlider.value) // 使用滑块的当前值
-                }) });
+                const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, 
+                    body: JSON.stringify(payload) 
+                });
                 getEl('typing-indicator')?.remove();
                 if (!response.ok) { const errorData = await response.text(); throw new Error(`HTTP Error ${response.status}: ${errorData}`); }
                 const responseData = await response.json();
-                console.log("【证据一：完整的原始数据包】（可以点开看详细结构）", responseData);
-                console.log("【证据二：AI回复的核心内容（最关键的原始字符串）】", responseData?.choices?.[0]?.message?.content);
-                if (responseData?.choices?.[0]?.message?.content) {
-                    processAiResponse(responseData.choices[0].message.content);
-                } else if (responseData?.error) { throw new Error(`API Error: ${responseData.error.message}`);
-                } else { throw new Error('Invalid or empty API response format.'); }
+                
+                let content = '';
+                const isGemini = apiBaseUrl.includes('google');
+                if (isGemini) {
+                    content = responseData?.candidates?.[0]?.content?.parts?.[0]?.text;
+                } else {
+                    content = responseData?.choices?.[0]?.message?.content;
+                }
+
+                if (content) {
+                    processAiResponse(content);
+                } else if (responseData?.error) { 
+                    throw new Error(`API Error: ${responseData.error.message || JSON.stringify(responseData.error)}`);
+                } else { 
+                    throw new Error('Invalid or empty API response format.'); 
+                }
             } catch (error) {
                 getEl('typing-indicator')?.remove();
                 addMessage({ sender: 'system', text: `错误: ${error.message}`, type: 'system' });
             }
         };
         
-                                const processAiResponse = (rawText) => {
-        let responseArray = [];
-        try {
-            const jsonMatch = rawText.match(/\[\s*\{[\s\S]*?\}\s*\]/s);
-            responseArray = jsonMatch ? JSON.parse(jsonMatch[0]) : [JSON.parse(rawText)];
-        } catch (e) {
-            const jsonObjects = rawText.match(/\{[\s\S]*?\}/g);
-            if (jsonObjects) {
-                jsonObjects.forEach(objStr => {
-                    try { responseArray.push(JSON.parse(objStr)); } catch (jsonErr) { console.warn('程序跳过了一个损坏的信息片段:', objStr, jsonErr); }
-                });
-            }
-        }
-
-        if (responseArray.length === 0) {
-            console.error("AI响应解析彻底失败。收到的原始文本:", rawText);
-            addMessage({ sender: 'system', text: `AI响应格式错误，无法解析：<pre>${rawText}</pre>`, type: 'system' });
-            return;
-        }
-
-        let dataChanged = false;
-        // 第一阶段：处理所有会改变数据状态的“动作”，比如投票、点赞、评论等
-        responseArray.forEach(msgObj => {
-            // 自动识别动作类型，让程序更聪明
-            if (!msgObj.type) {
-                if (msgObj.pollId && msgObj.option) msgObj.type = 'vote';
-                else if (msgObj.packetId) msgObj.type = 'grab_red_packet';
-                else if (msgObj.will_like === true) msgObj.type = 'moment_like'; // 新增：识别点赞动作
-                else if (msgObj.momentId && msgObj.comment_text) msgObj.type = 'moment_comment'; // 新增：识别评论动作
-                else if (msgObj.momentId && msgObj.reply_text) msgObj.type = 'moment_reply'; // 新增：识别回复动作
-            }
-
-            const senderId = msgObj.senderId || currentChat.id;
-            const momentType = currentChat.type === 'group' ? 'group' : 'direct';
-
-            switch(msgObj.type) {
-                case 'vote':
-                    if (senderId) { handleAiVote_dataOnly(msgObj); dataChanged = true; }
-                    break;
-                case 'grab_red_packet':
-                    if (senderId) { handleAiGrabRedPacket(msgObj.packetId, senderId); dataChanged = true; }
-                    break;
-                case 'moment_like': // 新增：处理点赞
-                    if (senderId && msgObj.momentId) { handleAiLike(msgObj.momentId, senderId, momentType); dataChanged = true; }
-                    break;
-                case 'moment_comment': // 新增：处理评论
-                    if (senderId && msgObj.momentId) { addCommentOrReplyByAI('comment', msgObj.momentId, msgObj.comment_text, senderId, null, momentType); dataChanged = true; }
-                    break;
-                case 'moment_reply': // 新增：处理回复
-                    if (senderId && msgObj.momentId) { addCommentOrReplyByAI('reply', msgObj.momentId, msgObj.reply_text, senderId, msgObj.commentId, momentType); dataChanged = true; }
-                    break;
-            }
-        });
-
-        // 如果数据有变，立刻刷新界面
-        if (dataChanged) {
-            if (elements.momentsOverlay.classList.contains('show')) {
-                renderMoments();
-            } else {
-                renderAllMessages();
-            }
-        }
-
-        // 第二阶段：处理普通的聊天消息
-        responseArray.forEach((msgObj, index) => {
-            const isAction = ['vote', 'grab_red_packet', 'moment_like', 'moment_comment', 'moment_reply'].includes(msgObj.type);
-            if (isAction) return; // 跳过已经处理过的动作
-
-            if (!msgObj.type && (msgObj.content || msgObj.message)) {
-                msgObj.type = 'text';
-                msgObj.content = msgObj.content || msgObj.message;
-            }
-            
-            setTimeout(() => {
-                const senderId = msgObj.senderId || currentChat.id;
-                const character = characterSets.find(c => c.id === senderId);
-                if (!character) return;
-
-                const llmContentForHistory = (index === 0) ? rawText : null;
-                let messageData = { sender: senderId, llmContent: llmContentForHistory };
-
-                switch (msgObj.type) {
-                    case 'text': addMessage({ ...messageData, text: msgObj.content, type: 'text' }); break;
-                    case 'voice': addMessage({ ...messageData, text: msgObj.content, type: 'voice', voiceDuration: `0:${Math.max(1, Math.round((msgObj.content || '').length / 5)).toString().padStart(2, '0')}` }); break;
-                    case 'text-image': addMessage({ ...messageData, text: msgObj.content, type: 'text-image' }); break;
-                    case 'sticker': if (character.aiStickers.length > 0) { addMessage({ ...messageData, type: 'sticker', stickerUrl: character.aiStickers[Math.floor(Math.random() * character.aiStickers.length)] }); } break;
-                    case 'transfer': addMessage({ ...messageData, type: 'transfer', transferAmount: msgObj.amount, transferMemo: msgObj.memo, transferCoverUrl: `https://files.catbox.moe/qwu221.jpg`, transferStatus: 'pending' }); break;
-                    case 'video-call-request': if (currentChat.type === 'direct') handleIncomingVideoCall(msgObj.content); break;
-                    case 'post_moment': if (character) { const momentType = currentChat.type === 'group' ? 'group' : 'direct'; addMomentByAI(character.id, { content: msgObj.content, image_query: msgObj.image_query }, momentType); } break;
-                    case 'diary_entry': if (character && msgObj.content) addDiaryEntry(character.id, msgObj.content); break;
+                                                        const processAiResponse = (rawText) => {
+            let responseArray = [];
+            try {
+                const jsonMatch = rawText.match(/\[\s*\{[\s\S]*?\}\s*\]/s);
+                if (jsonMatch) {
+                    responseArray = JSON.parse(jsonMatch[0]);
+                } else {
+                    // 尝试解析单个JSON对象
+                    const singleJsonMatch = rawText.match(/\{[\s\S]*\}/);
+                    if(singleJsonMatch) {
+                        responseArray = [JSON.parse(singleJsonMatch[0])];
+                    } else {
+                        throw new Error("No valid JSON found in the response.");
+                    }
                 }
-            }, index * 1200 + (dataChanged ? 200 : 0));
-        });
-    };
+            } catch (e) {
+                 const jsonObjects = rawText.match(/\{[\s\S]*?\}/g);
+                 if (jsonObjects) {
+                     responseArray = jsonObjects.map(objStr => {
+                         try { return JSON.parse(objStr); } catch (jsonErr) { return null; }
+                     }).filter(Boolean);
+                 }
+            }
+
+            if (responseArray.length === 0) {
+                console.error("AI响应解析彻底失败。收到的原始文本:", rawText);
+                addMessage({ sender: 'system', text: `AI响应格式错误，将作为纯文本处理：<pre>${rawText}</pre>`, type: 'system' });
+                // 将无法解析的内容作为普通文本消息发送
+                const senderId = (currentChat.type === 'direct') ? currentChat.id : null;
+                if(senderId) {
+                   addMessage({ sender: senderId, type: 'text', text: rawText });
+                }
+                return;
+            }
+
+            let dataChanged = false;
+            let aiMemoryInjections = {}; 
+
+            responseArray.forEach(msgObj => {
+                // 自动识别动作类型，让程序更聪明
+                if (!msgObj.type) {
+                    if (msgObj.packetId || msgObj.redPacketId) msgObj.type = 'grab_red_packet';
+                    else if (msgObj.pollId && msgObj.option) msgObj.type = 'vote';
+                    else if (msgObj.will_like === true) msgObj.type = 'moment_like';
+                    else if (msgObj.momentId && msgObj.comment_text) msgObj.type = 'moment_comment';
+                    else if (msgObj.momentId && msgObj.reply_text) msgObj.type = 'moment_reply';
+                    else if (msgObj.transferId && msgObj.decision) msgObj.type = 'acknowledge_transfer';
+                }
+
+                const senderId = msgObj.senderId || currentChat.id;
+                const momentType = currentChat.type === 'group' ? 'group' : 'direct';
+
+                switch(msgObj.type) {
+                    case 'vote':
+                        if (senderId) { handleAiVote_dataOnly(msgObj); dataChanged = true; }
+                        break;
+                    case 'grab_red_packet':
+                        if (senderId) {
+                            const currentPacketId = msgObj.packetId || msgObj.redPacketId;
+                            if (currentPacketId) {
+                                const amount = handleAiGrabRedPacket(currentPacketId, senderId);
+                                if (typeof amount === 'number') {
+                                    aiMemoryInjections[senderId] = `[Internal Memo: You just grabbed a red packet and got ${amount.toFixed(2)} yuan.]`;
+                                }
+                                dataChanged = true;
+                            }
+                        }
+                        break;
+                    case 'acknowledge_transfer':
+                        if (msgObj.transferId && msgObj.decision) {
+                            if (handleAcknowledgeTransfer(msgObj.transferId, msgObj.decision)) {
+                                dataChanged = true;
+                            }
+                        }
+                        break;
+                    case 'moment_like':
+                        if (senderId && msgObj.momentId) { handleAiLike(msgObj.momentId, senderId, momentType); dataChanged = true; }
+                        break;
+                    case 'moment_comment':
+                        if (senderId && msgObj.momentId) { addCommentOrReplyByAI('comment', msgObj.momentId, msgObj.comment_text, senderId, null, momentType); dataChanged = true; }
+                        break;
+                    case 'moment_reply':
+                        if (senderId && msgObj.momentId) { addCommentOrReplyByAI('reply', msgObj.momentId, msgObj.reply_text, senderId, msgObj.commentId, momentType); dataChanged = true; }
+                        break;
+                }
+            });
+
+            if (dataChanged) {
+                renderAllMessages(); // 刷新界面，显示转账状态更新
+                if (elements.momentsOverlay.classList.contains('show')) {
+                    renderMoments();
+                }
+            }
+
+            responseArray.forEach((msgObj, index) => {
+                const isAction = ['vote', 'grab_red_packet', 'moment_like', 'moment_comment', 'moment_reply', 'acknowledge_transfer'].includes(msgObj.type);
+                if (isAction) return;
+
+                if (!msgObj.type && (msgObj.content || msgObj.message)) {
+                    msgObj.type = 'text';
+                    msgObj.content = msgObj.content || msgObj.message;
+                }
+                
+                setTimeout(() => {
+                    const senderId = msgObj.senderId || currentChat.id;
+                    const character = characterSets.find(c => c.id === senderId);
+                    if (!character) return;
+
+                    let llmContentForHistory = (index === 0) ? rawText : null;
+                    if (aiMemoryInjections[senderId]) {
+                        llmContentForHistory = (llmContentForHistory || '') + '\n' + aiMemoryInjections[senderId];
+                        delete aiMemoryInjections[senderId]; 
+                    }
+                    
+                    let messageData = { sender: senderId, llmContent: llmContentForHistory };
+
+                    switch (msgObj.type) {
+                        case 'text': addMessage({ ...messageData, text: msgObj.content, type: 'text' }); break;
+                        case 'voice': addMessage({ ...messageData, text: msgObj.content, type: 'voice', voiceDuration: `0:${Math.max(1, Math.round((msgObj.content || '').length / 5)).toString().padStart(2, '0')}` }); break;
+                        case 'text-image': addMessage({ ...messageData, text: msgObj.content, type: 'text-image' }); break;
+                        case 'sticker': if (character.aiStickers.length > 0) { addMessage({ ...messageData, type: 'sticker', stickerUrl: character.aiStickers[Math.floor(Math.random() * character.aiStickers.length)] }); } break;
+                        case 'transfer': addMessage({ ...messageData, type: 'transfer', transferAmount: msgObj.amount, transferMemo: msgObj.memo, transferCoverUrl: `https://files.catbox.moe/qwu221.jpg`, transferStatus: 'pending' }); break;
+                        case 'video-call-request': if (currentChat.type === 'direct') handleIncomingVideoCall(msgObj.content); break;
+                        case 'post_moment': if (character) { const momentType = currentChat.type === 'group' ? 'group' : 'direct'; addMomentByAI(character.id, { content: msgObj.content, image_query: msgObj.image_query }, momentType); } break;
+                        case 'diary_entry': if (character && msgObj.content) addDiaryEntry(character.id, msgObj.content); break;
+                    }
+                }, index * 1200 + (dataChanged ? 200 : 0));
+            });
+        };
+        
+        const handleAcknowledgeTransfer = (transferId, decision) => {
+            const character = getCurrentCharacter();
+            if (!character || !character.chatHistory) return;
+
+            const transferMsg = character.chatHistory.find(m => m.id === transferId && m.sender === 'user');
+            
+            if (transferMsg && transferMsg.transferStatus === 'pending') {
+                if (decision === 'accept') {
+                    transferMsg.transferStatus = 'received';
+                } else if (decision === 'decline') {
+                    transferMsg.transferStatus = 'declined';
+                }
+                saveAllData();
+                return true; // 表示操作成功
+            }
+            return false; // 表示没找到或者已经处理过了
+        };
         
         const acknowledgeTransfer = (msgId) => {
             const chatData = getCurrentChatData();
@@ -2556,73 +2585,71 @@ ${momentsContext}
     elements.videoCallOverlay.classList.remove('show');
 };
         
-                            const showMindVoice = async () => {
-        if (currentChat.type !== 'direct') return;
-        const character = getCurrentCharacter();
-        if (!character) return;
-        const { config, chatHistory } = character;
-        const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
-        const apiKey = elements.apiKeyInput.value.trim();
-        const model = elements.modelSelect.value;
-        if (!apiBaseUrl || !apiKey || !model) {
-            elements.mindVoiceContent.textContent = '请先在设置中填写API信息。';
+        const showMindVoice = async () => {
+            if (currentChat.type !== 'direct') return;
+            const character = getCurrentCharacter();
+            if (!character) return;
+            const { config, chatHistory } = character;
+            const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
+            const apiKey = elements.apiKeyInput.value.trim();
+            const model = elements.modelSelect.value;
+            if (!apiBaseUrl || !apiKey || !model) {
+                elements.mindVoiceContent.textContent = '请先在设置中填写API信息。';
+                elements.mindVoiceModal.classList.add('show');
+                return;
+            }
+
+            elements.mindVoiceContent.textContent = '思考中...';
             elements.mindVoiceModal.classList.add('show');
-            return;
-        }
 
-        elements.mindVoiceContent.textContent = '思考中...';
-        elements.mindVoiceModal.classList.add('show');
+            const mindVoiceSystemPrompt = `[System Instruction for Language Model]
+                        
+    Your Persona: You are the character defined by the following prompt. You should ONLY use the personality, NOT the chat format instructions.
+    ${config.characterPrompt}
+    Your Task: You will be given a chat history. Your ONLY job is to analyze the conversation and output a single, short, internal thought of your character in the first person. This is an UNSPOKEN thought.
+    Output Rules (MANDATORY):
+    Your entire response MUST be a single sentence of plain text.
+    It MUST be an internal, unspoken thought, not a line of dialogue.
+    It MUST NOT contain any actions like (pounces) or descriptions in parentheses or asterisks. This is absolutely forbidden.
+    It MUST NOT be a direct reply to the user. It is a private thought.
+    Example:
+    Chat History ends with User saying: "You are so sweet!"
+    Correct Output Example: She actually called me sweet... I can't stop smiling.
+    Incorrect Output Example: (blushes) Thank you, you too.`;
+                
+            const payload = getApiPayload(model, chatHistory.slice(-config.memorySize), mindVoiceSystemPrompt);
 
-        const mindVoiceSystemPrompt = `[System Instruction for Language Model]
-                      
-Your Persona: You are the character defined by the following prompt. You should ONLY use the personality, NOT the chat format instructions.
-${config.characterPrompt}
-Your Task: You will be given a chat history. Your ONLY job is to analyze the conversation and output a single, short, internal thought of your character in the first person. This is an UNSPOKEN thought.
-Output Rules (MANDATORY):
-Your entire response MUST be a single sentence of plain text.
-It MUST be an internal, unspoken thought, not a line of dialogue.
-It MUST NOT contain any actions like (pounces) or descriptions in parentheses or asterisks. This is absolutely forbidden.
-It MUST NOT be a direct reply to the user. It is a private thought.
-Example:
-Chat History ends with User saying: "You are so sweet!"
-Correct Output Example: She actually called me sweet... I can't stop smiling.
-Incorrect Output Example: (blushes) Thank you, you too.`;
-            
-              // 这个小程序专门负责把聊天记录“翻译”成干净的文字
-  const formatForMindVoice = (msg) => {
-      const role = msg.sender === 'user' ? 'user' : 'assistant';
-      const content = msg.text; 
-      // 过滤掉表情、图片等没有文字的消息
-      if (!content || msg.type === 'sticker' || msg.type === 'image') {
-          return null;
-      }
-      return { role, content };
-  };
+            try {
+                const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, 
+                    body: JSON.stringify(payload) 
+                });
+                if (!response.ok) {
+                    throw new Error(`服务器错误 ${response.status}: ${await response.text()}`);
+                }
+                const responseData = await response.json();
+                
+                let content = '';
+                const isGemini = apiBaseUrl.includes('google');
+                if (isGemini) {
+                    content = responseData?.candidates?.[0]?.content?.parts?.[0]?.text;
+                } else {
+                    content = responseData?.choices?.[0]?.message?.content;
+                }
 
-  const messagesPayload = [
-      { role: 'system', content: mindVoiceSystemPrompt },
-      ...chatHistory.slice(-config.memorySize)
-                   .map(formatForMindVoice) 
-                   .filter(msg => msg !== null) // 把所有空消息都过滤掉
-  ];
-  
-  try {
-      const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages: messagesPayload }) });
-      if (!response.ok) {
-          throw new Error(`服务器错误 ${response.status}: ${await response.text()}`);
-      }
-      const responseData = await response.json();
-      if (responseData?.choices?.[0]?.message?.content) {
-          elements.mindVoiceContent.textContent = responseData.choices[0].message.content;
-      } else if (responseData.error) {
-          throw new Error(`API返回错误: ${responseData.error.message}`);
-      } else {
-          throw new Error('API没有返回有效的心声内容。');
-      }
-  } catch (error) {
-      elements.mindVoiceContent.textContent = `读取心声失败: ${error.message}`;
-  }
+                if (content) {
+                    elements.mindVoiceContent.textContent = content;
+                } else if (responseData.error) {
+                    throw new Error(`API返回错误: ${responseData.error.message}`);
+                } else {
+                    throw new Error('API没有返回有效的心声内容。');
+                }
+            } catch (error) {
+                elements.mindVoiceContent.textContent = `读取心声失败: ${error.message}`;
+            }
         };
+
         const openStickerManager = (context) => { if (currentChat.type !== 'direct') return; const character = getCurrentCharacter(); if(!character) return; let stickerManagementContext = context; const currentStickers = context === 'user' ? character.userStickers : character.aiStickers; let galleryHtml = '<p style="text-align:center; color:#999;">点击下方按钮添加，点击已添加的表情可删除。</p>' + currentStickers.map(url => `<img src="${url}" data-sticker-url="${url}" alt="sticker">`).join(''); openFeatureModal(context === 'user' ? '我的表情管理' : '他的表情管理', `<div id="sticker-gallery" style="margin-bottom:15px;">${galleryHtml}</div><button id="add-stickers-btn" class="file-input-label" style="text-align:center; width:100%;">从相册批量添加</button>`, '完成', () => closeModal(elements.featureModal)); getEl('add-stickers-btn').onclick = () => elements.stickerUploadInput.click(); getEl('sticker-gallery').onclick = e => { if (e.target.tagName === 'IMG') { if(confirm('要删除这个表情吗？')) { const urlToDelete = e.target.dataset.stickerUrl; if(stickerManagementContext === 'user') character.userStickers = character.userStickers.filter(url => url !== urlToDelete); else character.aiStickers = character.aiStickers.filter(url => url !== urlToDelete); saveAllData(); e.target.remove(); } } }; elements.stickerUploadInput.onchange = (e) => { Array.from(e.target.files).forEach((file, i, arr) => { handleFileUpload(file, (result) => { if (stickerManagementContext === 'user') character.userStickers.push(result); else character.aiStickers.push(result); if (i === arr.length - 1) { saveAllData(); alert(`已成功添加 ${arr.length} 个表情！`); closeModal(elements.featureModal); openStickerManager(stickerManagementContext); } }); }); e.target.value = ''; }; };
 
         // --- Chat Management Logic (Characters & Groups) ---
@@ -2951,32 +2978,56 @@ Incorrect Output Example: (blushes) Thank you, you too.`;
             });
         };
 
-        const renderRedPacket = (msg) => {
-            const { packetId, memo, grabbers, count, status } = msg;
+                                const renderRedPacket = (msg) => {
+            if (!msg || typeof msg !== 'object') {
+                return '<p>红包数据错误</p>';
+            }
+            const grabbers = msg.grabbers || {}; 
+            const { packetId, memo, count, status } = msg;
+            
+            if (!packetId || !count) {
+                return '<p>红包信息不完整</p>';
+            }
+
             const hasGrabbed = Object.keys(grabbers).includes('user');
             const isFullyClaimed = Object.keys(grabbers).length >= count;
 
             let resultsHtml = '';
-            if (hasGrabbed || isFullyClaimed) {
+            if (Object.keys(grabbers).length > 0) {
                 const items = Object.entries(grabbers).map(([id, amount]) => {
-                    const name = id === 'user' ? userMomentsProfile.name : characterSets.find(c => c.id === id)?.config.characterName || '未知';
-                    return `<div class="red-packet-result-item"><span>${name}</span><span>${amount.toFixed(2)}元</span></div>`;
+                    let name = '未知';
+                    if (id === 'user') {
+                        name = userMomentsProfile.name || '我';
+                    } else {
+                        const character = characterSets.find(c => c && c.id === id);
+                        if (character && character.config) {
+                            name = character.config.characterName;
+                        }
+                    }
+                    const amountDisplay = typeof amount === 'number' ? amount.toFixed(2) : '...';
+                    return `<div class="red-packet-result-item"><span>${name}</span><span>${amountDisplay}元</span></div>`;
                 }).join('');
                 resultsHtml = `<div class="red-packet-results">${items}</div>`;
             }
 
             const buttonHtml = (!hasGrabbed && !isFullyClaimed) ? `<button class="red-packet-grab-btn" onclick="handleGrabRedPacket('${packetId}')">开</button>` : '';
 
+            const footerText = isFullyClaimed 
+                ? `${count}个红包，已被抢完` 
+                : (Object.keys(grabbers).length > 0 
+                    ? `已领取${Object.keys(grabbers).length}/${count}个` 
+                    : `群红包，共${count}个`);
+
             return `
                 <div class="red-packet-body">
                     <div class="red-packet-body-header">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 4H6C4.9 4 4 4.9 4 6v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-6 11.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 6.5 12 6.5s4.5 2.01 4.5 4.5-2.01 4.5-4.5 4.5z"/></svg>
-                        <span class="red-packet-memo">${memo}</span>
+                        <span class="red-packet-memo">${memo || '恭喜发财，大吉大利'}</span>
                     </div>
                     ${buttonHtml}
                 </div>
                 ${resultsHtml}
-                <div class="red-packet-footer">群红包</div>
+                <div class="red-packet-footer">${footerText}</div>
             `;
         };
         
@@ -3007,10 +3058,11 @@ Incorrect Output Example: (blushes) Thank you, you too.`;
             handleUserAction({ sender: 'user', type: 'text', text: `[我领取了红包]`, llmContent: `[用户领取了红包]` });
         };
         
-        const handleAiGrabRedPacket = (packetId, grabberId) => {
+                const handleAiGrabRedPacket = (packetId, grabberId) => {
             const group = getCurrentGroup();
             if (!group) return;
             const packet = group.chatHistory.find(m => m.packetId === packetId);
+            
             if (!packet || packet.status === 'claimed' || Object.keys(packet.grabbers).includes(grabberId)) return;
 
             const remainingAmount = packet.amount - Object.values(packet.grabbers).reduce((a, b) => a + b, 0);
@@ -3022,17 +3074,19 @@ Incorrect Output Example: (blushes) Thank you, you too.`;
             if (remainingCount === 1) {
                 grabbedAmount = remainingAmount;
             } else {
-                 const min = 0.01;
+                const min = 0.01;
                 const max = (remainingAmount - (remainingCount - 1) * min);
-                grabbedAmount = Math.random() * (max - min) + min;
+                grabbedAmount = Math.max(min, Math.random() * (Math.max(max, min) - min) + min);
             }
+            const finalGrabbedAmount = parseFloat(grabbedAmount.toFixed(2));
+            packet.grabbers[grabberId] = finalGrabbedAmount; 
 
-            packet.grabbers[grabberId] = parseFloat(grabbedAmount.toFixed(2));
             if (Object.keys(packet.grabbers).length >= packet.count) {
                 packet.status = 'claimed';
             }
             saveAllData();
-            renderAllMessages();
+            
+            return finalGrabbedAmount;
         };
 
 
@@ -3040,7 +3094,6 @@ Incorrect Output Example: (blushes) Thank you, you too.`;
         const openCreatePollModal = () => { const bodyHtml = ` <div class="form-group"><label for="poll-question">投票问题</label><input type="text" id="poll-question" placeholder="晚饭吃什么？"></div> <div class="form-group"><label>选项 (每行一个)</label><textarea id="poll-options" rows="4" placeholder="披萨\n寿司\n墨西哥卷饼"></textarea></div> `; openFeatureModal('创建投票', bodyHtml, '创建', () => { const question = getEl('poll-question').value.trim(); const options = getEl('poll-options').value.split('\n').map(o => o.trim()).filter(o => o); if (question && options.length >= 2) { const pollId = generateId('poll'); handleUserAction({ sender: 'user', type: 'poll', pollId, question, options, llmContent: `[用户发起了一个投票。问题: "${question}", 选项: ${options.join(", ")}]` }); closeModal(elements.featureModal); } else { alert('请输入问题和至少两个选项。'); } }); };
         const renderPoll = (msg) => { const group = getCurrentGroup(); if (!group) return ''; const pollData = (group.polls || []).find(p => p.pollId === msg.pollId); if (!pollData) return `<p>投票数据加载失败。</p>`; const totalVotes = Object.values(pollData.votes).flat().length; const userHasVoted = Object.values(pollData.votes).flat().includes('user'); const optionsHtml = pollData.options.map(option => { const voters = pollData.votes[option] || []; const voteCount = voters.length; const percentage = totalVotes > 0 ? (voteCount / totalVotes * 100).toFixed(0) : 0; const voterAvatars = voters.map(voterId => { const avatarSrc = voterId === 'user' ? userMomentsProfile.chatAvatar : characterSets.find(c => c.id === voterId)?.config.aiAvatar; return avatarSrc ? `<img src="${avatarSrc}" class="poll-voter-avatar" title="${characterSets.find(c=>c.id===voterId)?.config.characterName || '我'}">` : ''; }).join(''); return ` <div class="poll-option"> <div class="poll-option-label">${option} (${voteCount}票)</div> <div class="poll-progress-bar"> <div class="poll-progress-fill" style="width: ${percentage}%;"> <span class="poll-percentage">${percentage}%</span> </div> </div> <div class="poll-voters">${voterAvatars}</div> ${!userHasVoted ? `<button class="poll-vote-btn" data-poll-id="${pollData.pollId}" data-option="${option}">投这一票</button>` : ''} </div>`; }).join(''); return `<div class="poll-question">${pollData.question}</div>${optionsHtml}`; };
         const handleUserVote = (pollId, option) => { const group = getCurrentGroup(); if (!group) return; const poll = (group.polls || []).find(p => p.pollId === pollId); if (!poll || poll.status === 'closed') return; Object.keys(poll.votes).forEach(key => { poll.votes[key] = (poll.votes[key] || []).filter(v => v !== 'user'); }); if (!poll.votes[option]) poll.votes[option] = []; poll.votes[option].push('user'); saveAllData(); renderAllMessages(); handleUserAction({ sender: 'user', type: 'text', text: `[我投了: 「${option}」]`, llmContent: `[用户投票了。选项: "${option}"]` }); };
-        // 这是专为AI设计的、只更新数据不刷新画面的“安静版”投票函数
 const handleAiVote_dataOnly = (voteAction) => {
     const group = getCurrentGroup();
     if (!group) return;
@@ -3049,14 +3102,12 @@ const handleAiVote_dataOnly = (voteAction) => {
     const option = voteAction.option;
     if (!poll || !voterId || !option || poll.status === 'closed' || !poll.options.includes(option)) return;
     
-    // 更新投票数据
     Object.keys(poll.votes).forEach(key => {
         poll.votes[key] = (poll.votes[key] || []).filter(v => v !== voterId);
     });
     if (!poll.votes[option]) poll.votes[option] = [];
     poll.votes[option].push(voterId);
 
-    // 只保存数据，不大喊“刷新”
     saveAllData();
 };
         
@@ -3117,7 +3168,6 @@ const handleAiVote_dataOnly = (voteAction) => {
                             <button class="comment-btn">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
                             </button>
-                            <!-- ↓↓↓ 这是我们新加的删除按钮 ↓↓↓ -->
                             <button class="delete-moment-btn" title="删除动态">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" height="18px" width="18px"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
                             </button>
@@ -3146,7 +3196,6 @@ const handleAiVote_dataOnly = (voteAction) => {
                         <span class="comment-user">${commenterName}</span>
                         ${repliedToUser ? ` <span style="color: #555;">回复</span> <span class="comment-user">${repliedToUser}</span>` : ''}:
                         <span class="comment-text">${comment.text}</span>
-                        <!-- ↓↓↓ 这是我们新加的评论删除按钮 ↓↓↓ -->
                         <button class="delete-comment-btn" title="删除评论" style="background:none; border:none; color:#aaa; cursor:pointer; font-size:1.2em; padding: 0 5px;">×</button>
                         ${renderComments(comment.replies, post, true)}
                     </div>
@@ -3196,26 +3245,21 @@ const handleAiVote_dataOnly = (voteAction) => {
                 const commentToReplyTo = type === 'reply' ? parentComment : newComment;
             }
         };
-    // 这是一个“侦探”函数，专门用来在评论和回复中找到并删除指定的评论
     const deleteCommentById = (commentsArray, idToDelete) => {
         for (let i = 0; i < commentsArray.length; i++) {
             if (commentsArray[i].id === idToDelete) {
-                // 找到了！从数组中删除它，并报告成功
                 commentsArray.splice(i, 1);
                 return true;
             }
-            // 如果当前评论有回复，就派“侦探”去它的回复里继续寻找
             if (commentsArray[i].replies && commentsArray[i].replies.length > 0) {
                 if (deleteCommentById(commentsArray[i].replies, idToDelete)) {
-                    // 如果在深层找到了，也要层层报告成功
                     return true;
                 }
             }
         }
-        // 找遍了所有地方都没找到
         return false;
     };
-                    const handleMomentsInteraction = (e) => {
+                        const handleMomentsInteraction = (e) => {
         const postEl = e.target.closest('.moment-post');
         if (!postEl) return;
         
@@ -3236,40 +3280,40 @@ const handleAiVote_dataOnly = (voteAction) => {
         const commentBtn = e.target.closest('.comment-btn');
         const commentText = e.target.closest('.comment-text');
         const commentForm = e.target.closest('.comment-input-form');
-        // --- ↓↓↓ 新增：识别删除按钮的点击 ↓↓↓ ---
         const deleteMomentBtn = e.target.closest('.delete-moment-btn');
         const deleteCommentBtn = e.target.closest('.delete-comment-btn');
 
-        // --- ↓↓↓ 全新的删除动态逻辑 ↓↓↓ ---
         if (deleteMomentBtn) {
             if (confirm('您确定要删除这条动态吗？此操作无法撤销。')) {
-                if (moment.senderId !== 'user' || (replyToCommentId && moment.comments.some(c => c.id === replyToCommentId && c.sender !== 'user')) ) {
-    const aiWhoShouldReply = moment.senderId !== 'user' ? moment.senderId : findCommentOwner(moment.comments, replyToCommentId);
-    const commentForAIToReplyTo = newCommentByUser;
-    
-    if(aiWhoShouldReply) {
-        setTimeout(() => triggerAiMomentReply(moment, commentForAIToReplyTo, aiWhoShouldReply, momentType), 2500);
-    }
-}
+                if (moment.senderId === 'user') {
+                    userMomentsProfile.posts = userMomentsProfile.posts.filter(p => p.id !== momentId);
+                } else if (momentType === 'direct') {
+                    const postChar = characterSets.find(c => c.id === moment.senderId);
+                    if (postChar && postChar.moments) {
+                        postChar.moments = postChar.moments.filter(m => m.id !== momentId);
+                    }
+                } else if (momentType === 'group') {
+                    const group = getCurrentGroup();
+                    if (group && group.groupMoments) {
+                        group.groupMoments = group.groupMoments.filter(m => m.id !== momentId);
+                    }
+                }
                 saveAllData();
                 renderMoments();
             }
-            return; // 操作完成，结束
+            return;
         }
 
-        // --- ↓↓↓ 全新的删除评论逻辑 ↓↓↓ ---
         if (deleteCommentBtn) {
             const commentEl = e.target.closest('.comment');
             const commentIdToDelete = commentEl.dataset.commentId;
             if (confirm('您确定要删除这条评论吗？')) {
-                // 使用我们的“侦探”函数来寻找并删除评论
                 deleteCommentById(moment.comments, commentIdToDelete);
                 saveAllData();
                 renderMoments();
             }
-            return; // 操作完成，结束
+            return; 
         }
-
 
         if (likeBtn) {
             const likeIndex = moment.likes.indexOf('user');
@@ -3307,7 +3351,7 @@ const handleAiVote_dataOnly = (voteAction) => {
             if (text) {
                 const newCommentByUser = { id: generateId('cmt'), sender: 'user', text, replies: [] };
                 
-                if (replyToCommentId) { // 如果是“回复”
+                if (replyToCommentId) { 
                      const findAndPushReply = (comments) => {
                         for (const c of comments) {
                             if (c.id === replyToCommentId) {
@@ -3321,7 +3365,7 @@ const handleAiVote_dataOnly = (voteAction) => {
                         return false;
                     };
                     findAndPushReply(moment.comments);
-                } else { // 如果是新的“评论”
+                } else { 
                     if (!moment.comments) moment.comments = [];
                     moment.comments.push(newCommentByUser);
                 }
@@ -3331,10 +3375,21 @@ const handleAiVote_dataOnly = (voteAction) => {
                 saveAllData();
                 renderMoments();
                 
-                if (moment.senderId !== 'user') {
-                    const aiWhoShouldReply = moment.senderId;
+                const findCommentOwner = (comments, targetId) => {
+                    for (const c of comments) {
+                        if (c.id === targetId) return c.sender;
+                        if (c.replies) {
+                            const owner = findCommentOwner(c.replies, targetId);
+                            if (owner) return owner;
+                        }
+                    }
+                    return null;
+                };
+
+                const aiWhoShouldReply = (replyToCommentId ? findCommentOwner(moment.comments, replyToCommentId) : moment.senderId);
+
+                if (aiWhoShouldReply && aiWhoShouldReply !== 'user') {
                     const commentForAIToReplyTo = newCommentByUser;
-                    
                     setTimeout(() => triggerAiMomentReply(moment, commentForAIToReplyTo, aiWhoShouldReply, momentType), 2500);
                 }
             }
@@ -3355,82 +3410,96 @@ const handleAiVote_dataOnly = (voteAction) => {
             if (todaysEntry) {
                 renderDiary(character);
             } else {
-    elements.diaryEntries.innerHTML = '<p>正在写今天的日记...</p>';
-    await triggerAiDiaryEntry(character);
-}
+                elements.diaryEntries.innerHTML = '<p>正在写今天的日记...</p>';
+                await triggerAiDiaryEntry(character);
+            }
         };
         
-                    const triggerAiDiaryEntry = async (character) => {
-        const { config, chatHistory } = character;
-        const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
-        const apiKey = elements.apiKeyInput.value.trim();
-        const model = elements.modelSelect.value;
-        if (!apiBaseUrl || !apiKey || !model) return;
+        const triggerAiDiaryEntry = async (character) => {
+            try {
+                const { config, chatHistory } = character;
+                const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
+                const apiKey = elements.apiKeyInput.value.trim();
+                const model = elements.modelSelect.value;
+                if (!apiBaseUrl || !apiKey || !model) {
+                    elements.diaryEntries.innerHTML = '<p>请先在设置中填写API信息。</p>';
+                    return;
+                }
 
-        const prompt = `[Role]: You are ${config.characterName}.
+                const prompt = `[Role]: You are ${config.characterName}.
 [Task]: It is the end of the day. Based on your conversations with the user today, write a short diary entry in Simplified Chinese, reflecting on your feelings and the day's events. Your personality must be consistent.
 [CRITICAL: Output Format]: Your response MUST be a JSON array containing a single object like this:
-[{"type": "diary_entry", "content": "Your diary content here."}]`;
+[{"type": "diary_entry", "content": "Your diary content here."}]
+ABSOLUTELY NO other text, markdown, or explanations outside the JSON array.`;
+                
+                const payload = getApiPayload(model, chatHistory.slice(-config.memorySize), prompt);
 
-                      // 这个小程序同样负责“翻译”聊天记录
-        const formatDiaryMessage = (msg) => {
-            const role = msg.sender === 'user' ? 'user' : 'assistant';
-            const content = msg.llmContent || msg.text;
-            if (!content || msg.type === 'sticker') {
-                return null;
-            }
-            return { role, content };
-        };
+                const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, 
+                    body: JSON.stringify(payload) 
+                });
 
-        const messages = [
-            { role: 'system', content: prompt },
-            ...chatHistory.slice(-config.memorySize)
-                         .map(formatDiaryMessage)
-                         .filter(msg => msg !== null)
-        ];
-        
-        try {
-            const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages }) });
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`服务器错误 (状态码: ${response.status}): ${errorText}`);
-            }
-            const data = await response.json();
-            if (data?.choices?.[0]?.message?.content) {
-                let parsed;
-                const rawContent = data.choices[0].message.content;
-                try {
-                    const jsonMatch = rawContent.match(/\[\s*\{.*\}\s*\]/s);
-                    parsed = JSON.parse(jsonMatch ? jsonMatch[0] : rawContent);
-                } catch (e) {
-                    throw new Error(`AI返回的内容不是有效的日记格式。收到的内容是: ${rawContent}`);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`服务器返回错误 (状态码: ${response.status})。响应内容: ${errorText}`);
                 }
-                const action = parsed[0];
-                if (action && action.type === 'diary_entry' && action.content) {
-                    addDiaryEntry(character.id, action.content);
+
+                const responseData = await response.json();
+                
+                let rawContent = '';
+                const isGemini = apiBaseUrl.includes('google');
+                if (isGemini) {
+                    rawContent = responseData?.candidates?.[0]?.content?.parts?.[0]?.text;
                 } else {
-                    throw new Error(`AI返回的不是有效的日记格式。收到的内容是: ${JSON.stringify(action)}`);
+                    rawContent = responseData?.choices?.[0]?.message?.content;
                 }
-            } else if (data.error) {
-                throw new Error(`API返回错误: ${data.error.message}`);
-            } else {
-                elements.diaryEntries.innerHTML = '<p>今天没什么特别的想写...</p>';
+                
+                if (rawContent) {
+                    let diaryText = null;
+                    try {
+                        const jsonMatch = rawContent.match(/\[\s*\{[\s\S]*?\}\s*\]/s);
+                        const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : rawContent);
+                        const action = Array.isArray(parsed) ? parsed[0] : parsed;
+                        if (action && action.type === 'diary_entry' && action.content) {
+                            diaryText = action.content;
+                        }
+                    } catch (e) {
+                        console.warn("AI日记响应不是标准JSON，将作为纯文本处理:", rawContent);
+                    }
+
+                    if (diaryText === null) {
+                        diaryText = rawContent.replace(/^```json\s*/, '').replace(/```$/, '').trim();
+                    }
+
+                    if (diaryText) {
+                        addDiaryEntry(character.id, diaryText);
+                    } else {
+                        throw new Error(`AI返回了有效但空的响应，无法提取日记内容。原始响应: ${rawContent}`);
+                    }
+                } else if (responseData.error) {
+                    throw new Error(`API返回了一个已知的错误: ${responseData.error.message || JSON.stringify(responseData.error)}`);
+                } else {
+                    elements.diaryEntries.innerHTML = '<p>今天没什么特别的想写...</p>';
+                }
+            } catch (e) {
+                console.error("写日记时发生了一个捕获到的错误:", e);
+                elements.diaryEntries.innerHTML = `<p style="color: red; font-weight: bold;">写日记时出错了:</p><p style="word-break: break-all;">${e.message || '发生了一个未知错误，请检查控制台获取详细信息。'}</p>`;
             }
-        } catch (e) {
-            console.error("写日记失败:", e);
-            elements.diaryEntries.innerHTML = `<p style="color: red; font-weight: bold;">写日记时出错了:</p><p style="word-break: break-all;">${e.message}</p>`;
-        }
-    };
+        };
 
         const addDiaryEntry = (characterId, content) => {
             const character = characterSets.find(c => c.id === characterId);
             if (!character) return;
             const today = getCurrentDate();
             if (!character.diary) character.diary = [];
-            if (!character.diary.some(e => e.date === today)) {
+            const existingEntry = character.diary.find(e => e.date === today);
+            if(existingEntry) {
+                existingEntry.content = content;
+            } else {
                 character.diary.unshift({ date: today, content });
-                saveAllData();
             }
+            saveAllData();
             if (elements.diaryModal.classList.contains('show')) {
                 renderDiary(character);
             }
@@ -3452,8 +3521,8 @@ const handleAiVote_dataOnly = (voteAction) => {
 
         // --- Data Import/Export ---
                 const exportData = async () => { 
-            await saveCurrentSettings(); // 修改了这里
-            await saveAllData(); // 修改了这里
+            await saveCurrentSettings(); 
+            await saveAllData(); 
             const data = localStorage.getItem('aiBoyfriendBackup_v6_meta'); 
             const blob = new Blob([data], {type: 'application/json'}); 
             const url = URL.createObjectURL(blob); 
@@ -3474,17 +3543,10 @@ const handleAiVote_dataOnly = (voteAction) => {
     reader.onload = (e) => {
         try {
             const data = e.target.result;
-            
-            // 1. 验证文件内容是否是有效的JSON
             const parsed = JSON.parse(data);
             
-            // 2. 验证JSON是否是我们应用需要的格式
-            // 我们检查是否存在'characterSets'和'globalSettings'这两个核心数据块
             if (parsed.characterSets && parsed.globalSettings) {
-                
-                // --- 核心修正：直接将数据写入【正确】的保险箱 ---
                 localStorage.setItem('aiBoyfriendBackup_v6_meta', data);
-                
                 alert('数据导入成功！页面即将刷新以应用您的备份。');
                 location.reload();
             } else {
@@ -3496,7 +3558,6 @@ const handleAiVote_dataOnly = (voteAction) => {
         }
     };
     
-    // 确保文件选择器在下次使用时是干净的
     reader.onerror = () => {
         alert('读取文件时发生错误。');
         event.target.value = '';
@@ -3539,7 +3600,7 @@ const handleAiVote_dataOnly = (voteAction) => {
         elements.actionVideoCall.onclick = () => { startVideoCall(); toggleActionPanel(true); };
         elements.actionCreatePoll.onclick = () => { openCreatePollModal(); toggleActionPanel(true); };
 
-        elements.fetchModelsBtn.onclick = async () => { const baseUrl = elements.apiBaseUrlInput.value.trim(); const apiKey = elements.apiKeyInput.value.trim(); if (!baseUrl || !apiKey) { alert('请输入API端点和API密钥'); return; } elements.fetchModelsBtn.textContent = '获取中...'; elements.fetchModelsBtn.disabled = true; try { const response = await fetch(`${baseUrl}/v1/models`, { headers: { 'Authorization': `Bearer ${apiKey}` } }); if (!response.ok) throw new Error(`获取模型列表失败, Status: ${response.status} ${await response.text()}`); const data = await response.json(); elements.modelSelect.innerHTML = ''; const models = data.data || data; if (!Array.isArray(models)) throw new Error('API返回的模型列表格式不正确'); models.sort((a, b) => a.id.localeCompare(b.id)).forEach(model => { if (model.id) elements.modelSelect.add(new Option(model.id, model.id)); }); const currentModel = elements.modelSelect.value; if(currentModel) elements.modelSelect.value = currentModel; } catch (error) { alert(`获取模型失败: ${error.message}`); } finally { elements.fetchModelsBtn.textContent = '获取模型列表'; elements.fetchModelsBtn.disabled = false; } };
+        elements.fetchModelsBtn.onclick = async () => { const baseUrl = elements.apiBaseUrlInput.value.trim(); const apiKey = elements.apiKeyInput.value.trim(); if (!baseUrl || !apiKey) { alert('请输入API端点和API密钥'); return; } elements.fetchModelsBtn.textContent = '获取中...'; elements.fetchModelsBtn.disabled = true; try { const response = await fetch(`${baseUrl}/v1/models`, { headers: { 'Authorization': `Bearer ${apiKey}` } }); if (!response.ok) throw new Error(`获取模型列表失败, Status: ${response.status} ${await response.text()}`); const data = await response.json(); elements.modelSelect.innerHTML = ''; const models = data.data || data.models || data; if (!Array.isArray(models)) throw new Error('API返回的模型列表格式不正确'); models.sort((a, b) => (a.id || a.name).localeCompare(b.id || b.name)).forEach(model => { const modelId = model.id || model.name; if (modelId) elements.modelSelect.add(new Option(modelId, modelId)); }); const currentModel = elements.modelSelect.value; if(currentModel) elements.modelSelect.value = currentModel; } catch (error) { alert(`获取模型失败: ${error.message}`); } finally { elements.fetchModelsBtn.textContent = '获取模型列表'; elements.fetchModelsBtn.disabled = false; } };
         elements.themeSelector.onclick = (e) => { const t = e.target.closest('.theme-option'); if (t) applyTheme(t.dataset.theme); };
         
         elements.fontSelect.addEventListener('change', () => applyFont(elements.fontSelect.value));   
@@ -3625,22 +3686,15 @@ const handleAiVote_dataOnly = (voteAction) => {
         };
 
                 getEl('bubble-style-select').addEventListener('change', (e) => {
-    // 新的逻辑非常简单：直接根据你选择的值，去应用对应的样式即可！
     applyBubbleStyle(e.target.value);
 });
         
-         // --- 新增代码开始 ---
 elements.applyCustomFontBtn.onclick = () => applyCustomFont(elements.customFontNameInput.value, elements.customFontUrlInput.value);
-// --- 新增代码结束 ---         
     };
 
-// ==============================================================
-// ================ 新增的“预设记忆芯片”核心函数 ================
-// ==============================================================
 const updatePresetsFromUI = () => {
     const presetItems = document.querySelectorAll('.preset-item');
     if (presetItems.length === 0 && globalPresets.length > 0) {
-        // 如果UI是空的但内存里有，说明可能正在被清空，此时应该清空内存
         globalPresets = [];
         return;
     }
@@ -3663,9 +3717,6 @@ const updatePresetsFromUI = () => {
     });
     globalPresets = updatedPresets;
 };
-// ==============================================================
-// ========================== 函数结束 ==========================
-// ==============================================================
       
           // --- 全新的预设功能和模型参数控制 ---
     const renderPresets = () => {
@@ -3701,7 +3752,7 @@ const updatePresetsFromUI = () => {
 
     const setupPresetEventListeners = () => {
         elements.addPresetBtn.onclick = () => {
-    updatePresetsFromUI(); // <-- 在所有操作之前，先调用“记忆芯片”！
+    updatePresetsFromUI(); 
 
     const newPreset = {
         id: generateId('preset'),
