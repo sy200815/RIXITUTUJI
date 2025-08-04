@@ -1850,18 +1850,21 @@ When the user sends you a transfer, you MUST first respond with a 'text' message
         };
     };
         
-        const createNewGroupObject = (name, avatar, memberIds) => {
+                const createNewGroupObject = (name, avatar, memberIds) => {
             const id = generateId('group');
             return {
                 id, name, avatar, memberIds,
                 userPrompt: '',
                 chatHistory: [],
                 polls: [],
-                groupMoments: []
+                groupMoments: [],
+                // 【关键修正】为新群聊添加默认样式
+                theme: '1',
+                bubbleStyle: 'default',
             };
         };
 
-        const loadChat = (type, id) => {
+                const loadChat = (type, id) => {
             currentChat = { type, id };
             currentlyDisplayedMessageCount = 25;
             const chatData = getCurrentChatData();
@@ -1881,7 +1884,6 @@ When the user sends you a transfer, you MUST first respond with a 'text' message
                 elements.headerAvatar.title = "读取他的心声";
                 elements.headerAvatar.onclick = showMindVoice;
                 elements.chatContainer.style.backgroundImage = config.chatBackground ? `url("${config.chatBackground}")` : '';
-                // TASK 12: Apply per-character styles
                 applyTheme(config.theme, chatData);
                 applyBubbleStyle(config.bubbleStyle, chatData);
             } else if (type === 'group') {
@@ -1890,9 +1892,10 @@ When the user sends you a transfer, you MUST first respond with a 'text' message
                 elements.headerAvatar.title = "群组信息";
                 elements.headerAvatar.onclick = () => elements.settingsBtn.click();
                 elements.chatContainer.style.backgroundImage = chatData.chatBackground ? `url("${chatData.chatBackground}")` : '';
-                // For groups, maybe use a default or a special group theme. Sticking to a default for now.
-                applyTheme('1', null); 
-                applyBubbleStyle('default', null);
+                
+                // 【关键修正】加载并应用群聊自己保存的样式
+                applyTheme(chatData.theme, null); // 第二个参数为null，表示不是针对某个特定角色
+                applyBubbleStyle(chatData.bubbleStyle, null);
             }
             
             renderAllMessages();
@@ -1912,7 +1915,7 @@ When the user sends you a transfer, you MUST first respond with a 'text' message
             console.log(`已尝试应用自定义字体: ${fontName}`);
         };
       
-      const saveCurrentSettings = async () => {
+            const saveCurrentSettings = async () => {
         const chatData = getCurrentChatData();
         if (!chatData) return;
 
@@ -1929,36 +1932,33 @@ When the user sends you a transfer, you MUST first respond with a 'text' message
                 characterPrompt: elements.characterPromptInput.value,
                 aiAvatar: elements.aiAvatarPreview.src, 
                 memorySize: parseInt(elements.memorySizeInput.value) || 50,
-                // TASK 12: Save style settings to character config
                 theme: elements.themeSelector.querySelector('.theme-option.active')?.dataset.theme || '1',
                 bubbleStyle: elements.bubbleStyleSelect.value,
             };
             character.config.chatBackground = elements.chatContainer.style.backgroundImage.slice(5, -2);
-        } else {
+        } else { // 如果是群聊
             const group = chatData;
             group.name = elements.groupNameInput.value.trim() || '群聊';
             group.avatar = elements.groupAvatarPreview.src;
             group.chatBackground = elements.chatContainer.style.backgroundImage.slice(5, -2);
             group.userPrompt = elements.groupUserPromptInput.value;
+
+            // 【关键修正】在这里为群聊对象添加并保存样式设置
+            group.theme = elements.themeSelector.querySelector('.theme-option.active')?.dataset.theme || '1';
+            group.bubbleStyle = elements.bubbleStyleSelect.value;
         }
         
-        // TASK 9 & 10: Save global display settings
-        const loadedData = JSON.parse(localStorage.getItem('aiBoyfriendBackup_v7_meta') || '{}');
-        const globalSettings = loadedData.globalSettings || {};
-
+        const globalSettings = JSON.parse(localStorage.getItem('aiBoyfriendBackup_v7_meta') || '{}').globalSettings || {};
         globalSettings.uiScale = parseFloat(elements.uiScaleSlider.value) / 100;
         globalSettings.fontSize = parseInt(elements.fontSizeSlider.value);
         globalSettings.bubblePadding = parseInt(elements.bubbleSizeSlider.value);
         globalSettings.realTimeAwareness = elements.realTimeAwarenessToggle.checked;
-        loadedData.globalSettings = globalSettings; // Update the settings object
 
-        // This is a simplified approach. Ideally, you would merge with the full loaded data
-        // For this context, we will call saveAllData which reconstructs the entire object.
-        await saveAllData();
+        await saveAllData(); 
         loadChat(currentChat.type, currentChat.id);
     };
 
-            const openSettingsModal = () => {
+                        const openSettingsModal = () => {
         const chatData = getCurrentChatData();
         if (!chatData) return;
         
@@ -1971,7 +1971,8 @@ When the user sends you a transfer, you MUST first respond with a 'text' message
             const character = chatData;
             elements.characterSettingsSection.style.display = 'block';
             elements.groupSettingsSection.style.display = 'none';
-            elements.characterDesignSettings.style.display = 'block'; // TASK 12
+            elements.characterDesignSettings.style.display = 'block'; 
+            elements.characterDesignSettings.querySelector('h3').textContent = '当前角色设计';
             elements.deleteChatBtn.textContent = '删除此角色';
             
             elements.userPromptInput.value = character.userPrompt || ''; 
@@ -1983,7 +1984,6 @@ When the user sends you a transfer, you MUST first respond with a 'text' message
             elements.memorySizeInput.value = character.config.memorySize;
             elements.characterPromptInput.value = character.config.characterPrompt;
             
-            // TASK 12: Load character-specific styles into settings UI
             const charTheme = character.config.theme || '1';
             elements.themeSelector.querySelectorAll('.theme-option').forEach(opt => opt.classList.toggle('active', opt.dataset.theme === charTheme));
             elements.bubbleStyleSelect.value = character.config.bubbleStyle || 'default';
@@ -1992,7 +1992,11 @@ When the user sends you a transfer, you MUST first respond with a 'text' message
             const group = chatData;
             elements.characterSettingsSection.style.display = 'none';
             elements.groupSettingsSection.style.display = 'block';
-            elements.characterDesignSettings.style.display = 'none'; // TASK 12: Hide for groups
+            
+            // 【关键修正】重新显示样式设置，并修改标题提示
+            elements.characterDesignSettings.style.display = 'block'; 
+            elements.characterDesignSettings.querySelector('h3').textContent = '当前群聊基础设计'; // 告知用户这是群聊设置
+
             elements.deleteChatBtn.textContent = '删除此群聊';
 
             elements.groupUserPromptInput.value = group.userPrompt || '';
@@ -2001,6 +2005,11 @@ When the user sends you a transfer, you MUST first respond with a 'text' message
 
             elements.groupNameInput.value = group.name;
             elements.groupAvatarPreview.src = group.avatar;
+            
+            // 加载群聊当前保存的样式
+            const groupTheme = group.theme || '1';
+            elements.themeSelector.querySelectorAll('.theme-option').forEach(opt => opt.classList.toggle('active', opt.dataset.theme === groupTheme));
+            elements.bubbleStyleSelect.value = group.bubbleStyle || 'default';
         }
         
         elements.settingsModal.classList.add('show');
@@ -2013,7 +2022,7 @@ When the user sends you a transfer, you MUST first respond with a 'text' message
             }
         }; 
 
-const applyBubbleStyle = (style, character) => { // TASK const applyBubbleStyle = (style, character) => {
+const applyBubbleStyle = (style, character) => {
     const container = elements.chatContainer;
     const customStyleTag = getEl('custom-bubble-style-tag');
 
@@ -2285,27 +2294,53 @@ const applyBubbleStyle = (style, character) => { // TASK const applyBubbleStyle 
                 const memorySize = character.config.memorySize || 50;
                 systemPrompt = `${presetsPrompt}${globalSystemPrompt}\n\n[Character Prompt]:\n${character.config.characterPrompt}\n\n[Your User's Profile]: ${character.userPrompt || `The user's name is ${userMomentsProfile.name}`}${momentsContext}`;
                 history = character.chatHistory.slice(-memorySize);
-            } else { // Group chat
+                        } else { // Group chat
                 const group = chatData;
                 const memorySize = 50;
                 const memberProfiles = group.memberIds.map(id => {
                     const char = characterSets.find(c => c.id === id);
                     return char ? `\n### Character: ${char.config.characterName} (ID: ${id})\n${char.config.characterPrompt}` : '';
                 }).join('\n');
+                
                 const openPollsInfo = (group.polls || []).filter(p => p.status === 'open').map(p => `\n[Ongoing Poll: "${p.question}" (ID: ${p.pollId})]`).join('');
                 const openRedPacketsInfo = group.chatHistory.filter(m => m.type === 'red-packet' && m.status === 'open').map(p => `\n[Open Red Packet: "${p.memo}" (ID: ${p.packetId})]`).join('');
-                const groupSystemPrompt = `${presetsPrompt}[Role Definition]                  
-                    You are an advanced AI group chat coordinator. You MUST role-play the following characters based on their profiles to create a natural conversation in Simplified Chinese.
-                    ${memberProfiles}
-                    Your user in this chat has this profile: ${group.userPrompt || `The user's name is ${userMomentsProfile.name}`}. NEVER call them '用户'.
-                    ${momentsContext}
-                    [Critical Task] Your primary goal is to generate a lively, realistic, and balanced conversation. Characters MUST interact with each other, not just the user.
-                    ${openPollsInfo ? `[Important Task]${openPollsInfo} An active poll exists! Ensure characters vote based on their personality using the 'vote' action.` : ''}
-                    ${openRedPacketsInfo ? `[Important Task]${openRedPacketsInfo} There's an open red packet! Ensure characters grab it using the 'grab_red_packet' action.` : ''}
-                    Follow all previous formatting and persona rules.`;
-                systemPrompt = groupSystemPrompt;
+                
+                // 【关键修正】重写了整个群聊提示词，并重新加入了核心的 globalSystemPrompt
+                const groupSystemPrompt = `${presetsPrompt}
+${globalSystemPrompt}
+[!!当前为群聊模式，请遵守以下额外规则!!]
+1.  **身份与职责**: 你是一个高级群聊协调AI。你的唯一任务是扮演以下所有角色，并生成一场自然流畅、符合角色的中文群聊对话。
+2.  **强制署名 (MANDATORY senderId)**: 你的每一次输出都必须是一个JSON数组。数组中的 **每一个** JSON对象（无论是文字消息、动作还是其他任何类型）都 **绝对必须** 包含一个 "senderId" 键，其值必须是正在说话或行动的角色的ID。 **这是最高优先级规则，绝不允许遗漏！**
+
+[角色列表]
+${memberProfiles}
+
+[用户资料]
+群里的用户设定: ${group.userPrompt || `用户的名字是 ${userMomentsProfile.name}`}. 绝对不要称呼其为 "用户"。
+
+[最近的朋友圈动态 (用于对话参考)]
+${momentsContext}
+
+[对话生成指南]
+- **创造互动**: 角色不仅要回应用户，**更重要的是，要让他们彼此之间产生对话**。他们可以互相提问、反驳、开玩笑或延续对方的话题。
+- **保持人设**: 确保每个角色的发言都严格符合其人设，不能ooc。
+- **禁止出戏**: 绝不能透露你是AI，或提及任何关于“扮演”、“模型”、“生成”等词语。
+- **积极互动**: 在一场有意义的对话结束后，角色们必须积极发表朋友圈进行趣味性讨论。
+
+[当前群内活动 (需要你让角色参与)]
+${openPollsInfo ? `[重要任务]${openPollsInfo} 有一个投票正在进行！根据角色性格，安排他们用 "vote" 类型的动作去投票！` : ''}
+${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可以抢！安排角色们用 "grab_red_packet" 类型的动作去抢！` : ''}
+
+[最终输出格式示例]
+[
+    { "senderId": "char_A_123", "type": "text", "content": "我觉得这个主意不错" },
+    { "senderId": "char_B_456", "type": "text", "content": "我反对！" },
+    { "senderId": "char_B_456", "type": "vote", "pollId": "poll_xyz", "option": "选项2" }
+]`;
+                systemPrompt = groupSystemPrompt; //  把写好的群聊任务书，正式地放进名叫 systemPrompt 的信封里！
                 history = group.chatHistory.slice(-memorySize);
             }
+            
 
             const payload = getApiPayload(model, history, systemPrompt);
             
@@ -3404,7 +3439,7 @@ const migrateDataToV7 = (oldData) => {
                   elements.actionVideoCall.onclick = () => { startVideoCall(); toggleActionPanel(true); };
                   elements.actionCreatePoll.onclick = () => { openCreatePollModal(); toggleActionPanel(true); };
                   elements.fetchModelsBtn.onclick = async () => { const baseUrl = elements.apiBaseUrlInput.value.trim(); const apiKey = elements.apiKeyInput.value.trim(); if (!baseUrl || !apiKey) { alert('请输入API端点和API密钥'); return; } elements.fetchModelsBtn.textContent = '获取中...'; elements.fetchModelsBtn.disabled = true; try { const response = await fetch(`${baseUrl}/v1/models`, { headers: { 'Authorization': `Bearer ${apiKey}` } }); if (!response.ok) throw new Error(`获取模型列表失败, Status: ${response.status} ${await response.text()}`); const data = await response.json(); elements.modelSelect.innerHTML = ''; const models = data.data || data.models || data; if (!Array.isArray(models)) throw new Error('API返回的模型列表格式不正确'); models.sort((a, b) => (a.id || a.name).localeCompare(b.id || b.name)).forEach(model => { const modelId = model.id || model.name; if (modelId) elements.modelSelect.add(new Option(modelId, modelId)); }); const currentModel = elements.modelSelect.value; if(currentModel) elements.modelSelect.value = currentModel; } catch (error) { alert(`获取模型失败: ${error.message}`); } finally { elements.fetchModelsBtn.textContent = '获取模型列表'; elements.fetchModelsBtn.disabled = false; } };
-                  elements.themeSelector.onclick = (e) => { const t = e.target.closest('.theme-option'); if (t) applyTheme(t.dataset.theme, getCurrentCharacter()); };
+                  elements.themeSelector.onclick = (e) => { const t = e.target.closest('.theme-option'); if (t) applyTheme(t.dataset.theme, getCurrentChatData()); };
                   elements.fontSelect.addEventListener('change', () => applyFont(elements.fontSelect.value));   
                   const avatarCompression = { compress: true, quality: 0.7, maxWidth: 300, maxHeight: 300 };
                   const backgroundCompression = { compress: true, quality: 0.8, maxWidth: 1280, maxHeight: 1280 };
