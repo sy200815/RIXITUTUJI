@@ -2013,14 +2013,15 @@ When the user sends you a transfer, you MUST first respond with a 'text' message
             }
         }; 
 
-const applyBubbleStyle = (style, character) => { // TASK 12: Pass character context
+const applyBubbleStyle = (style, character) => { // TASK const applyBubbleStyle = (style, character) => {
     const container = elements.chatContainer;
     const customStyleTag = getEl('custom-bubble-style-tag');
 
     container.classList.remove('bubble-style-round', 'bubble-style-wechat', 'custom-style-active');
     customStyleTag.textContent = '';
 
-    const styleToApply = character ? (character.config.bubbleStyle || 'default') : style;
+    // 【关键修正】优先使用传入的style参数，如果它不存在，再从角色配置中读取
+    const styleToApply = style || (character ? character.config.bubbleStyle : 'default');
 
     if (styleToApply === 'round') {
         container.classList.add('bubble-style-round');
@@ -2031,12 +2032,11 @@ const applyBubbleStyle = (style, character) => { // TASK 12: Pass character cont
         container.classList.add('custom-style-active');
     }
     
-    // Update UI
+    // 更新设置界面里的下拉框，让它显示正确的样式
     if (elements.bubbleStyleSelect.value !== styleToApply) {
         elements.bubbleStyleSelect.value = styleToApply;
     }
 };
-
       
         const handleFileUpload = (file, callback, compressionOptions = {}) => { 
             if (file) { 
