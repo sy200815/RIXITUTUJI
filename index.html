@@ -110,7 +110,7 @@ body.dark-mode .comment {
     --font-ui: 'Cubic 11', 'Noto Sans JP', sans-serif;
     --font-logo: 'Pacifico', cursive;
     
-    --bg-color: #fcefee;
+    --bg-color: #FFFFFF;
     --chat-bg-color: rgba(255, 255, 255, 0.85);
     --header-bg-color: rgba(255, 255, 255, 0.95);
     --input-bg-color: #ffffff;
@@ -118,11 +118,18 @@ body.dark-mode .comment {
     --text-light-color: #a0a0a0;
     --accent-color: #ff8fab;
     --accent-dark-color: #f87197;
-    --border-color: #fde2e2; /* 稍微调整边框色 */
+    --border-color: #fde2e2;
     --delete-color: #ff6b6b;
     --success-color: #4CAF50;
     --notification-bg: rgba(255, 143, 171, 0.9);
     --red-packet-color: #e67e22;
+
+    --base-font-size: 16px;
+    --bubble-padding: 10px 15px;
+    --ui-scale: 1.0;
+
+    /* ...后面的颜色变量保持不变... */*/
+    --ui-scale: 1.0; /* Default UI scale */
 
     /* Bubble Themes */
     /* 默认主题 */
@@ -147,19 +154,35 @@ body.dark-mode .comment {
     --theme8-ai-bg: #ffffff; --theme8-ai-text: #333333; /* 微信日间 */
     --theme8-user-bg: #a9ea7a; --theme8-user-text: #333333;
     --theme9-ai-bg: #343434; --theme9-ai-text: #E5E5E5; /* 微信夜间 */
---theme9-user-bg: #57BD61; --theme9-user-text: #343434;
+    --theme9-user-bg: #57BD61; --theme9-user-text: #343434;
+    
+    /* TASK 13: Add 4 New Bubble Themes */
+    --theme10-ai-bg: #f5f5f5; --theme10-ai-text: #333333; /* 最浅的灰和浅灰 */
+    --theme10-user-bg: #e0e0e0; --theme10-user-text: #333333;
+    --theme11-ai-bg: #795548; --theme11-ai-text: #ffffff; /* 薄巧的薄荷色和薄巧的巧克力色 */
+    --theme11-user-bg: #A8E6CF; --theme11-user-text: #333333; 
+    --theme12-ai-bg: #A7D8F0; --theme12-ai-text: #333333; /* 捡手机文学的淡天空蓝和淡奶油黄 */
+    --theme12-user-bg: #FFFACD; --theme12-user-text: #333333; 
+    --theme13-ai-bg: #f5f5f5; --theme13-ai-text: #333333; /* 最浅的灰色和很浅的奶油黄 */
+    --theme13-user-bg: #FFFDD0; --theme13-user-text: #333333;
+
     --ai-bubble-bg: var(--theme1-ai-bg);
     --ai-bubble-text: var(--theme1-ai-text);
     --user-bubble-bg: var(--theme1-user-bg);
     --user-bubble-text: var(--theme1-user-text);
 }
         /* --- Base & Layout --- */
+        html {
+           /* TASK 9: Use CSS variable for base font size to allow scaling */
+           font-size: var(--base-font-size); 
+        }
         html, body { height: 100%; overflow: hidden; }
         body {
             font-family: var(--font-main);
             margin: 0; padding: 0;
             background-color: var(--bg-color);
-            background-image: url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23f7d3e1" fill-opacity="0.4"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
+            /* TASK 8: Remove background image */
+            /* background-image: url('data:image/svg+xml,...'); */
             color: var(--text-color);
             transition: background-color 0.5s ease;
         }
@@ -167,11 +190,14 @@ body.dark-mode .comment {
         #chat-container {
             display: flex; flex-direction: column; height: 100%; max-width: 800px; margin: 0 auto;
             background-color: var(--chat-bg-color); backdrop-filter: blur(10px); box-shadow: 0 0 30px rgba(255, 143, 171, 0.15);
-            transition: background-color 0.5s ease;
+            transition: background-color 0.5s ease, transform 0.3s ease;
             position: relative;
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center center;
+            /* TASK 9: Apply UI scaling */
+            transform: scale(var(--ui-scale));
+            transform-origin: center center;
         }
         
         #top-notification {
@@ -196,9 +222,11 @@ body.dark-mode .comment {
         #chat-manager-btn svg { width: 26px; height: 26px; fill: var(--accent-color); transition: transform 0.3s ease, fill 0.3s ease; }
         #chat-manager-btn:hover svg { fill: var(--accent-dark-color); transform: scale(1.1); }
         
+        /* TASK 7: Make header avatar circular and remove border */
         #header-avatar {
-            width: 40px; height: 40px; border-radius: 8px; object-fit: cover;
-            border: 2px solid var(--border-color); cursor: pointer; transition: transform 0.2s ease;
+            width: 40px; height: 40px; border-radius: 50%; object-fit: cover;
+            /* border: 2px solid var(--border-color); */
+            cursor: pointer; transition: transform 0.2s ease;
         }
         #header-avatar:hover { transform: scale(1.1); }
         #chat-name-header { flex-grow: 1; text-align: center; font-size: 1.2em; font-weight: 500; color: var(--accent-dark-color); padding: 5px; border-radius: 5px; transition: background-color 0.2s; }
@@ -227,17 +255,55 @@ body.dark-mode .comment {
         .message.group-chat.ai .sender-name { display: block; }
         .message.system { align-self: center; background: #e0e0e0; color: #757575; font-size: 0.8em; padding: 4px 10px; border-radius: 10px; max-width: none; cursor: default; }
         .message.system .avatar, .message.system .timestamp { display: none; }
-        .avatar { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 2px solid var(--border-color); flex-shrink: 0; }
+        .avatar { 
+            width: 40px; height: 40px; 
+            /* TASK 7: Make avatars circular and remove border */
+            border-radius: 50%;
+            object-fit: cover;
+            /* border: 2px solid var(--border-color); */
+            flex-shrink: 0;
+        }
         .message-content { display: flex; flex-direction: column; }
         .message.user .message-content { align-items: flex-end; }
         .message.ai .message-content { align-items: flex-start; }
-        .bubble { padding: 10px 15px; border-radius: 18px; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05); word-wrap: break-word; max-width: 100%; transition: transform 0.2s ease, border 0.2s ease, opacity 0.2s ease; }
+        .bubble { 
+            /* TASK 9: Use CSS variable for padding */
+            padding: var(--bubble-padding); 
+            border-radius: 18px; position: relative;
+            /* TASK 7: Remove box-shadow */
+            /* box-shadow: 0 2px 5px rgba(0,0,0,0.05); */
+            word-wrap: break-word; max-width: 100%; transition: transform 0.2s ease, border 0.2s ease, opacity 0.2s ease; 
+        }
         :not(.custom-style-active) .message.ai .bubble { background-color: var(--ai-bubble-bg); color: var(--ai-bubble-text); }
-:not(.custom-style-active) .message.user .bubble { background-color: var(--user-bubble-bg); color: var(--user-bubble-text); }
-.message.ai .bubble { border-bottom-left-radius: 4px; }
-.message.user .bubble { border-bottom-right-radius: 4px; }
+        :not(.custom-style-active) .message.user .bubble { background-color: var(--user-bubble-bg); color: var(--user-bubble-text); }
+        .message.ai .bubble { border-bottom-left-radius: 4px; }
+        .message.user .bubble { border-bottom-right-radius: 4px; }
         .bubble p { margin: 0; }
         .timestamp { font-size: 0.7em; color: var(--text-light-color); margin-top: 5px; padding: 0 5px; }
+
+        /* TASK 7: Style for "Read" status */
+.message {
+    position: relative; /* 关键：让整个消息容器作为“已读”的定位参考 */
+}
+.read-status {
+    position: absolute; /* 使用绝对定位，让它“漂浮”起来 */
+    top: -12px;         /* 向上移动，把它放到头像的上方区域 */
+    font-size: 0.6em;   /* 保持小巧的字体 */
+    color: var(--text-light-color);
+    background-color: var(--chat-bg-color, white); /* 给一点背景色，避免和背景混淆 */
+    padding: 1px 4px;
+    border-radius: 5px;
+    white-space: nowrap;
+    opacity: 0.8;       /* 稍微透明一点，不那么抢眼 */
+}
+/* 用户消息的已读，定位在右侧头像上方 */
+.message.user .read-status {
+    right: 50px; /* 从右侧开始定位，50px大约是头像的宽度+间距 */
+}
+/* AI消息的已读，定位在左侧头像上方 */
+.message.ai .read-status {
+    left: 50px; /* 从左侧开始定位 */
+}
         
         .multi-select-mode .message:not(.selected):not(.system) { opacity: 0.6; }
         .multi-select-mode .message.selected .bubble { transform: scale(1.03); border: 2px solid var(--accent-dark-color); }
@@ -250,16 +316,18 @@ body.dark-mode .comment {
 
         /* --- Input Area & Action Panel --- */
         #bottom-panel { position: relative; flex-shrink: 0; background: var(--header-bg-color); }
-        #input-area { display: flex; align-items: flex-end; padding: 10px 15px; border-top: 1px solid var(--border-color); transition: opacity 0.3s ease, visibility 0.3s ease; }
+        #input-area { display: flex; align-items: flex-end; padding: 10px 15px; border-top: 1px solid var(--border-color); transition: opacity 0.3s ease, visibility 0.3s ease; gap: 10px; }
         #action-btn { background: none; border: none; cursor: pointer; padding: 5px; margin-right: 5px; align-self: center; flex-shrink: 0;}
         #action-btn svg { width: 28px; height: 28px; fill: var(--accent-color); transition: transform 0.3s ease, fill 0.2s; }
         #action-btn:hover svg { fill: var(--accent-dark-color); }
-        #message-input { flex-grow: 1; border: 1px solid var(--border-color); border-radius: 20px; padding: 10px 15px; font-size: 1em; font-family: var(--font-main); margin-right: 10px; resize: none; transition: border-color 0.3s ease, box-shadow 0.3s ease; max-height: 100px; overflow-y: auto; }
+        #message-input { flex-grow: 1; border: 1px solid var(--border-color); border-radius: 20px; padding: 10px 15px; font-size: 1em; font-family: var(--font-main); resize: none; transition: border-color 0.3s ease, box-shadow 0.3s ease; max-height: 100px; overflow-y: auto; }
         #message-input:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 5px var(--accent-color); }
-        #send-btn { background-color: var(--accent-color); border: none; border-radius: 50%; width: 44px; height: 44px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: background-color 0.3s ease, transform 0.2s ease; flex-shrink: 0; }
-        #send-btn:hover { background-color: var(--accent-dark-color); transform: scale(1.1); }
+        
+        /* TASK 5: Add styles for the new receive button */
+        #receive-btn, #send-btn { background-color: var(--accent-color); border: none; border-radius: 50%; width: 44px; height: 44px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: background-color 0.3s ease, transform 0.2s ease; flex-shrink: 0; }
+        #receive-btn:hover, #send-btn:hover { background-color: var(--accent-dark-color); transform: scale(1.1); }
         #send-btn:disabled { background-color: #f8c3d1; cursor: not-allowed; transform: scale(1); }
-        #send-btn svg { width: 20px; height: 20px; fill: white; }
+        #receive-btn svg, #send-btn svg { width: 20px; height: 20px; fill: white; }
 
         #action-panel { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 15px; padding: 0 20px; border-top: 1px solid var(--border-color); max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease-out; }
         #action-panel.show { max-height: 300px; padding-top: 20px; padding-bottom: 20px; }
@@ -285,7 +353,7 @@ body.dark-mode .comment {
         .voice-icon svg { width: 20px; height: 20px; fill: currentColor; }
         .voice-duration { font-family: var(--font-ui); }
 
-        .bubble.message-transfer { padding: 0; border-radius: 12px; overflow: hidden; background: #ff7675; color: white; width: 240px; box-shadow: 0 4px 10px rgba(255, 118, 117, 0.4); position: relative; cursor: default; }
+        .bubble.message-transfer { padding: 0; border-radius: 12px; overflow: hidden; background: #ff7675; color: white; width: 240px; position: relative; cursor: default; }
         .message.ai .bubble.message-transfer { cursor: pointer; }
         .transfer-cover { width: 100%; height: 110px; object-fit: cover; display: block; }
         .transfer-info { padding: 10px 15px; }
@@ -295,7 +363,7 @@ body.dark-mode .comment {
         .transfer-acknowledged { position: absolute; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.3); backdrop-filter: blur(2px); display:flex; justify-content:center; align-items:center; color:white; font-family:var(--font-ui); font-size:1.1em; }
 
         /* Red Packet Bubble */
-        .bubble.message-red-packet { width: 250px; padding: 0; background: var(--red-packet-color); border-radius: 12px; color: white; box-shadow: 0 4px 12px rgba(22, 22, 22, 0.2); }
+        .bubble.message-red-packet { width: 250px; padding: 0; background: var(--red-packet-color); border-radius: 12px; color: white; }
         .red-packet-body { padding: 15px; }
         .red-packet-body-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
         .red-packet-body-header svg { width: 32px; height: 32px; fill: white; }
@@ -399,9 +467,10 @@ body.dark-mode .comment {
         .model-group { display: flex; align-items: center; gap: 10px; }
         .model-group button { padding: 10px 15px; background: var(--accent-color); color: white; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.3s ease; white-space: nowrap; }
         .avatar-upload-group { display: flex; align-items: center; gap: 15px; }
-        .avatar-preview { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 2px dashed var(--border-color); }
+        /* TASK 7: Make preview avatars circular */
+        .avatar-preview { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px dashed var(--border-color); }
         .file-input-label { background: #f7f7f7; border: 1px solid #ddd; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 0.9em; transition: background-color 0.3s ease; display: inline-block; text-align: center; }
-        .theme-selector { display: flex; gap: 10px; flex-wrap: wrap; }
+        .theme-selector { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; }
         .theme-option { flex-grow: 1; padding: 10px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; text-align: center; transition: all 0.3s ease; }
         .theme-option.active { border-color: var(--accent-dark-color); font-weight: 500; }
         .theme-option span { display: block; width: 20px; height: 20px; border-radius: 5px; margin: 5px auto 0 auto; background: var(--user-bubble-bg); }
@@ -428,7 +497,8 @@ body.dark-mode .comment {
         #moments-cover-area { position: relative; width: 100%; height: 35vh; background-color: #eee; background-size: cover; background-position: center; flex-shrink: 0; }
         #moments-user-info { position: absolute; bottom: -25px; right: 20px; display: flex; align-items: flex-end; gap: 15px; }
         #moments-user-name { color: white; font-size: 1.2em; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); margin-bottom: 5px; font-weight: bold; }
-        #moments-user-avatar { width: 80px; height: 80px; border-radius: 12px; object-fit: cover; border: 3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        /* TASK 7: Make moments avatar circular */
+        #moments-user-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         
         #moments-header { position: absolute; top: 0; left: 0; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 15px; box-sizing: border-box; background: linear-gradient(to bottom, rgba(0,0,0,0.3), transparent); }
         #moments-close-btn { background: rgba(0,0,0,0.2); border: none; color: white; width: 30px; height: 30px; border-radius: 50%; font-size: 1.5em; line-height: 30px; text-align: center; cursor: pointer; transition: background-color 0.2s; }
@@ -439,7 +509,8 @@ body.dark-mode .comment {
         #moments-feed { padding-top: 45px; } /* Space for cover overlap */
         .moment-post { border-bottom: 1px solid #f0f0f0; padding: 15px 20px; display: flex; gap: 12px; }
         .moment-post:last-child { border-bottom: none; }
-        .moment-avatar { width: 45px; height: 45px; border-radius: 8px; object-fit: cover; flex-shrink: 0; cursor: pointer; }
+        /* TASK 7: Make moment post avatars circular */
+        .moment-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; flex-shrink: 0; cursor: pointer; }
         .moment-body { flex-grow: 1; }
         .moment-username { font-weight: 500; color: var(--accent-dark-color); margin-bottom: 8px; }
         .moment-content { margin-bottom: 10px; font-size: 0.95em; line-height: 1.6; color: #444; white-space: pre-wrap; }
@@ -459,10 +530,17 @@ body.dark-mode .comment {
         .comment-text { cursor: pointer; }
         .comment .replies { padding-left: 20px; margin-top: 8px; border-left: 2px solid #eee; }
 
-        .comment-input-form { display: flex; margin-top: 8px; gap: 5px; }
-        .comment-input-form input { flex-grow: 1; border: 1px solid #eee; border-radius: 15px; padding: 5px 10px; font-size: 0.9em; font-family: var(--font-ui); }
+        /* TASK 4: Fix comment input form CSS */
+        .comment-input-form { 
+            display: flex; 
+            margin-top: 8px; 
+            gap: 5px; 
+            width: 100%; /* Ensure it doesn't overflow */
+            box-sizing: border-box; /* Include padding in width calculation */
+        }
+        .comment-input-form input { flex-grow: 1; border: 1px solid #eee; border-radius: 15px; padding: 5px 10px; font-size: 0.9em; font-family: var(--font-ui); min-width: 0; /* Allow input to shrink */ }
         .comment-input-form input:focus { border-color: var(--accent-color); outline: none; }
-        .comment-input-form button { background: var(--accent-color); color: white; border: none; border-radius: 15px; padding: 5px 12px; font-size: 0.85em; cursor: pointer; }
+        .comment-input-form button { background: var(--accent-color); color: white; border: none; border-radius: 15px; padding: 5px 12px; font-size: 0.85em; cursor: pointer; flex-shrink: 0; }
 
         /* --- Chat Management (Character & Group) Modal --- */
         .chat-manager-tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 15px; }
@@ -475,7 +553,8 @@ body.dark-mode .comment {
         .chat-item { display: flex; align-items: center; padding: 12px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; transition: background-color 0.2s; border: 1px solid #eee; }
         .chat-item:hover { background-color: #fcf6f8; }
         .chat-item.active { background-color: var(--bg-color); border-color: var(--accent-color); }
-        .chat-item img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; margin-right: 15px; }
+        /* TASK 7: Make chat list item avatars circular */
+        .chat-item img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin-right: 15px; }
         .chat-item .name { font-weight: 500; font-size: 1.1em; flex-grow: 1; }
         .chat-item .delete-btn { background: none; border: none; cursor: pointer; color: #ccc; font-size: 1.5em; padding: 0 5px; transition: color 0.2s; }
         .chat-item .delete-btn:hover { color: var(--delete-color); }
@@ -499,9 +578,26 @@ body.dark-mode .comment {
         .diary-entry {
             background: rgba(255, 255, 255, 0.7); border-radius: 10px; padding: 15px;
             margin-bottom: 15px; border-left: 4px solid var(--accent-color);
+            position: relative; /* For delete button positioning */
         }
         .diary-date { font-weight: bold; color: var(--accent-dark-color); margin-bottom: 8px; }
         .diary-content { line-height: 1.7; color: #555; white-space: pre-wrap; }
+        /* TASK 2: Style for diary delete button */
+        .diary-delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 1.5em;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+        .diary-delete-btn:hover {
+            color: var(--delete-color);
+        }
         /* --- 全新的气泡样式切换 --- */
 /* 这是默认样式的“尾巴”，我们先把它定义好 */
 .message.ai .bubble { border-bottom-left-radius: 4px; }
@@ -665,7 +761,8 @@ input[type=range]::-webkit-slider-thumb {
 
 /* --- 消息气泡与字体 --- */
 .compact-mode .bubble {
-    padding: 8px 12px;
+    /* TASK 9: Use variable for padding */
+    padding: var(--bubble-padding);
     font-size: 0.95em; /* 字体也稍微缩小一点 */
 }
 .compact-mode .timestamp {
@@ -688,11 +785,11 @@ input[type=range]::-webkit-slider-thumb {
     width: 24px;
     height: 24px;
 }
-.compact-mode #send-btn {
+.compact-mode #send-btn, .compact-mode #receive-btn {
     width: 38px;
     height: 38px;
 }
-.compact-mode #send-btn svg {
+.compact-mode #send-btn svg, .compact-mode #receive-btn svg {
     width: 18px;
     height: 18px;
 }
@@ -773,6 +870,7 @@ input[type=range]::-webkit-slider-thumb {
                     <span>日记</span>
                 </div>
             </div>
+            <!-- TASK 5: Modify input area to include receive button -->
             <div id="input-area">
                  <button id="action-btn" title="其他功能">
                      <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
@@ -780,6 +878,9 @@ input[type=range]::-webkit-slider-thumb {
                 <textarea id="message-input" placeholder="输入消息..." rows="1"></textarea>
                 <button id="send-btn" title="发送">
                     <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </button>
+                <button id="receive-btn" title="接收消息">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
                 </button>
             </div>
             <div id="delete-toolbar">
@@ -806,10 +907,6 @@ input[type=range]::-webkit-slider-thumb {
                         <div class="form-group"><label for="api-base-url">API端点 (Base URL)</label><input type="text" id="api-base-url" placeholder="例如: https://api.openai.com 或 https://generativelanguage.googleapis.com"></div>
                         <div class="form-group"><label for="api-key">API密钥 (API Key)</label><input type="password" id="api-key" placeholder="在此输入您的API密钥"></div>
                         <div class="form-group"><label for="model-select">模型选择 (提示: 图片识别请用gpt-4o等vision模型)</label><div class="model-group"><select id="model-select"></select><button id="fetch-models-btn">获取模型列表</button></div></div>
-                    </div>
-                    <div class="settings-section">
-                        <h3>全局设定</h3>
-                        <div class="form-group"><label for="custom-system-prompt">自定义系统提示词 (留空则使用默认)</label><textarea id="custom-system-prompt" placeholder="定义AI响应格式的全局指令。若为空，则使用一个为提升角色扮演效果而优化的默认设置。"></textarea></div>
                     </div>
                 </div>
 
@@ -838,6 +935,17 @@ input[type=range]::-webkit-slider-thumb {
         <label for="top-p-slider">P值 (Top P): <span id="top-p-value">0.9</span></label>
         <input type="range" id="top-p-slider" min="0" max="1" step="0.05" value="0.9">
         <small>控制核心采样。它会从概率最高的词中进行选择，直到这些词的概率总和达到P值。一般建议只修改温度或P值其中一个。</small>
+    </div>
+    <!-- TASK 10: Add toggle for real-time awareness -->
+    <div class="form-group">
+        <label>角色感知真实时间</label>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span>开启后，AI在回复时会知道当前的日期和时间。</span>
+            <label class="preset-toggle">
+                <input type="checkbox" id="real-time-awareness-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
     </div>
 </div>
 <!-- ================================================================= -->
@@ -877,53 +985,91 @@ input[type=range]::-webkit-slider-thumb {
                     </div>
                 </div>
 
-                                <div class="settings-section">
-                    <h3>设计设置</h3>
-                                 <!-- ============================================= -->
-<!-- ============== 夜间模式开关 开始 ============== -->
-<!-- ============================================= -->
-<div class="form-group">
-    <label>夜间模式</label>
-    <div style="display: flex; align-items: center; justify-content: space-between;">
-        <span>为整个界面应用深色主题</span>
-        <label class="preset-toggle">
-            <input type="checkbox" id="dark-mode-toggle">
-            <span class="slider"></span>
-        </label>
-    </div>
-</div>
-<!-- ============================================= -->
-<!-- ============== 夜间模式开关 结束 ============== -->
-<!-- ============================================= -->
-           <!-- ============================================= -->
-<!-- ============== 紧凑模式开关 开始 ============== -->
-<!-- ============================================= -->
-<div class="form-group">
-    <label>紧凑模式 (类微信布局)</label>
-    <div style="display: flex; align-items: center; justify-content: space-between;">
-        <span>缩小头像、输入框和间距，更接近微信风格</span>
-        <label class="preset-toggle">
-            <input type="checkbox" id="compact-mode-toggle">
-            <span class="slider"></span>
-        </label>
-    </div>
-</div>
-<!-- ============================================= -->
-<!-- ============== 紧凑模式开关 结束 ============== -->
-<!-- ============================================= -->                       
+                <div class="settings-section">
+                    <h3>设计与显示</h3>
+                    <!-- ============================================= -->
+                    <!-- ============== 夜间模式开关 开始 ============== -->
+                    <!-- ============================================= -->
                     <div class="form-group">
-                        <label for="bubble-style-select">聊天气泡样式</label>
-                        <select id="bubble-style-select">
-                            <option value="default">默认方角</option>
-                            <option value="round">圆滚滚</option>
-                            <option value="wechat">仿微信尖角</option>
-                            <option value="custom">自定义高级</option>
-                        </select>
+                        <label>夜间模式</label>
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <span>为整个界面应用深色主题</span>
+                            <label class="preset-toggle">
+                                <input type="checkbox" id="dark-mode-toggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
                     </div>
+                    <!-- ============================================= -->
+                    <!-- ============== 夜间模式开关 结束 ============== -->
+                    <!-- ============================================= -->
+                    <!-- ============================================= -->
+                    <!-- ============== 紧凑模式开关 开始 ============== -->
+                    <!-- ============================================= -->
+                    <div class="form-group">
+                        <label>紧凑模式 (类微信布局)</label>
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <span>缩小头像、输入框和间距，更接近微信风格</span>
+                            <label class="preset-toggle">
+                                <input type="checkbox" id="compact-mode-toggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <!-- ============================================= -->
+                    <!-- ============== 紧凑模式开关 结束 ============== -->
+                    <!-- ============================================= -->                       
                     
+                    <!-- TASK 9: Add Sizing Controls -->
+                    <div class="form-group">
+                        <label for="ui-scale-slider">界面显示大小: <span id="ui-scale-value">100</span>%</label>
+                        <input type="range" id="ui-scale-slider" min="80" max="120" step="1" value="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="font-size-slider">聊天字体大小: <span id="font-size-value">16</span>px</label>
+                        <input type="range" id="font-size-slider" min="12" max="20" step="1" value="16">
+                    </div>
+                    <div class="form-group">
+                        <label for="bubble-size-slider">气泡边距大小: <span id="bubble-size-value">10</span>px</label>
+                        <input type="range" id="bubble-size-slider" min="5" max="20" step="1" value="10">
+                    </div>
+
+                    <!-- TASK 12: Moved Bubble/Font settings here under a character-specific section header -->
+                    <div id="character-design-settings">
+                        <h3 style="border-left: 3px solid var(--accent-dark-color); color: var(--accent-dark-color);">当前角色设计</h3>
+                        <div class="form-group">
+                            <label for="bubble-style-select">聊天气泡样式</label>
+                            <select id="bubble-style-select">
+                                <option value="default">默认方角</option>
+                                <option value="round">圆滚滚</option>
+                                <option value="wechat">仿微信尖角</option>
+                                <option value="custom">自定义高级</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>聊天气泡主题 (颜色)</label>
+                            <div class="theme-selector">
+                                <div class="theme-option active" data-theme="1">白/黑<span></span></div>
+                                <div class="theme-option" data-theme="2">黑/白<span></span></div>
+                                <div class="theme-option" data-theme="3">天蓝色<span></span></div>
+                                <div class="theme-option" data-theme="4">草绿色<span></span></div>
+                                <div class="theme-option" data-theme="5">樱花色<span></span></div>
+                                <div class="theme-option" data-theme="6">深空蓝<span></span></div>
+                                <div class="theme-option" data-theme="7">奶油黄<span></span></div>
+                                <div class="theme-option" data-theme="8">微信(日)<span></span></div>
+                                <div class="theme-option" data-theme="9">微信(夜)<span></span></div>
+                                <!-- TASK 13: Add new theme options -->
+                                <div class="theme-option" data-theme="10">浅灰调<span></span></div>
+                                <div class="theme-option" data-theme="11">薄荷巧<span></span></div>
+                                <div class="theme-option" data-theme="12">天蓝黄<span></span></div>
+                                <div class="theme-option" data-theme="13">灰奶油<span></span></div>
+                            </div>
+                        </div>
+                    </div>
+
 
                     <div class="form-group">
-                        <label for="font-select">聊天字体 (部分像素字体可能缺少某些汉字)</label>
+                        <label for="font-select">聊天字体 (全局, 部分像素字体可能缺少某些汉字)</label>
                         <select id="font-select">
                             <option value="'Cubic 11', 'Noto Sans JP', sans-serif">默认字体 (Cubic 11)</option>
                             <optgroup label="台湾繁体风格">
@@ -961,21 +1107,6 @@ input[type=range]::-webkit-slider-thumb {
 <!-- ======================================================= -->
 <!-- ============= 新增的自定义字体URL功能结束 ============= -->
 <!-- ======================================================= -->
-                    <div class="form-group">
-                        <label>聊天气泡主题 (颜色)</label>
-                        <div class="theme-selector">
-                            <div class="theme-option active" data-theme="1">白/黑<span></span></div>
-                            <div class="theme-option" data-theme="2">黑/白<span></span></div>
-                            <div class="theme-option" data-theme="3">天蓝色<span></span></div>
-                            <div class="theme-option" data-theme="4">草绿色<span></span></div>
-                            <div class="theme-option" data-theme="5">樱花色<span></span></div>
-                            <div class="theme-option" data-theme="6">深空蓝<span></span></div>
-                            <div class="theme-option" data-theme="7">奶油黄<span></span></div>
-                            <div class="theme-option" data-theme="8">微信(日)<span></span></div>
-                            <div class="theme-option" data-theme="9">微信(夜)<span></span></div>
-                        </div>
-                    </div>
-
                     <div class="form-group">
                         <label for="advanced-bubble-styles">高级样式库 (选择“自定义高级”样式后生效)</label>
                         <textarea id="advanced-bubble-styles" rows="10" placeholder="在此处粘贴您的自定义样式代码。
@@ -1091,19 +1222,21 @@ input[type=range]::-webkit-slider-thumb {
 
     <script>
       // 主题切换函数
-function applyTheme(themeNum) {
-    // 这里假设 themeNum 是 1-9 之间的数字字符串
+function applyTheme(themeNum, character) {
     const root = document.documentElement;
-    // 主题色变量名
-    root.style.setProperty('--ai-bubble-bg', getComputedStyle(root).getPropertyValue(`--theme${themeNum}-ai-bg`).trim());
-    root.style.setProperty('--ai-bubble-text', getComputedStyle(root).getPropertyValue(`--theme${themeNum}-ai-text`).trim());
-    root.style.setProperty('--user-bubble-bg', getComputedStyle(root).getPropertyValue(`--theme${themeNum}-user-bg`).trim());
-    root.style.setProperty('--user-bubble-text', getComputedStyle(root).getPropertyValue(`--theme${themeNum}-user-text`).trim());
-    // 高亮主题按钮
-    document.querySelectorAll('.theme-option').forEach(el => {
-        if (el.dataset.theme === themeNum) el.classList.add('active');
-        else el.classList.remove('active');
-    });
+    if (character) {
+        // TASK 12: Per-character theme application
+        const themeToApply = themeNum || '1'; // Fallback to theme 1
+        root.style.setProperty('--ai-bubble-bg', getComputedStyle(root).getPropertyValue(`--theme${themeToApply}-ai-bg`).trim());
+        root.style.setProperty('--ai-bubble-text', getComputedStyle(root).getPropertyValue(`--theme${themeToApply}-ai-text`).trim());
+        root.style.setProperty('--user-bubble-bg', getComputedStyle(root).getPropertyValue(`--theme${themeToApply}-user-bg`).trim());
+        root.style.setProperty('--user-bubble-text', getComputedStyle(root).getPropertyValue(`--theme${themeToApply}-user-text`).trim());
+        
+        // Update the UI in settings
+        document.querySelectorAll('.theme-option').forEach(el => {
+            el.classList.toggle('active', el.dataset.theme === themeToApply);
+        });
+    }
 }
     document.addEventListener('DOMContentLoaded', () => {
         // --- DOM Elements ---
@@ -1128,6 +1261,7 @@ function applyTheme(themeNum) {
             actionBtn: getEl('action-btn'),
             messageInput: getEl('message-input'),
             sendBtn: getEl('send-btn'),
+            receiveBtn: getEl('receive-btn'), // TASK 5
             
             deleteToolbar: getEl('delete-toolbar'),
             deleteInfo: getEl('delete-info'),
@@ -1201,7 +1335,6 @@ function applyTheme(themeNum) {
             apiKeyInput: getEl('api-key'),
             modelSelect: getEl('model-select'),
             fetchModelsBtn: getEl('fetch-models-btn'),
-            customSystemPromptInput: getEl('custom-system-prompt'),
             
             characterSettingsSection: getEl('character-settings-section'),
             characterNameInput: getEl('character-name-input'),
@@ -1210,6 +1343,7 @@ function applyTheme(themeNum) {
             characterPromptInput: getEl('character-prompt'),
             manageStickersBtn: getEl('manage-stickers-btn'),
             manageAiStickersBtn: getEl('manage-ai-stickers-btn'),
+            characterDesignSettings: getEl('character-design-settings'), // TASK 12
 
             groupSettingsSection: getEl('group-settings-section'),
             groupNameInput: getEl('group-name-input'),
@@ -1228,37 +1362,47 @@ function applyTheme(themeNum) {
             dangerZoneSection: getEl('danger-zone-section'),
             clearHistoryBtn: getEl('clear-history-btn'),
             deleteChatBtn: getEl('delete-chat-btn'),
-                  deleteChatBtnContainer: getEl('delete-chat-btn-container'),
-        advancedBubbleStylesInput: getEl('advanced-bubble-styles'),
-fontSelect: getEl('font-select'), // 新增这一行
-bubbleStyleSelect: getEl('bubble-style-select'),
-          darkModeToggle: getEl('dark-mode-toggle'), // <-- 添加这一行
-          compactModeToggle: getEl('compact-mode-toggle'), // <-- 添加这一行
-                  // --- 新增的模型参数和预设UI元素 ---
-        presetListContainer: getEl('preset-list-container'),
-        addPresetBtn: getEl('add-preset-btn'),
-        temperatureSlider: getEl('temperature-slider'),
-        temperatureValue: getEl('temperature-value'),
-        topPSlider: getEl('top-p-slider'),
-        topPValue: getEl('top-p-value'),
-         // --- 新增代码开始 ---
-customFontNameInput: getEl('custom-font-name'),
-customFontUrlInput: getEl('custom-font-url'),
-applyCustomFontBtn: getEl('apply-custom-font-btn'),
-// --- 新增代码结束 --- 
-    };
+            deleteChatBtnContainer: getEl('delete-chat-btn-container'),
+            advancedBubbleStylesInput: getEl('advanced-bubble-styles'),
+            fontSelect: getEl('font-select'), 
+            bubbleStyleSelect: getEl('bubble-style-select'),
+            darkModeToggle: getEl('dark-mode-toggle'), 
+            compactModeToggle: getEl('compact-mode-toggle'),
+            
+            // --- Model parameter and preset UI elements ---
+            presetListContainer: getEl('preset-list-container'),
+            addPresetBtn: getEl('add-preset-btn'),
+            temperatureSlider: getEl('temperature-slider'),
+            temperatureValue: getEl('temperature-value'),
+            topPSlider: getEl('top-p-slider'),
+            topPValue: getEl('top-p-value'),
+            
+            // --- Custom font UI elements ---
+            customFontNameInput: getEl('custom-font-name'),
+            customFontUrlInput: getEl('custom-font-url'),
+            applyCustomFontBtn: getEl('apply-custom-font-btn'),
+
+            // --- TASK 9 & 10: New settings elements ---
+            uiScaleSlider: getEl('ui-scale-slider'),
+            uiScaleValue: getEl('ui-scale-value'),
+            fontSizeSlider: getEl('font-size-slider'),
+            fontSizeValue: getEl('font-size-value'),
+            bubbleSizeSlider: getEl('bubble-size-slider'),
+            bubbleSizeValue: getEl('bubble-size-value'),
+            realTimeAwarenessToggle: getEl('real-time-awareness-toggle'),
+        };
 
         // --- State Management ---
         let characterSets = [];
         let groupChats = [];
         let userMomentsProfile = {};
         let currentChat = { type: 'direct', id: null };
-      let globalPresets = [];
+        let globalPresets = [];
         let isMultiSelectMode = false, selectedMessageIds = [];
-        let responseTriggerTimer = null, isActionPanelOpen = false, isVideoCallActive = false;
+        let isActionPanelOpen = false, isVideoCallActive = false;
         let currentlyDisplayedMessageCount = 25;
         
-                const DEFAULT_SYSTEM_PROMPT = `
+                        const DEFAULT_SYSTEM_PROMPT = `
 [核心输出协议：绝对严格遵守]
 1.  **唯一格式**：你的所有回复 **必须** 是一个JSON数组结构的字符串。这是你与系统交流的唯一方式。
 2.  **纯净输出**：绝对不允许在JSON数组的外部添加任何文本、注释、解释、Markdown标记或其他任何字符。你的回复必须从'['开始，到']'结束，中间是严格合法的JSON内容。
@@ -1319,46 +1463,44 @@ When the user sends you a transfer, you MUST first respond with a 'text' message
         const autoResizeTextarea = () => { elements.messageInput.style.height = 'auto'; elements.messageInput.style.height = (elements.messageInput.scrollHeight) + 'px'; };
         const generateId = (prefix) => `${prefix}_${Date.now()}${Math.random().toString(36).substring(2, 9)}`;
 
-        // --- 新增：智能打包函数，适配OpenAI和Gemini ---
+        // --- API payload function ---
         const getApiPayload = (model, history, systemPrompt) => {
             const apiBaseUrl = elements.apiBaseUrlInput.value.trim().toLowerCase();
             const isGemini = apiBaseUrl.includes('google');
 
+            // TASK 10: Add real time awareness if enabled
+            let finalSystemPrompt = systemPrompt;
+            if (elements.realTimeAwarenessToggle.checked) {
+                const currentTime = `[System Knowledge: The current real-world date and time is ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}]`;
+                finalSystemPrompt = `${currentTime}\n\n${systemPrompt}`;
+            }
+
             if (isGemini) {
-                // Gemini 打包方式
                 const formatForGemini = (msg) => {
-                    if (!msg || typeof msg !== 'object' || msg.type === 'system' || typeof msg.sender !== 'string') {
-                        return null;
-                    }
+                    if (!msg || typeof msg !== 'object' || msg.type === 'system' || typeof msg.sender !== 'string') return null;
                     const role = msg.sender === 'user' ? 'user' : 'model';
-                    
                     if (msg.sender === 'user' && msg.type === 'image' && msg.imageUrl) {
                         const textContent = msg.llmContent || msg.text || '用户发送了一张图片。';
                         const mimeType = msg.imageUrl.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
                         return { role, parts: [ { text: textContent }, { inline_data: { mime_type: mimeType, data: msg.imageUrl.split(',')[1] } } ]};
                     }
-
                     const content = msg.llmContent || msg.text || '';
                     if (!content.trim()) return null;
                     return { role, parts: [{ text: content }] };
                 };
                 
                 const contents = [
-                    { role: 'user', parts: [{ text: systemPrompt }] },
+                    { role: 'user', parts: [{ text: finalSystemPrompt }] },
                     { role: 'model', parts: [{ text: '好的，我会严格遵守以上所有指令。' }] },
                     ...history.map(formatForGemini).filter(Boolean)
                 ];
                 return { contents, "generationConfig": { "temperature": parseFloat(elements.temperatureSlider.value), "topP": parseFloat(elements.topPSlider.value) } };
 
             } else {
-                // OpenAI (及兼容API) 打包方式
-                 const formatForOpenAI = (msg) => {
-                    if (!msg || typeof msg !== 'object' || msg.type === 'system' || typeof msg.sender !== 'string') {
-                        return null;
-                    }
+                const formatForOpenAI = (msg) => {
+                    if (!msg || typeof msg !== 'object' || msg.type === 'system' || typeof msg.sender !== 'string') return null;
                     const role = msg.sender === 'user' ? 'user' : 'assistant';
                     let content = msg.llmContent || msg.text || '';
-
                     if (msg.sender === 'user' && msg.type === 'image' && msg.imageUrl) {
                         const imageContent = [
                             { type: 'text', text: content || '用户发送了一张图片。' },
@@ -1366,14 +1508,11 @@ When the user sends you a transfer, you MUST first respond with a 'text' message
                         ];
                         return { role, content: imageContent };
                     }
-                    if (!content.trim()) {
-                        return null;
-                    }
+                    if (!content.trim()) return null;
                     return { role, content };
                 };
-
                 const messages = [
-                    { role: 'system', content: systemPrompt },
+                    { role: 'system', content: finalSystemPrompt },
                     ...history.map(formatForOpenAI).filter(Boolean)
                 ];
                 return { model, messages, stream: false, temperature: parseFloat(elements.temperatureSlider.value), top_p: parseFloat(elements.topPSlider.value) };
@@ -1420,51 +1559,29 @@ When the user sends you a transfer, you MUST first respond with a 'text' message
                 request.onsuccess = () => resolve(request.result);
             });
         };
-        // --- IndexedDB 帮助函数结束 ---
-
-             // --- 全新的图片压缩函数 ---
+        
         const compressImage = (dataUrl, options = {}) => {
             return new Promise((resolve, reject) => {
                 const { quality = 0.7, maxWidth = 300, maxHeight = 300 } = options;
-                
                 const img = new Image();
                 img.src = dataUrl;
-
                 img.onload = () => {
-                    let width = img.width;
-                    let height = img.height;
-
+                    let width = img.width, height = img.height;
                     if (width > height) {
-                        if (width > maxWidth) {
-                            height = Math.round(height * (maxWidth / width));
-                            width = maxWidth;
-                        }
+                        if (width > maxWidth) { height = Math.round(height * (maxWidth / width)); width = maxWidth; }
                     } else {
-                        if (height > maxHeight) {
-                            width = Math.round(width * (maxHeight / height));
-                            height = maxHeight;
-                        }
+                        if (height > maxHeight) { width = Math.round(width * (maxHeight / height)); height = maxHeight; }
                     }
-
                     const canvas = document.createElement('canvas');
-                    canvas.width = width;
-                    canvas.height = height;
+                    canvas.width = width; canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-
-                    // 对于头像等，使用JPEG格式可以获得更好的压缩率
                     const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
                     resolve(compressedDataUrl);
                 };
-
-                img.onerror = (error) => {
-                    console.error("图片加载失败，无法压缩", error);
-                    // 如果压缩失败，就返回原始图片，确保程序不会中断
-                    resolve(dataUrl); 
-                };
+                img.onerror = (error) => { console.error("图片加载失败，无法压缩", error); resolve(dataUrl); };
             });
         };
-        // --- 压缩函数结束 --- 
         
         const closeModal = (modal) => {
             if (!modal) return;
@@ -1477,13 +1594,13 @@ When the user sends you a transfer, you MUST first respond with a 'text' message
             }, 300);
         };
         
-        const showTopNotification = (message, avatarUrl) => {
+        const showTopNotification = (message, avatarUrl, duration = 3000) => {
             elements.notificationText.textContent = message;
             elements.notificationAvatar.src = avatarUrl;
             elements.topNotification.classList.add('show');
             setTimeout(() => {
                 elements.topNotification.classList.remove('show');
-            }, 5000);
+            }, duration);
         };
 
         // --- Data & State Management ---
@@ -1494,28 +1611,41 @@ When the user sends you a transfer, you MUST first respond with a 'text' message
             if (currentChat.type === 'group') return getCurrentGroup();
             return null;
         }
-// --- 夜间模式控制函数 ---
-const applyDarkMode = (enable) => {
-    document.body.classList.toggle('dark-mode', enable);
-    localStorage.setItem('ui_dark_mode_enabled', enable);
-    // 确保设置界面里的开关状态和当前模式一致
-    if (elements.darkModeToggle.checked !== enable) {
-        elements.darkModeToggle.checked = enable;
-    }
-};
-      // --- 紧凑模式控制函数 ---
-const applyCompactMode = (enable) => {
-    const container = elements.chatContainer;
-    container.classList.toggle('compact-mode', enable);
-    localStorage.setItem('ui_compact_mode_enabled', enable);
-    if (elements.compactModeToggle.checked !== enable) {
-        elements.compactModeToggle.checked = enable;
-    }
-};
+
+        const applyDarkMode = (enable) => {
+            document.body.classList.toggle('dark-mode', enable);
+            localStorage.setItem('ui_dark_mode_enabled', enable);
+            if (elements.darkModeToggle.checked !== enable) {
+                elements.darkModeToggle.checked = enable;
+            }
+        };
+
+        const applyCompactMode = (enable) => {
+            elements.chatContainer.classList.toggle('compact-mode', enable);
+            localStorage.setItem('ui_compact_mode_enabled', enable);
+            if (elements.compactModeToggle.checked !== enable) {
+                elements.compactModeToggle.checked = enable;
+            }
+        };
+
+        // TASK 9: Functions to apply sizing settings
+        const applySizing = (settings) => {
+            const rootStyle = document.documentElement.style;
+            rootStyle.setProperty('--ui-scale', settings.uiScale || 1.0);
+            rootStyle.setProperty('--base-font-size', `${settings.fontSize || 16}px`);
+            rootStyle.setProperty('--bubble-padding', `${settings.bubblePadding || 10}px ${ (settings.bubblePadding || 10) * 1.5}px`);
+
+            // Update sliders in settings UI
+            elements.uiScaleSlider.value = (settings.uiScale || 1.0) * 100;
+            elements.uiScaleValue.textContent = `${elements.uiScaleSlider.value}%`;
+            elements.fontSizeSlider.value = settings.fontSize || 16;
+            elements.fontSizeValue.textContent = `${elements.fontSizeSlider.value}px`;
+            elements.bubbleSizeSlider.value = settings.bubblePadding || 10;
+            elements.bubbleSizeValue.textContent = `${elements.bubbleSizeSlider.value}px`;
+        };
                 const saveAllData = async () => {
     const isImage = (value) => typeof value === 'string' && value.startsWith('data:image');
-    const imageKeys = new Set(); 
-
+    
     const processObjectForSaving = async (obj) => {
         if (!obj || typeof obj !== 'object') return obj;
         const newObj = Array.isArray(obj) ? [] : {};
@@ -1526,7 +1656,6 @@ const applyCompactMode = (enable) => {
                     const imageKey = `img_${generateId(key)}`;
                     await dbSet(imageKey, value);
                     newObj[key] = imageKey;
-                    imageKeys.add(imageKey);
                 } else if (typeof value === 'object') {
                     newObj[key] = await processObjectForSaving(value);
                 } else {
@@ -1539,100 +1668,54 @@ const applyCompactMode = (enable) => {
 
     try {
         updatePresetsFromUI();
-
-        // --- 核心修正：彻底移除了对已删除的二级下拉菜单的引用 ---
-        // 我们现在直接保存主下拉菜单的值 ('default', 'round', 'wechat', 或 'custom')
-        const bubbleStyleToSave = elements.bubbleStyleSelect.value;
-        // --- 修正结束 ---
         
+        // 【关键修正】不再从UI元素实时读取设置，而是从一个已经加载到内存中的变量读取
+        // 我们需要先确保这个变量是最新的，这在 saveCurrentSettings 中完成
+        const loadedData = JSON.parse(localStorage.getItem('aiBoyfriendBackup_v7_meta') || '{}');
+        const currentGlobalSettings = loadedData.globalSettings || {};
+
+        // 只有在点击“保存设置”时，我们才从UI更新这些值。
+        // 在普通发消息时，我们使用内存中已有的值，避免了读取不存在元素的错误。
         const backupData = {
+            version: '1.1',
             characterSets,
             groupChats,
             currentChat,
             userMomentsProfile,
             globalSettings: {
-                customSystemPrompt: elements.customSystemPromptInput.value,
-                apiBaseUrl: elements.apiBaseUrlInput.value,
+                ...currentGlobalSettings, // 先加载已有的设置
+                apiBaseUrl: elements.apiBaseUrlInput.value, // 这些是安全的，可以随时读取
                 apiKey: elements.apiKeyInput.value,
                 model: elements.modelSelect.value,
-                theme: elements.themeSelector.querySelector('.theme-option.active')?.dataset.theme || '1',
-                customBubbleCss: elements.advancedBubbleStylesInput.value,
                 fontFamily: elements.fontSelect.value,
-                bubbleStyle: bubbleStyleToSave, // 这里现在保存的是正确的值
+                advancedBubbleStyles: elements.advancedBubbleStylesInput.value,
                 temperature: parseFloat(elements.temperatureSlider.value),
                 topP: parseFloat(elements.topPSlider.value),
                 customFontName: elements.customFontNameInput.value,
                 customFontUrl: elements.customFontUrlInput.value,
-                presets: globalPresets 
+                presets: globalPresets
             }
         };
         
         const processedData = await processObjectForSaving(backupData);
-        localStorage.setItem('aiBoyfriendBackup_v6_meta', JSON.stringify(processedData));
+        localStorage.setItem('aiBoyfriendBackup_v7_meta', JSON.stringify(processedData));
         
     } catch (error) {
         console.error("保存数据时出错:", error);
-        alert("保存数据时出错: " + error.message); // 让提示更友好
-    }
-};
-                // --- 变化开始：替换这个函数 ---
-        const loadAllData = async () => {
-    // --- 立即应用夜间模式，防止闪烁 ---
-    const darkModeSaved = localStorage.getItem('ui_dark_mode_enabled') === 'true';
-    applyDarkMode(darkModeSaved);
-          
-    // --- 立即应用紧凑模式，防止闪烁 ---
-const compactModeSaved = localStorage.getItem('ui_compact_mode_enabled') === 'true';
-applyCompactMode(compactModeSaved);
-    // =================================================================
-    // ================== 核心：数据迁移与加载逻辑 ==================
-    // =================================================================
-    const savedMeta = localStorage.getItem('aiBoyfriendBackup_v6_meta');
-    const oldDataRaw = localStorage.getItem('aiBoyfriendBackup_v6');
-
-    // ----------------- 1. 如果存在旧数据，执行一次性迁移 -----------------
-    if (oldDataRaw && !savedMeta) {
-        console.log("检测到旧版本数据，正在启动一次性迁移程序...");
-        alert("检测到旧版本数据，将为您自动升级到新格式，请稍候...");
-        try {
-            const oldData = JSON.parse(oldDataRaw);
-            
-            // --- 升级数据结构：这是确保旧记录完美兼容的关键 ---
-            if (oldData.userMomentsProfile && oldData.userMomentsProfile.userPrompt) {
-                console.log("正在迁移全局 userPrompt 到每个角色...");
-                oldData.characterSets.forEach(char => {
-                    if (!char.userPrompt) {
-                        char.userPrompt = oldData.userMomentsProfile.userPrompt;
-                    }
-                });
-            }
-
-            // 将升级后的旧数据作为我们的当前数据
-            characterSets = oldData.characterSets || [];
-            groupChats = oldData.groupChats || [];
-            currentChat = oldData.currentChat || { type: 'direct', id: characterSets[0]?.id };
-            userMomentsProfile = oldData.userMomentsProfile || {};
-            
-            // 用新的、更强大的 saveAllData 函数来保存到新的位置
-            await saveAllData();
-            
-            // 移除旧的数据，防止重复迁移
-            localStorage.removeItem('aiBoyfriendBackup_v6');
-            
-            console.log("数据迁移成功！页面将自动刷新以应用更改。");
-            alert('数据已成功迁移！您的聊天记录都回来了！页面即将刷新。');
-            location.reload();
-            return; // 终止后续加载，等待刷新
-        } catch (e) {
-            console.error("旧数据迁移失败:", e);
-            alert("尝试迁移您的旧聊天记录时发生错误，为保护数据，操作已终止。请查看控制台详情。");
-            return;
+        // 只在用户能看到的地方（比如设置界面）弹窗，避免聊天时被打扰
+        if(document.getElementById('settings-modal').classList.contains('show')) {
+           alert("保存数据时出错: " + error.message);
         }
     }
+};
+                // --- Re-written loadAllData with migration logic ---
+                const loadAllData = async () => {
+    const darkModeSaved = localStorage.getItem('ui_dark_mode_enabled') === 'true';
+    applyDarkMode(darkModeSaved);
+    const compactModeSaved = localStorage.getItem('ui_compact_mode_enabled') === 'true';
+    applyCompactMode(compactModeSaved);
 
-    // ----------------- 2. 正常加载流程 (或全新安装) -----------------
     const isImageKey = (value) => typeof value === 'string' && value.startsWith('img_');
-
     const processObjectForLoading = async (obj) => {
         if (!obj || typeof obj !== 'object') return obj;
         for (const key in obj) {
@@ -1648,36 +1731,53 @@ applyCompactMode(compactModeSaved);
         }
         return obj;
     };
-    
-    if (!savedMeta) {
+
+    const savedMetaV7Raw = localStorage.getItem('aiBoyfriendBackup_v7_meta');
+    const savedMetaV6Raw = localStorage.getItem('aiBoyfriendBackup_v6_meta');
+    const oldDataV6Raw = localStorage.getItem('aiBoyfriendBackup_v6');
+
+    let rawDataToProcess = null;
+
+    if (savedMetaV7Raw) {
+        rawDataToProcess = savedMetaV7Raw;
+    } else if (savedMetaV6Raw) {
+        alert("检测到旧版本数据(v6_meta)，将为您自动升级...");
+        let dataToMigrate = JSON.parse(savedMetaV6Raw);
+        let migratedData = migrateDataToV7(dataToMigrate);
+        localStorage.setItem('aiBoyfriendBackup_v7_meta', JSON.stringify(migratedData));
+        localStorage.removeItem('aiBoyfriendBackup_v6_meta');
+        alert("数据升级成功！页面将刷新。");
+        location.reload();
+        return;
+    } else if (oldDataV6Raw) {
+        alert("检测到非常早期的版本数据(v6)，将为您自动升级...");
+        let dataToMigrate = JSON.parse(oldDataV6Raw);
+        let migratedData = migrateDataToV7(dataToMigrate);
+        localStorage.setItem('aiBoyfriendBackup_v7_meta', JSON.stringify(migratedData));
+        localStorage.removeItem('aiBoyfriendBackup_v6');
+        alert("数据升级成功！页面将刷新。");
+        location.reload();
+        return;
+    }
+
+    if (!rawDataToProcess) {
         console.log("未找到任何数据，正在进行全新安装...");
         const newChar = createNewCharacterObject();
         characterSets.push(newChar);
         currentChat = { type: 'direct', id: newChar.id };
+        applySizing({ fontSize: 13, uiScale: 1.0, bubblePadding: 10 });
         loadChat(currentChat.type, currentChat.id);
         return;
     }
 
     try {
-        let savedData = JSON.parse(savedMeta);
-        savedData = await processObjectForLoading(savedData);
+        let savedData = await processObjectForLoading(JSON.parse(rawDataToProcess));
 
         characterSets = savedData.characterSets || [];
         groupChats = savedData.groupChats || [];
-
-        const savedProfile = savedData.userMomentsProfile || {};
-        const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2EwYTBiMyI+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQgMS43OS00IDQgMS43OSA0IDQgNHptMCAyYy0yLjY3IDAtOCAyLjI0LTggNC41VDIwYzAgLjU1IDMuNTggMS41IDggMS41czgtLjk1IDgtMS41di0xLjVjMC0yLjI2LTUuMzMtNC41LTgtNC41eiIvPjwvc3ZnPg==';
-        
-        userMomentsProfile = {
-            name: savedProfile.name || '我',
-            chatAvatar: savedProfile.chatAvatar || defaultAvatar,
-            momentsAvatar: savedProfile.momentsAvatar || defaultAvatar,
-            cover: savedProfile.cover || 'https://images.unsplash.com/photo-1507525428034-b723a996f3d5?q=80&w=1000',
-            posts: savedProfile.posts || [],
-        };
+        userMomentsProfile = savedData.userMomentsProfile || {};
         
         const globalSettings = savedData.globalSettings || {};
-        elements.customSystemPromptInput.value = globalSettings.customSystemPrompt || '';
         elements.apiBaseUrlInput.value = globalSettings.apiBaseUrl || '';
         elements.apiKeyInput.value = globalSettings.apiKey || '';
         elements.temperatureSlider.value = globalSettings.temperature || 0.8;
@@ -1686,6 +1786,7 @@ applyCompactMode(compactModeSaved);
         elements.topPValue.textContent = elements.topPSlider.value;
         globalPresets = globalSettings.presets || [];
         renderPresets();
+        
         const currentModel = globalSettings.model || '';
         if (currentModel) {
              if(![...elements.modelSelect.options].some(o => o.value === currentModel)) {
@@ -1693,11 +1794,12 @@ applyCompactMode(compactModeSaved);
             }
             elements.modelSelect.value = currentModel;
         }
-        elements.advancedBubbleStylesInput.value = globalSettings.customBubbleCss || '';
-        applyTheme(globalSettings.theme || '1');
-        applyFont(globalSettings.fontFamily || "'Cubic 11', 'Noto Sans JP', sans-serif");
-        applyBubbleStyle(globalSettings.bubbleStyle || 'default');
         
+        elements.advancedBubbleStylesInput.value = globalSettings.advancedBubbleStyles || '';
+        applyFont(globalSettings.fontFamily || "'Cubic 11', 'Noto Sans JP', sans-serif");
+        applySizing(globalSettings);
+        elements.realTimeAwarenessToggle.checked = globalSettings.realTimeAwareness || false;
+
         if (globalSettings.customFontName && globalSettings.customFontUrl) {
             elements.customFontNameInput.value = globalSettings.customFontName;
             elements.customFontUrlInput.value = globalSettings.customFontUrl;
@@ -1707,7 +1809,7 @@ applyCompactMode(compactModeSaved);
         if (characterSets.length > 0) {
             const isValidSavedChat = savedData.currentChat && 
                 ( (savedData.currentChat.type === 'direct' && characterSets.some(c => c.id === savedData.currentChat.id)) || 
-                  (savedData.currentChat.type === 'group' && groupChats.some(g => g.id === savedData.currentChat.id)) );
+                (savedData.currentChat.type === 'group' && groupChats.some(g => g.id === savedData.currentChat.id)) );
             currentChat = isValidSavedChat ? savedData.currentChat : { type: 'direct', id: characterSets[0].id };
         } else {
             const newChar = createNewCharacterObject();
@@ -1719,12 +1821,13 @@ applyCompactMode(compactModeSaved);
     } catch(error) {
         console.error("加载数据失败:", error);
         alert("加载数据失败，可能数据已损坏。将尝试重置。详情请查看控制台。");
+        localStorage.removeItem('aiBoyfriendBackup_v7_meta');
         localStorage.removeItem('aiBoyfriendBackup_v6_meta');
+        localStorage.removeItem('aiBoyfriendBackup_v6');
         location.reload();
     }
 };
   
-        // --- 变化结束：替换这个函数 ---
            const createNewCharacterObject = () => {
         const id = generateId('char');
         return {
@@ -1734,8 +1837,11 @@ applyCompactMode(compactModeSaved);
                 aiAvatar: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBkPSJNNTAsMi41QzI0LjgsMi41LDIuNSwyNC44LDIuNSw1MHMxOS4zLDQ3LjUsNDcuNSw0Ny41czQ3LjUtMjIuMyw0Ny41LTQ3LjVMNTAsMi41eiBNMzgsNDQuOGMtMi4xLDAtMy44LTEuNy0zLjgtMy44czEuNy0zLjgsMy44LTMuOHMzLjgsMS43LDMuOCwzLjhTNDAuMSw0NC44LDM4LDQ0Ljh6IE02Miw0NC44Yy0yLjEsMC0zLjgtMS43LTMuOC0zLighYzAtMi4xLDEuNy0zLjgsMy44LTMuOHMzLjgsMS43LDMuOCwzLjhDNTguMiw0My4xLDY0LjEsNDQuOCw2Miw0NC44eiBNNzcuNSw2Ny41YzAsMC0xMC03LjUtMjcuNS03LjVzLTI3LjUsNy41LTI3LjUsNy41cy0yLjUtMTAgMC0yMHMxMi41LTEyLjUsMjcuNS0xMi41czI3LjUsMi41LDI3LjUsMTIuNVM3Ny41LDY3LjUsNzcuNSw2Ny41eiIgZmlsbD0iI2ZlY2VkNiIvPjwvc3ZnPg==',
                 characterPrompt: '',
                 memorySize: 50,
+                // TASK 12: Add character-specific style properties
+                theme: '1',
+                bubbleStyle: 'default',
             },
-            userPrompt: '', // 这里就是为这个角色单独设置的“关于我”的人设
+            userPrompt: '', 
             chatHistory: [],
             userStickers: [],
             aiStickers: [],
@@ -1756,87 +1862,55 @@ applyCompactMode(compactModeSaved);
         };
 
         const loadChat = (type, id) => {
-    currentChat = { type, id };
-    currentlyDisplayedMessageCount = 25;
-    const chatData = getCurrentChatData();
-    if (!chatData) return;
+            currentChat = { type, id };
+            currentlyDisplayedMessageCount = 25;
+            const chatData = getCurrentChatData();
+            if (!chatData) return;
 
-    // Show/hide action buttons based on chat type
-    const isGroup = type === 'group';
-    elements.actionCreatePoll.style.display = isGroup ? 'flex' : 'none';
-    elements.actionSendRedPacket.style.display = isGroup ? 'flex' : 'none';
-    elements.actionSendTransfer.style.display = isGroup ? 'none' : 'flex';
-    elements.actionVideoCall.style.display = isGroup ? 'none' : 'flex';
-    elements.actionShowDiary.style.display = isGroup ? 'none' : 'flex';
+            const isGroup = type === 'group';
+            elements.actionCreatePoll.style.display = isGroup ? 'flex' : 'none';
+            elements.actionSendRedPacket.style.display = isGroup ? 'flex' : 'none';
+            elements.actionSendTransfer.style.display = isGroup ? 'none' : 'flex';
+            elements.actionVideoCall.style.display = isGroup ? 'none' : 'flex';
+            elements.actionShowDiary.style.display = isGroup ? 'none' : 'flex';
 
-    // --- 核心修复 ---
-    // 从正确的地方 (aiBoyfriendBackup_v6_meta) 读取包含主题的全局设置
-    // --- 核心修正：增加安全检查，防止因无效的localStorage数据导致崩溃 ---
-let globalSettings = {}; // 先创建一个安全的、空的默认设置对象
-const savedMetaRaw = localStorage.getItem('aiBoyfriendBackup_v6_meta'); // 从“小本本”里读取原始文本
-
-// 安全检查：只有在读到的文本是有效的情况下，才去尝试解析它
-if (savedMetaRaw && savedMetaRaw !== 'undefined' && savedMetaRaw !== 'null') {
-    try {
-        const savedData = JSON.parse(savedMetaRaw); // 尝试解析
-        globalSettings = savedData.globalSettings || {}; // 如果解析成功，就用里面的设置
-    } catch (e) {
-        console.error("在 loadChat 中解析 localStorage 数据失败，将使用默认设置:", e);
-        // 如果解析失败（比如文本损坏了），也使用安全的空对象，并打印一个错误日志
-        globalSettings = {};
-    }
-}
-// --- 修正结束 ---
-    const globalTheme = globalSettings.theme || '1';
-
-    if (type === 'direct') {
-        const { config } = chatData;
-        elements.chatNameHeader.textContent = config.characterName;
-        elements.headerAvatar.src = config.aiAvatar;
-        elements.headerAvatar.title = "读取他的心声";
-        elements.headerAvatar.onclick = showMindVoice;
-        elements.chatContainer.style.backgroundImage = config.chatBackground ? `url("${config.chatBackground}")` : '';
-    } else if (type === 'group') {
-        elements.chatNameHeader.textContent = chatData.name;
-        elements.headerAvatar.src = chatData.avatar;
-        elements.headerAvatar.title = "群组信息";
-        elements.headerAvatar.onclick = () => elements.settingsBtn.click();
-        elements.chatContainer.style.backgroundImage = chatData.chatBackground ? `url("${chatData.chatBackground}")` : '';
-    }
-    
-    applyTheme(globalTheme);
-    renderAllMessages();
-    // --- 另一个修复 ---
-    // 移除这里多余的保存操作，因为它可能导致错误的配置被意外保存
-    // saveAllData(); // 这行被注释或删除了
-};
-      // --- 新增代码开始 ---
-// 这个函数负责通过URL加载和应用自定义字体
-const applyCustomFont = (fontName, fontUrl) => {
-    if (!fontName || !fontUrl) return;
-
-    // 查找或创建一个专门用来放自定义字体样式的<style>标签
-    let styleTag = document.getElementById('runtime-custom-font-style');
-    if (!styleTag) {
-        styleTag = document.createElement('style');
-        styleTag.id = 'runtime-custom-font-style';
-        document.head.appendChild(styleTag);
-    }
-
-    // 创建 @font-face 规则，告诉浏览器去哪里下载字体，并给它命名
-    const fontFaceRule = `
-        @font-face {
-            font-family: '${fontName}';
-            src: url('${fontUrl}');
-        }
-    `;
-    styleTag.innerHTML = fontFaceRule;
-
-    // 应用这个刚刚定义好的字体
-    applyFont(`'${fontName}'`);
-    console.log(`已尝试应用自定义字体: ${fontName}`);
-};
-// --- 新增代码结束 ---
+            if (type === 'direct') {
+                const { config } = chatData;
+                elements.chatNameHeader.textContent = config.characterName;
+                elements.headerAvatar.src = config.aiAvatar;
+                elements.headerAvatar.title = "读取他的心声";
+                elements.headerAvatar.onclick = showMindVoice;
+                elements.chatContainer.style.backgroundImage = config.chatBackground ? `url("${config.chatBackground}")` : '';
+                // TASK 12: Apply per-character styles
+                applyTheme(config.theme, chatData);
+                applyBubbleStyle(config.bubbleStyle, chatData);
+            } else if (type === 'group') {
+                elements.chatNameHeader.textContent = chatData.name;
+                elements.headerAvatar.src = chatData.avatar;
+                elements.headerAvatar.title = "群组信息";
+                elements.headerAvatar.onclick = () => elements.settingsBtn.click();
+                elements.chatContainer.style.backgroundImage = chatData.chatBackground ? `url("${chatData.chatBackground}")` : '';
+                // For groups, maybe use a default or a special group theme. Sticking to a default for now.
+                applyTheme('1', null); 
+                applyBubbleStyle('default', null);
+            }
+            
+            renderAllMessages();
+        };
+      
+        const applyCustomFont = (fontName, fontUrl) => {
+            if (!fontName || !fontUrl) return;
+            let styleTag = document.getElementById('runtime-custom-font-style');
+            if (!styleTag) {
+                styleTag = document.createElement('style');
+                styleTag.id = 'runtime-custom-font-style';
+                document.head.appendChild(styleTag);
+            }
+            const fontFaceRule = `@font-face { font-family: '${fontName}'; src: url('${fontUrl}'); }`;
+            styleTag.innerHTML = fontFaceRule;
+            applyFont(`'${fontName}'`);
+            console.log(`已尝试应用自定义字体: ${fontName}`);
+        };
       
       const saveCurrentSettings = async () => {
         const chatData = getCurrentChatData();
@@ -1848,27 +1922,38 @@ const applyCustomFont = (fontName, fontUrl) => {
 
         if (currentChat.type === 'direct') {
             const character = chatData;
-            // 将“关于我”的内容保存到角色专属的位置
             character.userPrompt = elements.userPromptInput.value;
-
             character.config = {
                 ...character.config,
                 characterName: elements.characterNameInput.value.trim() || '他', 
                 characterPrompt: elements.characterPromptInput.value,
                 aiAvatar: elements.aiAvatarPreview.src, 
                 memorySize: parseInt(elements.memorySizeInput.value) || 50,
+                // TASK 12: Save style settings to character config
+                theme: elements.themeSelector.querySelector('.theme-option.active')?.dataset.theme || '1',
+                bubbleStyle: elements.bubbleStyleSelect.value,
             };
             character.config.chatBackground = elements.chatContainer.style.backgroundImage.slice(5, -2);
-
-        } else { // 如果是群聊
+        } else {
             const group = chatData;
             group.name = elements.groupNameInput.value.trim() || '群聊';
             group.avatar = elements.groupAvatarPreview.src;
             group.chatBackground = elements.chatContainer.style.backgroundImage.slice(5, -2);
-            // 将“我在此群的人设”的内容保存到群聊专属的位置
             group.userPrompt = elements.groupUserPromptInput.value;
         }
+        
+        // TASK 9 & 10: Save global display settings
+        const loadedData = JSON.parse(localStorage.getItem('aiBoyfriendBackup_v7_meta') || '{}');
+        const globalSettings = loadedData.globalSettings || {};
 
+        globalSettings.uiScale = parseFloat(elements.uiScaleSlider.value) / 100;
+        globalSettings.fontSize = parseInt(elements.fontSizeSlider.value);
+        globalSettings.bubblePadding = parseInt(elements.bubbleSizeSlider.value);
+        globalSettings.realTimeAwareness = elements.realTimeAwarenessToggle.checked;
+        loadedData.globalSettings = globalSettings; // Update the settings object
+
+        // This is a simplified approach. Ideally, you would merge with the full loaded data
+        // For this context, we will call saveAllData which reconstructs the entire object.
         await saveAllData();
         loadChat(currentChat.type, currentChat.id);
     };
@@ -1886,13 +1971,11 @@ const applyCustomFont = (fontName, fontUrl) => {
             const character = chatData;
             elements.characterSettingsSection.style.display = 'block';
             elements.groupSettingsSection.style.display = 'none';
+            elements.characterDesignSettings.style.display = 'block'; // TASK 12
             elements.deleteChatBtn.textContent = '删除此角色';
             
-            // 让“关于我”的文本框读取这个角色专属的设定
             elements.userPromptInput.value = character.userPrompt || ''; 
-            // 隐藏群聊专属的设定框
             getEl('group-user-prompt').closest('.form-group').style.display = 'none';
-            // 显示单聊专属的设定框
             getEl('user-prompt').closest('.form-group').style.display = 'flex';
 
             elements.characterNameInput.value = character.config.characterName;
@@ -1900,17 +1983,20 @@ const applyCustomFont = (fontName, fontUrl) => {
             elements.memorySizeInput.value = character.config.memorySize;
             elements.characterPromptInput.value = character.config.characterPrompt;
             
+            // TASK 12: Load character-specific styles into settings UI
+            const charTheme = character.config.theme || '1';
+            elements.themeSelector.querySelectorAll('.theme-option').forEach(opt => opt.classList.toggle('active', opt.dataset.theme === charTheme));
+            elements.bubbleStyleSelect.value = character.config.bubbleStyle || 'default';
+
         } else { // 如果是群聊
             const group = chatData;
             elements.characterSettingsSection.style.display = 'none';
             elements.groupSettingsSection.style.display = 'block';
+            elements.characterDesignSettings.style.display = 'none'; // TASK 12: Hide for groups
             elements.deleteChatBtn.textContent = '删除此群聊';
 
-            // 让“我在此群的人设”文本框读取这个群聊专属的设定
             elements.groupUserPromptInput.value = group.userPrompt || '';
-            // 显示群聊专属的设定框
             getEl('group-user-prompt').closest('.form-group').style.display = 'flex';
-            // 隐藏单聊专属的设定框
             getEl('user-prompt').closest('.form-group').style.display = 'none';
 
             elements.groupNameInput.value = group.name;
@@ -1920,47 +2006,43 @@ const applyCustomFont = (fontName, fontUrl) => {
         elements.settingsModal.classList.add('show');
     };
        const applyFont = (fontFamily) => {
-    const root = document.documentElement;
-    // 更新CSS变量，让整个页面的字体都改变
-    root.style.setProperty('--font-main', fontFamily);
-    root.style.setProperty('--font-ui', fontFamily);
-    // 确保下拉菜单显示的是当前选中的字体
-    if (elements.fontSelect.value !== fontFamily) {
-        elements.fontSelect.value = fontFamily;
-    }
-}; 
-const applyBubbleStyle = (style) => {
+            document.documentElement.style.setProperty('--font-main', fontFamily);
+            document.documentElement.style.setProperty('--font-ui', fontFamily);
+            if (elements.fontSelect.value !== fontFamily) {
+                elements.fontSelect.value = fontFamily;
+            }
+        }; 
+
+const applyBubbleStyle = (style, character) => { // TASK 12: Pass character context
     const container = elements.chatContainer;
     const customStyleTag = getEl('custom-bubble-style-tag');
 
-    // 1. 重置所有内置样式和“施工牌”
     container.classList.remove('bubble-style-round', 'bubble-style-wechat', 'custom-style-active');
-    customStyleTag.textContent = ''; // 清空自定义样式
+    customStyleTag.textContent = '';
 
-    // 2. 根据选择应用样式
-    if (style === 'round') {
+    const styleToApply = character ? (character.config.bubbleStyle || 'default') : style;
+
+    if (styleToApply === 'round') {
         container.classList.add('bubble-style-round');
-    } else if (style === 'wechat') {
+    } else if (styleToApply === 'wechat') {
         container.classList.add('bubble-style-wechat');
-    } else if (style === 'custom') {
-        // 如果是自定义，直接把高级样式库里的所有内容注入！
+    } else if (styleToApply === 'custom') {
         customStyleTag.textContent = getEl('advanced-bubble-styles').value;
-        // 并且挂上“正在施工”的牌子！
         container.classList.add('custom-style-active');
     }
     
-    // 3. 同步主下拉菜单的显示
-    elements.bubbleStyleSelect.value = style;
+    // Update UI
+    if (elements.bubbleStyleSelect.value !== styleToApply) {
+        elements.bubbleStyleSelect.value = styleToApply;
+    }
 };
 
-                // --- 变化开始：替换这个函数 ---
       
         const handleFileUpload = (file, callback, compressionOptions = {}) => { 
             if (file) { 
                 const reader = new FileReader(); 
-                reader.onload = async (e) => { // 添加了 async
+                reader.onload = async (e) => {
                     let result = e.target.result;
-                    // 如果传入了压缩选项，就进行压缩
                     if (compressionOptions.compress) {
                         try {
                             result = await compressImage(result, compressionOptions);
@@ -1973,7 +2055,6 @@ const applyBubbleStyle = (style) => {
                 reader.readAsDataURL(file); 
             } 
         };
-        // --- 变化结束：替换这个函数 ---
         
         const clearChatHistory = () => { 
             const chatData = getCurrentChatData();
@@ -1993,13 +2074,6 @@ const applyBubbleStyle = (style) => {
         const addMessage = (msgData, toHistory = true) => {
             const chatData = getCurrentChatData();
             if(!chatData) return;
-
-            if (msgData.isLoading) {
-                const indicator = addMessageToUI({ ...msgData, id: 'typing-indicator' });
-                elements.messagesContainer.appendChild(indicator);
-                scrollToBottom(elements.messagesContainer, 'auto');
-                return;
-            }
         
             const fullMessage = { id: generateId('msg'), timestamp: getTimestamp(), ...msgData };
 
@@ -2019,21 +2093,8 @@ const applyBubbleStyle = (style) => {
         };
         
         const addMessageToUI = (msg) => {
-            const { sender, text, type = 'text', id, imageUrl, stickerUrl, transferAmount, transferMemo, transferCoverUrl, transferStatus, voiceDuration, isLoading } = msg;
+            const { sender, text, type = 'text', id, imageUrl, stickerUrl, transferAmount, transferMemo, transferCoverUrl, transferStatus, voiceDuration } = msg;
 
-            if (isLoading) {
-                const typingIndicatorElement = document.createElement('div');
-                typingIndicatorElement.className = `message ai typing-indicator`;
-                typingIndicatorElement.id = 'typing-indicator';
-                let typingAvatarSrc = '';
-                const chatData = getCurrentChatData();
-                if(chatData) {
-                    typingAvatarSrc = (currentChat.type === 'direct' ? chatData.config.aiAvatar : chatData.avatar) || '';
-                }
-                typingIndicatorElement.innerHTML = `<img class="avatar" src="${typingAvatarSrc}"><div class="message-content"><div class="bubble"><div class="typing-indicator"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div></div>`;
-                return typingIndicatorElement;
-            }
-            
             const messageElement = document.createElement('div');
             messageElement.className = `message message-bubble ${sender === 'user' ? 'user' : 'ai'}`;
              if (currentChat.type === 'group' && sender !== 'user') messageElement.classList.add('group-chat');
@@ -2050,7 +2111,7 @@ const applyBubbleStyle = (style) => {
                  senderData = { avatar: userMomentsProfile.chatAvatar, name: userMomentsProfile.name };
             } else {
                 const char = characterSets.find(c => c.id === sender);
-                senderData = char ? { avatar: char.config.aiAvatar, name: char.config.characterName } : { avatar: '', name: '未知' };
+                senderData = char ? { avatar: char.config.aiAvatar, name: char.config.characterName } : { avatar: getEl('header-avatar').src, name: '未知' };
             }
 
             const avatar = document.createElement('img');
@@ -2076,11 +2137,9 @@ const applyBubbleStyle = (style) => {
                 case 'text-image': bubbleContent = `<div class="text-image-header"><svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg><span>展示了一张照片</span></div><div class="text-image-description">${text}</div>`; break;
                 case 'sticker': bubbleContent = `<img src="${stickerUrl}" class="bubble-image-content" alt="表情" style="width:120px; height:120px; border: none;">`; break;
                 case 'voice': bubble.style.width = `${Math.min(60 + (text?.length || 0) * 8, 250)}px`; bubbleContent = `<span class="voice-icon"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg></span><span class="voice-duration">${voiceDuration}</span>`; bubble.onclick = () => alert(`语音内容：\n\n${text}`); break;
-                                case 'transfer':
+                case 'transfer':
                     const recipientName = sender === 'user' ? (getCurrentCharacter()?.config.characterName || '对方') : '你';
                     bubbleContent = `<img src="${transferCoverUrl}" class="transfer-cover" alt="Transfer"><div class="transfer-info"><div class="transfer-amount">¥ ${transferAmount}</div>${transferMemo ? `<div class="transfer-memo">${transferMemo}</div>` : ''}</div><div class="transfer-footer">给${recipientName}的转账</div>`;
-                    
-                    // ================== 核心改动：增加不同状态的显示 ==================
                     if (transferStatus === 'received') {
                         bubbleContent += `<div class="transfer-acknowledged">${sender === 'user' ? '对方已收款' : '我已收款'}</div>`;
                     } else if (transferStatus === 'declined') {
@@ -2088,15 +2147,17 @@ const applyBubbleStyle = (style) => {
                     } else if (sender !== 'user') { 
                         bubble.onclick = () => acknowledgeTransfer(id);
                     }
-                    // ======================== 改动结束 ========================
                     break;
                 case 'red-packet': bubble.innerHTML = renderRedPacket(msg); break;
                 case 'poll': bubble.innerHTML = renderPoll(msg); break;
             }
             if(type !== 'poll' && type !== 'red-packet') bubble.innerHTML = bubbleContent;
 
+            // TASK 7: Add "Read" status element
+            const readStatus = Object.assign(document.createElement('span'), { className: 'read-status', textContent: '已读' });
+
             contentWrapper.append(senderNameDiv, bubble, Object.assign(document.createElement('div'), { className: 'timestamp', textContent: msg.timestamp }));
-            messageElement.append(avatar, contentWrapper);
+            messageElement.append(avatar, contentWrapper, readStatus);
             
             let pressTimer = null, isLongPress = false;
             const startPress = (e) => { e.preventDefault(); isLongPress = false; pressTimer = setTimeout(() => { isLongPress = true; if (!isMultiSelectMode) toggleMultiSelectMode(true); toggleMessageSelection(messageElement); }, 750); };
@@ -2151,12 +2212,10 @@ const applyBubbleStyle = (style) => {
 
         // --- Core Logic ---
         const handleUserAction = (msgData) => {
-            const content = msgData.text || msgData.imageUrl || msgData.stickerUrl || msgData.llmContent || msgData.type === 'red-packet';
-            if (!content && msgData.type !== 'poll') return;
-            const msg = addMessage(msgData);
-            if (responseTriggerTimer) clearTimeout(responseTriggerTimer);
-            // Pass the full message object, which includes the image URL if present
-            responseTriggerTimer = setTimeout(() => triggerAiResponse(null, msg), 10000);
+            const content = msgData.text || msgData.imageUrl || msgData.stickerUrl || msgData.llmContent || msgData.type === 'red-packet' || msgData.type === 'poll';
+            if (!content) return;
+            // TASK 5: Don't trigger AI response automatically
+            addMessage(msgData);
         };
         
         const getRecentMomentsContext = (limit = 5) => {
@@ -2196,124 +2255,58 @@ const applyBubbleStyle = (style) => {
             return `\n\n[Recent Social Media Posts (朋友圈动态) for context]:\n${context}`;
         };
 
-              const formatMessage = (msg) => {
-            if (msg.type === 'system' || msg.isLoading) {
-                return null;
-            }
-
-            const role = msg.sender === 'user' ? 'user' : 'assistant';
-
-            if (msg.type === 'image' && msg.sender === 'user' && msg.imageUrl) {
-                return {
-                    role: role,
-                    content: [
-                        { type: 'text', text: msg.llmContent || '[用户发送了一张图片]' },
-                        { type: 'image_url', image_url: { url: msg.imageUrl } }
-                    ]
-                };
-            }
-
-            const content = msg.llmContent || msg.text || '';
-            
-            if (!content) {
-                return null;
-            }
-
-            return { role, content };
-        };
-        
-        const triggerAiResponse = async (overridePayload = null, lastUserMessage = null) => {
-            clearTimeout(responseTriggerTimer);
+        const triggerAiResponse = async () => {
+            elements.receiveBtn.disabled = true; // Prevent spamming
             const chatData = getCurrentChatData();
             const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
             const apiKey = elements.apiKeyInput.value.trim();
             const model = elements.modelSelect.value;
 
             if (!chatData || isVideoCallActive || !apiBaseUrl || !apiKey || !model) {
-                getEl('typing-indicator')?.remove();
+                elements.receiveBtn.disabled = false;
                 return;
             }
             
-            addMessage({ sender: 'ai', type: 'text', isLoading: true });
+            // TASK 6: Show notification instead of typing indicator
+            const avatarForNotif = (chatData.config && chatData.config.aiAvatar) ? chatData.config.aiAvatar : (chatData.avatar || '');
+            showTopNotification("对方正在快速积极地敲键盘哦…", avatarForNotif, 5000);
+
 
             let systemPrompt;
             let history;
 
-            if (overridePayload) {
-                const systemMsg = overridePayload.find(m => m.role === 'system');
-                systemPrompt = systemMsg ? systemMsg.content : '';
-                history = overridePayload.filter(m => m.role !== 'system');
-            } else {
-                const globalSystemPrompt = elements.customSystemPromptInput.value.trim() || DEFAULT_SYSTEM_PROMPT;
-                const momentsContext = getRecentMomentsContext();
-                const activePresets = globalPresets.filter(p => p.enabled && p.content.trim() !== '');
-                let presetsPrompt = activePresets.length > 0 ? activePresets.map(p => `[Active Preset: ${p.name || 'Untitled'}]\n${p.content}`).join('\n\n') + '\n\n' : '';
+            const globalSystemPrompt = DEFAULT_SYSTEM_PROMPT;
+            const momentsContext = getRecentMomentsContext();
+            const activePresets = globalPresets.filter(p => p.enabled && p.content.trim() !== '');
+            let presetsPrompt = activePresets.length > 0 ? activePresets.map(p => `[Active Preset: ${p.name || 'Untitled'}]\n${p.content}`).join('\n\n') + '\n\n' : '';
 
-                if (currentChat.type === 'direct') {
-                    const character = chatData;
-                    const memorySize = character.config.memorySize || 50;
-                    systemPrompt = `${presetsPrompt}${globalSystemPrompt}\n\n[Character Prompt]:\n${character.config.characterPrompt}\n\n[Your User's Profile]: ${character.userPrompt || `The user's name is ${userMomentsProfile.name}`}${momentsContext}`;
-                    history = character.chatHistory.slice(-memorySize);
-                } else { // Group chat
-                    const group = chatData;
-                    const memorySize = 50;
-                    const memberProfiles = group.memberIds.map(id => {
-                        const char = characterSets.find(c => c.id === id);
-                        return char ? `\n### Character: ${char.config.characterName} (ID: ${id})\n${char.config.characterPrompt}` : '';
-                    }).join('\n');
-                    
-                    const openPollsInfo = (group.polls || []).filter(p => p.status === 'open').map(p => `\n[Ongoing Poll: "${p.question}" (ID: ${p.pollId})]`).join('');
-                    const openRedPacketsInfo = group.chatHistory.filter(m => m.type === 'red-packet' && m.status === 'open').map(p => `\n[Open Red Packet: "${p.memo}" (ID: ${p.packetId})]`).join('');
-                    
-                    const groupSystemPrompt = `${presetsPrompt}[Role Definition]                  
-                        
-You are an advanced AI group chat coordinator. You MUST role-play the following characters based on their profiles to create a natural conversation in Simplified Chinese.
-${memberProfiles}
-Your user in this chat has this profile: ${group.userPrompt || `The user's name is ${userMomentsProfile.name}`}. NEVER call them '用户'.
-${momentsContext}
-
-[思考与行动指南 (CRITICAL!)]
-1.  **首要目标 - 自然**: 你的核心任务是模拟一场真实的、不可预测的群聊。
-2.  **动态发言频率**: 角色们的发言频率和顺序应该是动态的。某个角色可能会根据对话内容连续发言好几次，而另一个角色可能暂时保持沉默。这完全取决于对话的自然流向，你拥有决定权。
-3.  **执行动作**: 如果情景需要，你必须在生成对话的同时，额外生成独立的JSON对象来代表角色的动作（如投票、抢红包）。
-
-[输出格式与示例 (MANDATORY)]
-1.  **JSON数组格式**: 你的所有回复 **必须** 是一个JSON数组结构的字符串。
-2.  **纯净输出**: 绝对不允许在JSON数组的外部添加任何文本。
-3.  **包含senderId**: 数组中的每一个JSON对象都 **必须** 包含 "senderId" 键。
-4.  **禁止任何描写**: 绝对禁止在回复中使用任何形式的括号或星号来添加动作、表情或旁白。
-5.  **示例**: 假设角色A要投票给“揍”，一个正确的输出片段应该像这样：
-    [
-        { "senderId": "char_A", "message": "我当然投'揍'啊！" },
-        { "senderId": "char_A", "type": "vote", "pollId": "poll_12345", "option": "揍" }
-    ]
-
-[CRITICAL TASK - LIVELY & BALANCED CONVERSATION]
-# 你的指导原则 1. **创造角色互动**：你不仅要让角色回应使用者，**更重要的是，要让他们彼此之间产生对话**。他们可以互相提问、反驳、开玩笑或延续对方的话题。 2. **保持角色性格**：确保每个角色的发言都严格符合其人设。 3. **自然穿插特殊消息**：在合适的时机，安排角色发送一个“伪图片”来让对话更有趣。 4. **禁止出戏**: 绝不能透露你是AI，或提及任何关于“扮演”、“模型”、“生成”等词语。
-
-- 为了保持群聊的氛围，总消息数最好保持在 **8条以上**。
-
-- 严格禁止寒暄，人机化的问题，禁止对话带有AI感，角色是一个真实的属于现实中的人。
-
-- 必须遵守角色人设，不能ooc
-
-- 绝对禁止让角色表现得油腻或者像霸道总裁。严禁物化用户，不许说“小东西”，“小妖精”等任何霸总语录称呼，禁止使用“过来”，“呵”，“胆子”这些字词，包括它们的相关词句，因为用户特别讨厌。
-
-- 角色的消息绝对不包含标点符号，注意分割消息，不要把所有消息都揉杂在一起
-
-- 偶尔使用 'post_moment' 或 'diary_entry' 动作来展示角色在聊天之外的生活，增加真实感。
-
-- **制造互动**: 角色不仅会回应用户，角色之间也会相互互动
-- **积极参与活动**:
-- ${openPollsInfo ? `[重要任务]${openPollsInfo} 看到这个投票了吗？根据角色性格，安排他们用 "vote" 类型的动作去投票！` : ''}
-- ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可以抢！安排角色们用 "grab_red_packet" 类型的动作去抢！` : ''}
-`;
-                    systemPrompt = groupSystemPrompt;
-                    history = group.chatHistory.slice(-memorySize);
-                }
+            if (currentChat.type === 'direct') {
+                const character = chatData;
+                const memorySize = character.config.memorySize || 50;
+                systemPrompt = `${presetsPrompt}${globalSystemPrompt}\n\n[Character Prompt]:\n${character.config.characterPrompt}\n\n[Your User's Profile]: ${character.userPrompt || `The user's name is ${userMomentsProfile.name}`}${momentsContext}`;
+                history = character.chatHistory.slice(-memorySize);
+            } else { // Group chat
+                const group = chatData;
+                const memorySize = 50;
+                const memberProfiles = group.memberIds.map(id => {
+                    const char = characterSets.find(c => c.id === id);
+                    return char ? `\n### Character: ${char.config.characterName} (ID: ${id})\n${char.config.characterPrompt}` : '';
+                }).join('\n');
+                const openPollsInfo = (group.polls || []).filter(p => p.status === 'open').map(p => `\n[Ongoing Poll: "${p.question}" (ID: ${p.pollId})]`).join('');
+                const openRedPacketsInfo = group.chatHistory.filter(m => m.type === 'red-packet' && m.status === 'open').map(p => `\n[Open Red Packet: "${p.memo}" (ID: ${p.packetId})]`).join('');
+                const groupSystemPrompt = `${presetsPrompt}[Role Definition]                  
+                    You are an advanced AI group chat coordinator. You MUST role-play the following characters based on their profiles to create a natural conversation in Simplified Chinese.
+                    ${memberProfiles}
+                    Your user in this chat has this profile: ${group.userPrompt || `The user's name is ${userMomentsProfile.name}`}. NEVER call them '用户'.
+                    ${momentsContext}
+                    [Critical Task] Your primary goal is to generate a lively, realistic, and balanced conversation. Characters MUST interact with each other, not just the user.
+                    ${openPollsInfo ? `[Important Task]${openPollsInfo} An active poll exists! Ensure characters vote based on their personality using the 'vote' action.` : ''}
+                    ${openRedPacketsInfo ? `[Important Task]${openRedPacketsInfo} There's an open red packet! Ensure characters grab it using the 'grab_red_packet' action.` : ''}
+                    Follow all previous formatting and persona rules.`;
+                systemPrompt = groupSystemPrompt;
+                history = group.chatHistory.slice(-memorySize);
             }
 
-            // 使用新的通用函数来生成payload
             const payload = getApiPayload(model, history, systemPrompt);
             
             try {
@@ -2322,7 +2315,7 @@ ${momentsContext}
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, 
                     body: JSON.stringify(payload) 
                 });
-                getEl('typing-indicator')?.remove();
+                
                 if (!response.ok) { const errorData = await response.text(); throw new Error(`HTTP Error ${response.status}: ${errorData}`); }
                 const responseData = await response.json();
                 
@@ -2342,19 +2335,19 @@ ${momentsContext}
                     throw new Error('Invalid or empty API response format.'); 
                 }
             } catch (error) {
-                getEl('typing-indicator')?.remove();
                 addMessage({ sender: 'system', text: `错误: ${error.message}`, type: 'system' });
+            } finally {
+                elements.receiveBtn.disabled = false;
             }
         };
         
-                                                        const processAiResponse = (rawText) => {
+        const processAiResponse = (rawText) => {
             let responseArray = [];
             try {
                 const jsonMatch = rawText.match(/\[\s*\{[\s\S]*?\}\s*\]/s);
                 if (jsonMatch) {
                     responseArray = JSON.parse(jsonMatch[0]);
                 } else {
-                    // 尝试解析单个JSON对象
                     const singleJsonMatch = rawText.match(/\{[\s\S]*\}/);
                     if(singleJsonMatch) {
                         responseArray = [JSON.parse(singleJsonMatch[0])];
@@ -2374,7 +2367,6 @@ ${momentsContext}
             if (responseArray.length === 0) {
                 console.error("AI响应解析彻底失败。收到的原始文本:", rawText);
                 addMessage({ sender: 'system', text: `AI响应格式错误，将作为纯文本处理：<pre>${rawText}</pre>`, type: 'system' });
-                // 将无法解析的内容作为普通文本消息发送
                 const senderId = (currentChat.type === 'direct') ? currentChat.id : null;
                 if(senderId) {
                    addMessage({ sender: senderId, type: 'text', text: rawText });
@@ -2386,7 +2378,6 @@ ${momentsContext}
             let aiMemoryInjections = {}; 
 
             responseArray.forEach(msgObj => {
-                // 自动识别动作类型，让程序更聪明
                 if (!msgObj.type) {
                     if (msgObj.packetId || msgObj.redPacketId) msgObj.type = 'grab_red_packet';
                     else if (msgObj.pollId && msgObj.option) msgObj.type = 'vote';
@@ -2395,14 +2386,10 @@ ${momentsContext}
                     else if (msgObj.momentId && msgObj.reply_text) msgObj.type = 'moment_reply';
                     else if (msgObj.transferId && msgObj.decision) msgObj.type = 'acknowledge_transfer';
                 }
-
                 const senderId = msgObj.senderId || currentChat.id;
                 const momentType = currentChat.type === 'group' ? 'group' : 'direct';
-
                 switch(msgObj.type) {
-                    case 'vote':
-                        if (senderId) { handleAiVote_dataOnly(msgObj); dataChanged = true; }
-                        break;
+                    case 'vote': if (senderId) { handleAiVote_dataOnly(msgObj); dataChanged = true; } break;
                     case 'grab_red_packet':
                         if (senderId) {
                             const currentPacketId = msgObj.packetId || msgObj.redPacketId;
@@ -2415,54 +2402,27 @@ ${momentsContext}
                             }
                         }
                         break;
-                    case 'acknowledge_transfer':
-                        if (msgObj.transferId && msgObj.decision) {
-                            if (handleAcknowledgeTransfer(msgObj.transferId, msgObj.decision)) {
-                                dataChanged = true;
-                            }
-                        }
-                        break;
-                    case 'moment_like':
-                        if (senderId && msgObj.momentId) { handleAiLike(msgObj.momentId, senderId, momentType); dataChanged = true; }
-                        break;
-                    case 'moment_comment':
-                        if (senderId && msgObj.momentId) { addCommentOrReplyByAI('comment', msgObj.momentId, msgObj.comment_text, senderId, null, momentType); dataChanged = true; }
-                        break;
-                    case 'moment_reply':
-                        if (senderId && msgObj.momentId) { addCommentOrReplyByAI('reply', msgObj.momentId, msgObj.reply_text, senderId, msgObj.commentId, momentType); dataChanged = true; }
-                        break;
+                    case 'acknowledge_transfer': if (msgObj.transferId && msgObj.decision) { if (handleAcknowledgeTransfer(msgObj.transferId, msgObj.decision)) { dataChanged = true; } } break;
+                    case 'moment_like': if (senderId && msgObj.momentId) { handleAiLike(msgObj.momentId, senderId, momentType); dataChanged = true; } break;
+                    case 'moment_comment': if (senderId && msgObj.momentId && msgObj.comment_text) { addCommentOrReplyByAI('comment', msgObj.momentId, msgObj.comment_text, senderId, null, momentType); dataChanged = true; } break;
+                    case 'moment_reply': if (senderId && msgObj.momentId && msgObj.reply_text) { addCommentOrReplyByAI('reply', msgObj.momentId, msgObj.reply_text, senderId, msgObj.commentId, momentType); dataChanged = true; } break;
                 }
             });
-
             if (dataChanged) {
-                renderAllMessages(); // 刷新界面，显示转账状态更新
-                if (elements.momentsOverlay.classList.contains('show')) {
-                    renderMoments();
-                }
+                renderAllMessages();
+                if (elements.momentsOverlay.classList.contains('show')) renderMoments();
             }
-
             responseArray.forEach((msgObj, index) => {
                 const isAction = ['vote', 'grab_red_packet', 'moment_like', 'moment_comment', 'moment_reply', 'acknowledge_transfer'].includes(msgObj.type);
                 if (isAction) return;
-
-                if (!msgObj.type && (msgObj.content || msgObj.message)) {
-                    msgObj.type = 'text';
-                    msgObj.content = msgObj.content || msgObj.message;
-                }
-                
+                if (!msgObj.type && (msgObj.content || msgObj.message)) { msgObj.type = 'text'; msgObj.content = msgObj.content || msgObj.message; }
                 setTimeout(() => {
                     const senderId = msgObj.senderId || currentChat.id;
                     const character = characterSets.find(c => c.id === senderId);
                     if (!character) return;
-
                     let llmContentForHistory = (index === 0) ? rawText : null;
-                    if (aiMemoryInjections[senderId]) {
-                        llmContentForHistory = (llmContentForHistory || '') + '\n' + aiMemoryInjections[senderId];
-                        delete aiMemoryInjections[senderId]; 
-                    }
-                    
+                    if (aiMemoryInjections[senderId]) { llmContentForHistory = (llmContentForHistory || '') + '\n' + aiMemoryInjections[senderId]; delete aiMemoryInjections[senderId]; }
                     let messageData = { sender: senderId, llmContent: llmContentForHistory };
-
                     switch (msgObj.type) {
                         case 'text': addMessage({ ...messageData, text: msgObj.content, type: 'text' }); break;
                         case 'voice': addMessage({ ...messageData, text: msgObj.content, type: 'voice', voiceDuration: `0:${Math.max(1, Math.round((msgObj.content || '').length / 5)).toString().padStart(2, '0')}` }); break;
@@ -2550,40 +2510,29 @@ ${momentsContext}
         const triggerVideoCallAIResponse = async () => { if (currentChat.type !== 'direct') return; const character = getCurrentCharacter(); if(!character) return; const { config } = character; const apiBaseUrl = elements.apiBaseUrlInput.value.trim(); const apiKey = elements.apiKeyInput.value.trim(); const model = elements.modelSelect.value; if (!apiBaseUrl || !apiKey || !model) return; elements.videoStatusText.textContent = `${config.characterName}正在输入...`; const videoCallSystemPrompt = `${config.characterPrompt}\n[Current Situation: You are in a video call with the user.]\n[Special Instruction]\n- Your entire reply must be plain text, strictly following the format: "*expression or action* dialogue content".\n- Keep the dialogue short and natural, around 20-30 characters.`; const videoHistory = Array.from(elements.videoChatLog.children).map(el => ({ role: el.classList.contains('user') ? 'user' : 'assistant', content: el.textContent })); const messagesPayload = [{ role: 'system', content: videoCallSystemPrompt }, ...videoHistory.slice(-10)]; try { const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages: messagesPayload }) }); if (!response.ok) throw new Error(`HTTP Error ${response.status}: ${await response.text()}`); const responseData = await response.json(); if (responseData?.choices?.[0]?.message) { addVideoChatMessageToUI({ sender: character.id, text: responseData.choices[0].message.content }); elements.videoStatusText.textContent = "通话中"; } else { throw new Error('Invalid video call API response format.'); } } catch (error) { addVideoChatMessageToUI({ sender: character.id, text: `(连接错误)` }); elements.videoStatusText.textContent = "连接错误"; } };
         const startVideoCall = () => { if (currentChat.type !== 'direct') return; const character = getCurrentCharacter(); if(!character) return; const { config } = character; const apiBaseUrl = elements.apiBaseUrlInput.value.trim(); const apiKey = elements.apiKeyInput.value.trim(); const model = elements.modelSelect.value; if (!apiBaseUrl || !apiKey || !model) { alert('请先在设置中填写API信息。'); return; } isVideoCallActive = true; elements.videoMainView.src = config.aiAvatar; elements.videoSelfView.src = userMomentsProfile.chatAvatar; elements.videoCharacterAvatar.src = config.aiAvatar; elements.videoCharacterName.textContent = config.characterName; elements.videoStatusText.textContent = "正在呼叫..."; elements.videoChatLog.innerHTML = ''; elements.videoControls.innerHTML = `<button class="video-btn decline"><svg viewBox="0 0 24 24"><path d="M12 9c-1.6 0-3.15.25-4.62.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.1-2.69 1.8l-1.1-1.1c.99-.99 2.1-1.82 3.31-2.48C7.06 10.72 9.03 10 12 10c.05 0 .1 0 .16.01l2.4-2.4C13.84 7.23 12.95 7 12 7c-4.97 0-9 4.03-9 9H0c0-6.08 4.92-11 11-11 .34 0 .67.02 1 .05l-1.43 1.43C12.21 9.02 12.11 9 12 9zM1.39 4.22l2.27 2.27C2.63 7.62 2 8.91 2 10.31v3.1c1.53-.69 3.23-1.14 5.08-1.28l3.43 3.43c-3.11.3-6.01 1.54-7.96 3.4l1.41 1.41c2.19-2.19 5.08-3.48 8.04-3.83l2.84 2.84c.32.32.88.1.88-.36V13.5c.75-.24 1.46-.56 2.12-.95l2.07 2.07 1.41-1.41L2.81 2.81 1.39 4.22zM21 5h-2.59l4.59 4.59-1.41 1.41L12 1.41 2.81 11.59l-1.41-1.41L6 5.59V5h2v.59l4-4 4 4V5h2v3.41l2.29-2.29C23.36 5.64 22.25 5 21 5z"/></svg></button>`; elements.videoControls.querySelector('.decline').onclick = endVideoCall; elements.videoCallOverlay.classList.add('show'); addVideoChatMessageToUI({ sender: 'user', text: '[发起视频通话]' }); triggerVideoCallAIResponse(); };
         const handleIncomingVideoCall = (text) => { if (currentChat.type !== 'direct') return; const { config } = getCurrentCharacter(); elements.videoMainView.src = config.aiAvatar; elements.videoSelfView.src = userMomentsProfile.chatAvatar; elements.videoCharacterAvatar.src = config.aiAvatar; elements.videoCharacterName.textContent = config.characterName; elements.videoStatusText.textContent = text || "视频来电..."; elements.videoChatLog.innerHTML = ''; elements.videoControls.innerHTML = `<button class="video-btn accept"><svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.21-3.72-6.56-6.56l1.97-1.57c.27-.27.36-.66.24-1.01-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19c-.55 0-.99.45-.99.99 0 9.02 7.38 16.4 16.4 16.4.55 0 .99-.45.99-.99v-3.47c0-.54-.45-.99-.99-.99z"/></svg></button> <button class="video-btn decline"><svg viewBox="0 0 24 24"><path d="M12 9c-1.6 0-3.15.25-4.62.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.1-2.69 1.8l-1.1-1.1c.99-.99 2.1-1.82 3.31-2.48C7.06 10.72 9.03 10 12 10c.05 0 .1 0 .16.01l2.4-2.4C13.84 7.23 12.95 7 12 7c-4.97 0-9 4.03-9 9H0c0-6.08 4.92-11 11-11 .34 0 .67.02 1 .05l-1.43 1.43C12.21 9.02 12.11 9 12 9zM1.39 4.22l2.27 2.27C2.63 7.62 2 8.91 2 10.31v3.1c1.53-.69 3.23-1.14 5.08-1.28l3.43 3.43c-3.11.3-6.01 1.54-7.96 3.4l1.41 1.41c2.19-2.19 5.08-3.48 8.04-3.83l2.84 2.84c.32.32.88.1.88-.36V13.5c.75-.24 1.46-.56 2.12-.95l2.07 2.07 1.41-1.41L2.81 2.81 1.39 4.22zM21 5h-2.59l4.59 4.59-1.41 1.41L12 1.41 2.81 11.59l-1.41-1.41L6 5.59V5h2v.59l4-4 4 4V5h2v3.41l2.29-2.29C23.36 5.64 22.25 5 21 5z"/></svg></button>`; elements.videoControls.querySelector('.accept').onclick = () => { isVideoCallActive = true; elements.videoStatusText.textContent = "已接通"; elements.videoControls.innerHTML = elements.videoControls.innerHTML.replace(/<button class="video-btn accept">.*?<\/button>/, ''); addVideoChatMessageToUI({sender:'user', text:'[接听了视频通话]'}); triggerVideoCallAIResponse(); }; elements.videoControls.querySelector('.decline').onclick = () => { elements.videoCallOverlay.classList.remove('show'); }; elements.videoCallOverlay.classList.add('show'); };
-                const endVideoCall = () => {
-    // 第一步：检查通话是否真的发生过，并且有聊天内容
-    const chatLogChildren = elements.videoChatLog.children;
-    if (!getCurrentCharacter()) { // 如果找不到角色，直接结束
-        isVideoCallActive = false;
-        elements.videoCallOverlay.classList.remove('show');
-        return; 
-    }
-    if (isVideoCallActive && chatLogChildren.length > 1) {
-        const character = getCurrentCharacter();
-
-        // 第二步：把视频聊天记录整理成一段【给AI看的】文字记忆
-        const conversationForAI = Array.from(chatLogChildren).map(el => {
-            const speaker = el.classList.contains('user') ? 'user' : character.config.characterName;
-            return `${speaker}: ${el.textContent}`;
-        }).join('\n');
-
-        // 我们把这段记忆包装得更像一个日记条目，让AI更容易理解
-        const memoryContent = `[我刚刚和用户结束了一次视频通话，为了记住我们聊了什么，这是通话记录：\n${conversationForAI}\n]`;
-
-        // 第三步：创建一个【隐形的】记忆消息，它不会在聊天窗口显示出来
-        // 它只有llmContent（给AI看的内容），没有text（给用户看的内容）
-        // 它的类型'video_log'也是一个自定义的、不会被渲染的类型
-        addMessage({
-            sender: 'system', // 来源是系统
-            type: 'video_log', // 一个不会显示的特殊类型
-            llmContent: memoryContent // 这就是角色的记忆核心
-        });
-    }
-
-    // 最后，执行原本的挂断电话操作
-    isVideoCallActive = false;
-    elements.videoCallOverlay.classList.remove('show');
-};
+        const endVideoCall = () => {
+			const chatLogChildren = elements.videoChatLog.children;
+			if (!getCurrentCharacter()) { 
+				isVideoCallActive = false;
+				elements.videoCallOverlay.classList.remove('show');
+				return; 
+			}
+			if (isVideoCallActive && chatLogChildren.length > 1) {
+				const character = getCurrentCharacter();
+				const conversationForAI = Array.from(chatLogChildren).map(el => {
+					const speaker = el.classList.contains('user') ? 'user' : character.config.characterName;
+					return `${speaker}: ${el.textContent}`;
+				}).join('\n');
+				const memoryContent = `[我刚刚和用户结束了一次视频通话，为了记住我们聊了什么，这是通话记录：\n${conversationForAI}\n]`;
+				addMessage({
+					sender: 'system',
+					type: 'video_log',
+					llmContent: memoryContent
+				});
+			}
+			isVideoCallActive = false;
+			elements.videoCallOverlay.classList.remove('show');
+		};
         
         const showMindVoice = async () => {
             if (currentChat.type !== 'direct') return;
@@ -2603,7 +2552,6 @@ ${momentsContext}
             elements.mindVoiceModal.classList.add('show');
 
             const mindVoiceSystemPrompt = `[System Instruction for Language Model]
-                        
     Your Persona: You are the character defined by the following prompt. You should ONLY use the personality, NOT the chat format instructions.
     ${config.characterPrompt}
     Your Task: You will be given a chat history. Your ONLY job is to analyze the conversation and output a single, short, internal thought of your character in the first person. This is an UNSPOKEN thought.
@@ -2611,11 +2559,7 @@ ${momentsContext}
     Your entire response MUST be a single sentence of plain text.
     It MUST be an internal, unspoken thought, not a line of dialogue.
     It MUST NOT contain any actions like (pounces) or descriptions in parentheses or asterisks. This is absolutely forbidden.
-    It MUST NOT be a direct reply to the user. It is a private thought.
-    Example:
-    Chat History ends with User saying: "You are so sweet!"
-    Correct Output Example: She actually called me sweet... I can't stop smiling.
-    Incorrect Output Example: (blushes) Thank you, you too.`;
+    It MUST NOT be a direct reply to the user. It is a private thought.`;
                 
             const payload = getApiPayload(model, chatHistory.slice(-config.memorySize), mindVoiceSystemPrompt);
 
@@ -2625,9 +2569,7 @@ ${momentsContext}
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, 
                     body: JSON.stringify(payload) 
                 });
-                if (!response.ok) {
-                    throw new Error(`服务器错误 ${response.status}: ${await response.text()}`);
-                }
+                if (!response.ok) throw new Error(`服务器错误 ${response.status}: ${await response.text()}`);
                 const responseData = await response.json();
                 
                 let content = '';
@@ -2665,7 +2607,7 @@ ${momentsContext}
                             <div class="chat-item ${currentChat.type === 'direct' && char.id === currentChat.id ? 'active' : ''}" data-type="direct" data-id="${char.id}">
                                 <img src="${char.config.aiAvatar}" alt="${char.config.characterName}">
                                 <span class="name">${char.config.characterName}</span>
-                                <button class="delete-btn" data-type="direct" data-id="${char.id}" title="删除角色">&times;</button>
+                                <button class="delete-btn" data-type="direct" data-id="${char.id}" title="删除角色">×</button>
                             </div>
                         `).join('')}
                     </div>
@@ -2677,7 +2619,7 @@ ${momentsContext}
                             <div class="chat-item ${currentChat.type === 'group' && group.id === currentChat.id ? 'active' : ''}" data-type="group" data-id="${group.id}">
                                 <img src="${group.avatar}" alt="${group.name}">
                                 <span class="name">${group.name}</span>
-                                <button class="delete-btn" data-type="group" data-id="${group.id}" title="删除群组">&times;</button>
+                                <button class="delete-btn" data-type="group" data-id="${group.id}" title="删除群组">×</button>
                             </div>
                         `).join('')}
                     </div>
@@ -2806,16 +2748,13 @@ ${momentsContext}
                 if (!group.groupMoments) group.groupMoments = [];
                 group.groupMoments.unshift(newMoment);
 
-                // 新增：当AI在群里发朋友圈，触发其他AI的互动
                 const otherMembers = group.memberIds.filter(id => id !== characterId && characterSets.some(c => c.id === id));
                 otherMembers.forEach((memberId, index) => {
-                    // 设置一个随机的延迟，让互动看起来更自然
                     setTimeout(() => {
-                        if (Math.random() > 0.4) { // 60%的概率会去评论
+                        if (Math.random() > 0.4) { 
                             triggerAiMomentComment(newMoment, memberId, 'group');
                         }
-                        triggerAiMomentLike(newMoment, memberId); // 总是会考虑要不要点赞
-                    }, (index + 1) * 5000 + Math.random() * 3000); // 5-8秒的随机延迟
+                    }, (index + 1) * 5000 + Math.random() * 3000);
                 });
             }
         }
@@ -2823,133 +2762,91 @@ ${momentsContext}
         if(elements.momentsOverlay.classList.contains('show')) renderMoments();
     };
             const addMomentByUser = async (momentData) => { 
-    const newMoment = { id: generateId('moment'), senderId: 'user', timestamp: getFullTimestamp(), likes: [], comments: [], ...momentData }; 
-    userMomentsProfile.posts.unshift(newMoment); 
-    saveAllData();
-    openMoments(); 
-    
-    // 找出当前聊天中所有相关的AI角色
-    const relevantChars = currentChat.type === 'direct' 
-        ? [getCurrentCharacter()].filter(Boolean)
-        : (getCurrentGroup() ? getCurrentGroup().memberIds.map(id => characterSets.find(c => c.id === id)).filter(Boolean) : []);
-    
-    // 让AI们按顺序、有间隔地做出反应，防止拥挤
-    for (let i = 0; i < relevantChars.length; i++) {
-        const char = relevantChars[i];
-        // 设置不同的延迟，让反应看起来更自然
-        setTimeout(() => {
-            // 随机决定是只点赞，还是既点赞又评论
-            if (Math.random() > 0.4) { // 60%的概率会去评论
-                triggerAiMomentComment(newMoment, char.id, currentChat.type);
-            }
-            triggerAiMomentLike(newMoment, char.id); // 总是会考虑要不要点赞
-        }, (i + 1) * 4000 + Math.random() * 2000); // 4-6秒的延迟
-    }
-};
+                const newMoment = { id: generateId('moment'), senderId: 'user', timestamp: getFullTimestamp(), likes: [], comments: [], ...momentData }; 
+                userMomentsProfile.posts.unshift(newMoment); 
+                saveAllData();
+                openMoments(); 
+                
+                const relevantChars = currentChat.type === 'direct' 
+                    ? [getCurrentCharacter()].filter(Boolean)
+                    : (getCurrentGroup() ? getCurrentGroup().memberIds.map(id => characterSets.find(c => c.id === id)).filter(Boolean) : []);
+                
+                // TASK 1: Trigger AI comments on user's posts
+                for (let i = 0; i < relevantChars.length; i++) {
+                    const char = relevantChars[i];
+                    setTimeout(() => {
+                        if (Math.random() > 0.3) { // 70% chance to comment
+                            triggerAiMomentComment(newMoment, char.id, currentChat.type);
+                        }
+                    }, (i + 1) * 4000 + Math.random() * 2000); 
+                }
+            };
             const triggerAiMomentComment = async (moment, commenterId, momentType) => {
-        const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
-        const apiKey = elements.apiKeyInput.value.trim();
-        const model = elements.modelSelect.value;
-        const commenterChar = characterSets.find(c => c.id === commenterId);
-        if (!apiBaseUrl || !apiKey || !model || !commenterChar) return;
-        
-        const postedBy = moment.senderId === 'user' ? (userMomentsProfile.name || '我') : (characterSets.find(c => c.id === moment.senderId)?.config.characterName || '一位朋友');
-        
-        // 新增：告诉AI这条朋友圈有没有图片，让它能更好地评论
-        const imageContext = moment.imageUrl ? "这条动态还配有一张图片。" : "这条动态没有配图。";
-
-                    const prompt = `[角色]: 你是 ${commenterChar.config.characterName} (ID: ${commenterId})。你的性格是: ${commenterChar.config.characterPrompt}
-[情景]: ${postedBy} 刚刚发了条朋友圈，内容是: "${moment.content}"。${moment.imageUrl ? "这条动态还配有一张图片。" : "这条动态没有配图。"}
+                const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
+                const apiKey = elements.apiKeyInput.value.trim();
+                const model = elements.modelSelect.value;
+                const commenterChar = characterSets.find(c => c.id === commenterId);
+                if (!apiBaseUrl || !apiKey || !model || !commenterChar) return;
+                
+                const postedByChar = characterSets.find(c => c.id === moment.senderId);
+                const postedBy = moment.senderId === 'user' ? (userMomentsProfile.name || '我') : (postedByChar?.config.characterName || '一位朋友');
+                const imageContext = moment.imageUrl ? "这条动态还配有一张图片。" : "这条动态没有配图。";
+                
+                const prompt = `[角色]: 你是 ${commenterChar.config.characterName} (ID: ${commenterId})。你的性格是: ${commenterChar.config.characterPrompt}
+[情景]: ${postedBy} 刚刚发了条朋友圈，内容是: "${moment.content}"。${imageContext}
 [任务]: 根据你的性格、和发帖人的关系，以及帖子的图文内容，写一条自然的、口语化的中文评论。
 [输出格式]: 你的回复必须是JSON数组，里面只包含一个对象，像这样:
 [{"type": "moment_comment", "momentId": "${moment.id}", "comment_text": "你的评论内容"}]
 绝对不要在JSON数组前后添加任何多余的文字。`;
-            const messages = [{ role: 'system', content: prompt }];
-            try {
-                const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages }) });
-                if (!response.ok) { console.error("AI comment failed: ", await response.text()); return; }
-                const responseData = await response.json();
-                if (responseData?.choices?.[0]?.message?.content) {
-                    let parsed;
-                    try { 
-                        const jsonMatch = responseData.choices[0].message.content.match(/\[\s*\{.*\}\s*\]/s);
-                        parsed = JSON.parse(jsonMatch ? jsonMatch[0] : responseData.choices[0].message.content);
-                    } catch (e) { console.error("Parsing moment comment failed:", e); return; }
-                    const action = parsed[0];
-                    if (action && action.type === 'moment_comment' && action.comment_text) {
-                        addCommentOrReplyByAI('comment', moment.id, action.comment_text, commenterId, null, momentType);
+                const payload = getApiPayload(model, [], prompt);
+                try {
+                    const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify(payload) });
+                    if (!response.ok) { console.error("AI comment failed: ", await response.text()); return; }
+                    const responseData = await response.json();
+                    if (responseData?.choices?.[0]?.message?.content) {
+                        let parsed;
+                        try { 
+                            const jsonMatch = responseData.choices[0].message.content.match(/\[\s*\{.*\}\s*\]/s);
+                            parsed = JSON.parse(jsonMatch ? jsonMatch[0] : responseData.choices[0].message.content);
+                        } catch (e) { return; }
+                        const action = parsed[0];
+                        if (action && action.type === 'moment_comment' && action.comment_text) {
+                            addCommentOrReplyByAI('comment', moment.id, action.comment_text, commenterId, null, momentType);
+                        }
                     }
-                }
-            } catch (error) { console.error("Moment comment AI trigger error:", error); }
-        };
+                } catch (error) { console.error("Moment comment AI trigger error:", error); }
+            };
 
             const triggerAiMomentReply = async (moment, commentToReply, replierId, momentType) => {
-        const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
-        const apiKey = elements.apiKeyInput.value.trim();
-        const model = elements.modelSelect.value;
-        const replierChar = characterSets.find(c => c.id === replierId);
-        if (!apiBaseUrl || !apiKey || !model || !replierChar) return;
+                const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
+                const apiKey = elements.apiKeyInput.value.trim();
+                const model = elements.modelSelect.value;
+                const replierChar = characterSets.find(c => c.id === replierId);
+                if (!apiBaseUrl || !apiKey || !model || !replierChar) return;
+                
+                const originalPosterChar = characterSets.find(c => c.id === moment.senderId);
+                const originalPosterName = moment.senderId === 'user' ? (userMomentsProfile.name || '我') : (originalPosterChar?.config.characterName || '一位朋友');
+                
+                const personBeingRepliedToChar = characterSets.find(c => c.id === commentToReply.sender);
+                const personBeingRepliedToName = commentToReply.sender === 'user' ? (userMomentsProfile.name || '我') : (personBeingRepliedToChar?.config.characterName || '一位朋友');
 
-        const originalPosterName = moment.senderId === 'user' ? (userMomentsProfile.name || '我') : (characterSets.find(c => c.id === moment.senderId)?.config.characterName || '一位朋友');
-        const personBeingRepliedToName = commentToReply.sender === 'user' ? (userMomentsProfile.name || '我') : (characterSets.find(c => c.id === commentToReply.sender)?.config.characterName || '一位朋友');
-
-        // 新增：把原帖内容也告诉AI，防止它回复时“失忆”
-         const prompt = `[角色]: 你是 ${replierChar.config.characterName} (ID: ${replierId})。你的性格是: ${replierChar.config.characterPrompt}。
+                const prompt = `[角色]: 你是 ${replierChar.config.characterName} (ID: ${replierId})。你的性格是: ${replierChar.config.characterPrompt}。
 [情景]: 在 ${originalPosterName} 发表的朋友圈（内容为：“${moment.content}”）下方，${personBeingRepliedToName} 评论说：“${commentToReply.text}”。
 [任务]: 现在轮到你回复 ${personBeingRepliedToName} 的这条评论。你的回复必须自然、口语化，并要结合原帖和评论的内容。
 [输出格式]: 你的回复必须是JSON数组，里面只包含一个对象，像这样:
 [{"type": "moment_reply", "momentId": "${moment.id}", "commentId": "${commentToReply.id}", "reply_text": "你的回复内容"}]
 绝对不要在JSON数组前后添加任何多余的文字。`;
-            const messages = [{ role: 'system', content: prompt }];
-        try {
-            const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model: model, messages }) });
-            if (!response.ok) { console.error("AI回复评论失败: ", await response.text()); return; }
-            const responseData = await response.json();
-             if (responseData?.choices?.[0]?.message?.content) {
-                processAiResponse(responseData.choices[0].message.content);
-            }
-        } catch (error) { console.error("AI触发回复时出错:", error); }
-    };
-            const handleAiLike = (momentId, likerId, momentType) => {
-        let momentSource;
-        if (momentType === 'direct') {
-            momentSource = [...userMomentsProfile.posts, ...characterSets.flatMap(c => c.moments || [])];
-        } else {
-            momentSource = (getCurrentGroup() || {}).groupMoments || [];
-        }
-        const moment = momentSource.find(m => m.id === momentId);
-        if (!moment || moment.likes.includes(likerId)) return; // 如果没找到或者已经赞过，就什么都不做
-
-        moment.likes.push(likerId);
-        saveAllData();
-        if (elements.momentsOverlay.classList.contains('show')) {
-            renderMoments();
-        }
-    };
-
-    const triggerAiMomentLike = async (moment, likerId) => {
-        const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
-        const apiKey = elements.apiKeyInput.value.trim();
-        const model = elements.modelSelect.value;
-        const likerChar = characterSets.find(c => c.id === likerId);
-        if (!apiBaseUrl || !apiKey || !model || !likerChar) return;
-
-                    const prompt = `[角色]: 你是 ${likerChar.config.characterName}。你的性格是: ${likerChar.config.characterPrompt}
-[情景]: 一位朋友刚刚发了条朋友圈: "${moment.content}"
-[任务]: 根据你的性格，你是否会为这条动态点赞？
-[输出格式]: 你的回复必须是JSON格式，只能包含一个键 "will_like"，值为 true 或 false。示例: [{"type": "moment_like", "momentId": "${moment.id}", "senderId": "${likerId}", "will_like": true}]`;
-      const messages = [{ role: 'system', content: prompt }];
-        try {
-            const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages }) });
-            if (!response.ok) return;
-            const responseData = await response.json();
-            if (responseData?.choices?.[0]?.message?.content) {
-                processAiResponse(responseData.choices[0].message.content);
-            }
-        } catch (error) {
-            console.error("AI点赞触发失败:", error);
-        }
-    };
+                const payload = getApiPayload(model, [], prompt);
+                try {
+                    const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify(payload) });
+                    if (!response.ok) { console.error("AI回复评论失败: ", await response.text()); return; }
+                    const responseData = await response.json();
+                     if (responseData?.choices?.[0]?.message?.content) {
+                        processAiResponse(responseData.choices[0].message.content);
+                    }
+                } catch (error) { console.error("AI触发回复时出错:", error); }
+            };
+            
         const openMoments = () => { renderMoments(); elements.momentsOverlay.classList.add('show'); };
         
         const openPostMomentModal = () => { let tempImage = null; const bodyHtml = ` <div class="form-group"> <textarea id="new-moment-text" rows="5" placeholder="在想些什么？"></textarea> </div> <div class="form-group"> <label for="moment-post-image-input" class="file-input-label">添加图片</label> <img id="new-moment-preview" src="" style="max-width: 100px; max-height: 100px; border-radius: 8px; margin-top: 10px; display: none;"> </div> `; openFeatureModal('发布新动态', bodyHtml, '发布', () => { const text = getEl('new-moment-text').value.trim(); if(text || tempImage) { addMomentByUser({ content: text, imageUrl: tempImage }); closeModal(elements.featureModal); } }); const preview = getEl('new-moment-preview'); getEl('feature-modal-body').querySelector('label').onclick = () => elements.momentPostImageInput.click(); elements.momentPostImageInput.onchange = e => handleFileUpload(e.target.files[0], (dataUrl) => { tempImage = dataUrl; preview.src = dataUrl; preview.style.display = 'block'; }); };
@@ -2979,19 +2876,13 @@ ${momentsContext}
         };
 
                                 const renderRedPacket = (msg) => {
-            if (!msg || typeof msg !== 'object') {
-                return '<p>红包数据错误</p>';
-            }
+            if (!msg || typeof msg !== 'object') return '<p>红包数据错误</p>';
             const grabbers = msg.grabbers || {}; 
             const { packetId, memo, count, status } = msg;
             
-            if (!packetId || !count) {
-                return '<p>红包信息不完整</p>';
-            }
-
+            if (!packetId || !count) return '<p>红包信息不完整</p>';
             const hasGrabbed = Object.keys(grabbers).includes('user');
             const isFullyClaimed = Object.keys(grabbers).length >= count;
-
             let resultsHtml = '';
             if (Object.keys(grabbers).length > 0) {
                 const items = Object.entries(grabbers).map(([id, amount]) => {
@@ -3009,26 +2900,11 @@ ${momentsContext}
                 }).join('');
                 resultsHtml = `<div class="red-packet-results">${items}</div>`;
             }
-
             const buttonHtml = (!hasGrabbed && !isFullyClaimed) ? `<button class="red-packet-grab-btn" onclick="handleGrabRedPacket('${packetId}')">开</button>` : '';
-
             const footerText = isFullyClaimed 
                 ? `${count}个红包，已被抢完` 
-                : (Object.keys(grabbers).length > 0 
-                    ? `已领取${Object.keys(grabbers).length}/${count}个` 
-                    : `群红包，共${count}个`);
-
-            return `
-                <div class="red-packet-body">
-                    <div class="red-packet-body-header">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 4H6C4.9 4 4 4.9 4 6v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-6 11.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 6.5 12 6.5s4.5 2.01 4.5 4.5-2.01 4.5-4.5 4.5z"/></svg>
-                        <span class="red-packet-memo">${memo || '恭喜发财，大吉大利'}</span>
-                    </div>
-                    ${buttonHtml}
-                </div>
-                ${resultsHtml}
-                <div class="red-packet-footer">${footerText}</div>
-            `;
+                : (Object.keys(grabbers).length > 0 ? `已领取${Object.keys(grabbers).length}/${count}个` : `群红包，共${count}个`);
+            return `<div class="red-packet-body"><div class="red-packet-body-header"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 4H6C4.9 4 4 4.9 4 6v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-6 11.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 6.5 12 6.5s4.5 2.01 4.5 4.5-2.01 4.5-4.5 4.5z"/></svg><span class="red-packet-memo">${memo || '恭喜发财，大吉大利'}</span></div>${buttonHtml}</div>${resultsHtml}<div class="red-packet-footer">${footerText}</div>`;
         };
         
         window.handleGrabRedPacket = (packetId) => { // Make it global for inline onclick
@@ -3036,99 +2912,51 @@ ${momentsContext}
             if (!group) return;
             const packet = group.chatHistory.find(m => m.packetId === packetId);
             if (!packet || packet.status === 'claimed' || Object.keys(packet.grabbers).includes('user')) return;
-
             const remainingAmount = packet.amount - Object.values(packet.grabbers).reduce((a, b) => a + b, 0);
             const remainingCount = packet.count - Object.keys(packet.grabbers).length;
-            
             let grabbedAmount;
-            if (remainingCount === 1) {
-                grabbedAmount = remainingAmount;
-            } else {
-                const min = 0.01;
-                const max = (remainingAmount - (remainingCount - 1) * min);
-                grabbedAmount = Math.random() * (max - min) + min;
-            }
-            
+            if (remainingCount === 1) { grabbedAmount = remainingAmount; } 
+            else { const min = 0.01; const max = (remainingAmount - (remainingCount - 1) * min); grabbedAmount = Math.random() * (max - min) + min; }
             packet.grabbers['user'] = parseFloat(grabbedAmount.toFixed(2));
-            if (Object.keys(packet.grabbers).length >= packet.count) {
-                packet.status = 'claimed';
-            }
-            saveAllData();
-            renderAllMessages();
+            if (Object.keys(packet.grabbers).length >= packet.count) packet.status = 'claimed';
+            saveAllData(); renderAllMessages();
             handleUserAction({ sender: 'user', type: 'text', text: `[我领取了红包]`, llmContent: `[用户领取了红包]` });
         };
         
                 const handleAiGrabRedPacket = (packetId, grabberId) => {
-            const group = getCurrentGroup();
-            if (!group) return;
+            const group = getCurrentGroup(); if (!group) return;
             const packet = group.chatHistory.find(m => m.packetId === packetId);
-            
             if (!packet || packet.status === 'claimed' || Object.keys(packet.grabbers).includes(grabberId)) return;
-
             const remainingAmount = packet.amount - Object.values(packet.grabbers).reduce((a, b) => a + b, 0);
             const remainingCount = packet.count - Object.keys(packet.grabbers).length;
-            
             if (remainingCount <= 0) return;
-
             let grabbedAmount;
-            if (remainingCount === 1) {
-                grabbedAmount = remainingAmount;
-            } else {
-                const min = 0.01;
-                const max = (remainingAmount - (remainingCount - 1) * min);
-                grabbedAmount = Math.max(min, Math.random() * (Math.max(max, min) - min) + min);
-            }
+            if (remainingCount === 1) { grabbedAmount = remainingAmount; }
+            else { const min = 0.01; const max = (remainingAmount - (remainingCount - 1) * min); grabbedAmount = Math.max(min, Math.random() * (Math.max(max, min) - min) + min); }
             const finalGrabbedAmount = parseFloat(grabbedAmount.toFixed(2));
             packet.grabbers[grabberId] = finalGrabbedAmount; 
-
-            if (Object.keys(packet.grabbers).length >= packet.count) {
-                packet.status = 'claimed';
-            }
+            if (Object.keys(packet.grabbers).length >= packet.count) packet.status = 'claimed';
             saveAllData();
-            
             return finalGrabbedAmount;
         };
-
 
         // --- Poll Logic ---
         const openCreatePollModal = () => { const bodyHtml = ` <div class="form-group"><label for="poll-question">投票问题</label><input type="text" id="poll-question" placeholder="晚饭吃什么？"></div> <div class="form-group"><label>选项 (每行一个)</label><textarea id="poll-options" rows="4" placeholder="披萨\n寿司\n墨西哥卷饼"></textarea></div> `; openFeatureModal('创建投票', bodyHtml, '创建', () => { const question = getEl('poll-question').value.trim(); const options = getEl('poll-options').value.split('\n').map(o => o.trim()).filter(o => o); if (question && options.length >= 2) { const pollId = generateId('poll'); handleUserAction({ sender: 'user', type: 'poll', pollId, question, options, llmContent: `[用户发起了一个投票。问题: "${question}", 选项: ${options.join(", ")}]` }); closeModal(elements.featureModal); } else { alert('请输入问题和至少两个选项。'); } }); };
         const renderPoll = (msg) => { const group = getCurrentGroup(); if (!group) return ''; const pollData = (group.polls || []).find(p => p.pollId === msg.pollId); if (!pollData) return `<p>投票数据加载失败。</p>`; const totalVotes = Object.values(pollData.votes).flat().length; const userHasVoted = Object.values(pollData.votes).flat().includes('user'); const optionsHtml = pollData.options.map(option => { const voters = pollData.votes[option] || []; const voteCount = voters.length; const percentage = totalVotes > 0 ? (voteCount / totalVotes * 100).toFixed(0) : 0; const voterAvatars = voters.map(voterId => { const avatarSrc = voterId === 'user' ? userMomentsProfile.chatAvatar : characterSets.find(c => c.id === voterId)?.config.aiAvatar; return avatarSrc ? `<img src="${avatarSrc}" class="poll-voter-avatar" title="${characterSets.find(c=>c.id===voterId)?.config.characterName || '我'}">` : ''; }).join(''); return ` <div class="poll-option"> <div class="poll-option-label">${option} (${voteCount}票)</div> <div class="poll-progress-bar"> <div class="poll-progress-fill" style="width: ${percentage}%;"> <span class="poll-percentage">${percentage}%</span> </div> </div> <div class="poll-voters">${voterAvatars}</div> ${!userHasVoted ? `<button class="poll-vote-btn" data-poll-id="${pollData.pollId}" data-option="${option}">投这一票</button>` : ''} </div>`; }).join(''); return `<div class="poll-question">${pollData.question}</div>${optionsHtml}`; };
         const handleUserVote = (pollId, option) => { const group = getCurrentGroup(); if (!group) return; const poll = (group.polls || []).find(p => p.pollId === pollId); if (!poll || poll.status === 'closed') return; Object.keys(poll.votes).forEach(key => { poll.votes[key] = (poll.votes[key] || []).filter(v => v !== 'user'); }); if (!poll.votes[option]) poll.votes[option] = []; poll.votes[option].push('user'); saveAllData(); renderAllMessages(); handleUserAction({ sender: 'user', type: 'text', text: `[我投了: 「${option}」]`, llmContent: `[用户投票了。选项: "${option}"]` }); };
-const handleAiVote_dataOnly = (voteAction) => {
-    const group = getCurrentGroup();
-    if (!group) return;
-    const poll = (group.polls || []).find(p => p.pollId === voteAction.pollId);
-    const voterId = voteAction.senderId;
-    const option = voteAction.option;
-    if (!poll || !voterId || !option || poll.status === 'closed' || !poll.options.includes(option)) return;
-    
-    Object.keys(poll.votes).forEach(key => {
-        poll.votes[key] = (poll.votes[key] || []).filter(v => v !== voterId);
-    });
-    if (!poll.votes[option]) poll.votes[option] = [];
-    poll.votes[option].push(voterId);
-
-    saveAllData();
-};
+        const handleAiVote_dataOnly = (voteAction) => { const group = getCurrentGroup(); if (!group) return; const poll = (group.polls || []).find(p => p.pollId === voteAction.pollId); const voterId = voteAction.senderId; const option = voteAction.option; if (!poll || !voterId || !option || poll.status === 'closed' || !poll.options.includes(option)) return; Object.keys(poll.votes).forEach(key => { poll.votes[key] = (poll.votes[key] || []).filter(v => v !== voterId); }); if (!poll.votes[option]) poll.votes[option] = []; poll.votes[option].push(voterId); saveAllData(); };
         
         const renderMoments = () => {
-            const chatData = getCurrentChatData();
-            if(!chatData) { elements.momentsFeed.innerHTML = ''; return; }
-            
+            const chatData = getCurrentChatData(); if(!chatData) { elements.momentsFeed.innerHTML = ''; return; }
             let allPosts = [];
-            
             if (currentChat.type === 'direct') {
                 const character = chatData;
-                allPosts = [
-                    ...(character.moments || []).map(m => ({ ...m, senderType: 'ai' })),
-                    ...(userMomentsProfile.posts || []).map(p => ({ ...p, senderType: 'user' }))
-                ];
+                allPosts = [...(character.moments || []).map(m => ({ ...m, senderType: 'ai' })), ...(userMomentsProfile.posts || []).map(p => ({ ...p, senderType: 'user' }))];
                 elements.postNewMomentBtn.style.display = 'block';
                 elements.momentsUserAvatar.src = userMomentsProfile.momentsAvatar;
                 elements.momentsUserName.textContent = userMomentsProfile.name;
                 elements.momentsCoverArea.style.backgroundImage = `url(${userMomentsProfile.cover})`;
-
-            } else { // Group Chat Moments
+            } else { // Group Chat
                 const group = chatData;
                 allPosts = [...(group.groupMoments || []).map(m => ({...m, senderType: 'ai'}))];
                 elements.postNewMomentBtn.style.display = 'none';
@@ -3136,9 +2964,7 @@ const handleAiVote_dataOnly = (voteAction) => {
                 elements.momentsUserName.textContent = group.name;
                 elements.momentsCoverArea.style.backgroundImage = `url(${group.avatar})`;
             }
-
             allPosts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            
             elements.momentsFeed.innerHTML = allPosts.length === 0 
                 ? `<p style="text-align:center; padding: 40px; color: #999;">这里还没有任何动态。</p>`
                 : allPosts.map(post => renderSingleMoment(post)).join('');
@@ -3146,8 +2972,9 @@ const handleAiVote_dataOnly = (voteAction) => {
         
             const renderSingleMoment = (post) => {
         const senderIsUser = post.senderId === 'user';
+        // TASK 11: Correctly find character for post
         const postChar = !senderIsUser ? characterSets.find(c => c.id === post.senderId) : null;
-        const senderName = senderIsUser ? userMomentsProfile.name : postChar?.config.characterName || '未知';
+        const senderName = senderIsUser ? userMomentsProfile.name : postChar?.config.characterName || '一位朋友';
         const senderAvatar = senderIsUser ? userMomentsProfile.momentsAvatar : postChar?.config.aiAvatar || '';
         const momentType = currentChat.type === 'direct' ? 'direct' : 'group';
 
@@ -3187,9 +3014,12 @@ const handleAiVote_dataOnly = (voteAction) => {
         const containerClass = isReply ? 'replies' : '';
         return `<div class="${containerClass}">
             ${comments.map(comment => {
+                // TASK 11: Correctly find character for comment
                 const commenterChar = comment.sender !== 'user' ? characterSets.find(char => char.id === comment.sender) : null;
-                const commenterName = comment.sender === 'user' ? userMomentsProfile.name : commenterChar?.config.characterName || '未知';
-                const repliedToUser = comment.replyTo ? (comment.replyTo === 'user' ? userMomentsProfile.name : characterSets.find(c=>c.id === comment.replyTo)?.config.characterName) : null;
+                const commenterName = comment.sender === 'user' ? userMomentsProfile.name : commenterChar?.config.characterName || '一位朋友';
+                
+                const repliedToChar = comment.replyTo ? characterSets.find(c => c.id === comment.replyTo) : null;
+                const repliedToUser = comment.replyTo ? (comment.replyTo === 'user' ? userMomentsProfile.name : repliedToChar?.config.characterName || '一位朋友') : null;
 
                 return `
                     <div class="comment" data-comment-id="${comment.id}" data-sender-id="${comment.sender}">
@@ -3220,6 +3050,7 @@ const handleAiVote_dataOnly = (voteAction) => {
             if (type === 'comment') {
                 if (!moment.comments) moment.comments = [];
                 moment.comments.push(newComment);
+                parentComment = newComment; // The new comment itself is the parent for potential replies
             } else if (type === 'reply' && targetCommentId) {
                 const findAndPushReply = (comments) => {
                     for (const c of comments) {
@@ -3240,42 +3071,39 @@ const handleAiVote_dataOnly = (voteAction) => {
             saveAllData();
             if (elements.momentsOverlay.classList.contains('show')) renderMoments();
             
+            // TASK 3: Trigger inter-AI replies in group moments
             if (momentType === 'group' && senderId !== 'user') {
                 const group = getCurrentGroup();
-                const commentToReplyTo = type === 'reply' ? parentComment : newComment;
+                const commentToReplyTo = parentComment;
+                if(group && commentToReplyTo) {
+                    // All other members in the group might reply
+                    const otherMembers = group.memberIds.filter(id => id !== senderId && id !== commentToReplyTo?.sender);
+                    otherMembers.forEach((memberId, index) => {
+                        // Small chance for another member to jump in
+                        if (Math.random() > 0.8) { 
+                            setTimeout(() => {
+                                triggerAiMomentReply(moment, commentToReplyTo, memberId, 'group');
+                            }, (index + 1) * 6000 + Math.random() * 3000); // Slower, more spaced out replies
+                        }
+                    });
+                }
             }
         };
     const deleteCommentById = (commentsArray, idToDelete) => {
         for (let i = 0; i < commentsArray.length; i++) {
-            if (commentsArray[i].id === idToDelete) {
-                commentsArray.splice(i, 1);
-                return true;
-            }
-            if (commentsArray[i].replies && commentsArray[i].replies.length > 0) {
-                if (deleteCommentById(commentsArray[i].replies, idToDelete)) {
-                    return true;
-                }
-            }
+            if (commentsArray[i].id === idToDelete) { commentsArray.splice(i, 1); return true; }
+            if (commentsArray[i].replies && commentsArray[i].replies.length > 0) { if (deleteCommentById(commentsArray[i].replies, idToDelete)) return true; }
         }
         return false;
     };
                         const handleMomentsInteraction = (e) => {
-        const postEl = e.target.closest('.moment-post');
-        if (!postEl) return;
-        
+        const postEl = e.target.closest('.moment-post'); if (!postEl) return;
         const momentId = postEl.dataset.momentId;
         const momentType = postEl.dataset.momentType;
-
         let allVisiblePosts = [];
-        if (momentType === 'direct') {
-            allVisiblePosts = [...userMomentsProfile.posts, ...characterSets.flatMap(c => c.moments || [])];
-        } else {
-            const group = getCurrentGroup();
-            allVisiblePosts = group ? group.groupMoments || [] : [];
-        }
-        const moment = allVisiblePosts.find(m => m.id === momentId);
-        if (!moment) return;
-
+        if (momentType === 'direct') { allVisiblePosts = [...userMomentsProfile.posts, ...characterSets.flatMap(c => c.moments || [])]; } 
+        else { const group = getCurrentGroup(); allVisiblePosts = group ? group.groupMoments || [] : []; }
+        const moment = allVisiblePosts.find(m => m.id === momentId); if (!moment) return;
         const likeBtn = e.target.closest('.like-btn');
         const commentBtn = e.target.closest('.comment-btn');
         const commentText = e.target.closest('.comment-text');
@@ -3285,59 +3113,29 @@ const handleAiVote_dataOnly = (voteAction) => {
 
         if (deleteMomentBtn) {
             if (confirm('您确定要删除这条动态吗？此操作无法撤销。')) {
-                if (moment.senderId === 'user') {
-                    userMomentsProfile.posts = userMomentsProfile.posts.filter(p => p.id !== momentId);
-                } else if (momentType === 'direct') {
-                    const postChar = characterSets.find(c => c.id === moment.senderId);
-                    if (postChar && postChar.moments) {
-                        postChar.moments = postChar.moments.filter(m => m.id !== momentId);
-                    }
-                } else if (momentType === 'group') {
-                    const group = getCurrentGroup();
-                    if (group && group.groupMoments) {
-                        group.groupMoments = group.groupMoments.filter(m => m.id !== momentId);
-                    }
-                }
-                saveAllData();
-                renderMoments();
+                if (moment.senderId === 'user') { userMomentsProfile.posts = userMomentsProfile.posts.filter(p => p.id !== momentId); } 
+                else if (momentType === 'direct') { const postChar = characterSets.find(c => c.id === moment.senderId); if (postChar && postChar.moments) postChar.moments = postChar.moments.filter(m => m.id !== momentId); } 
+                else if (momentType === 'group') { const group = getCurrentGroup(); if (group && group.groupMoments) group.groupMoments = group.groupMoments.filter(m => m.id !== momentId); }
+                saveAllData(); renderMoments();
             }
             return;
         }
-
-        if (deleteCommentBtn) {
-            const commentEl = e.target.closest('.comment');
-            const commentIdToDelete = commentEl.dataset.commentId;
-            if (confirm('您确定要删除这条评论吗？')) {
-                deleteCommentById(moment.comments, commentIdToDelete);
-                saveAllData();
-                renderMoments();
-            }
-            return; 
-        }
-
-        if (likeBtn) {
-            const likeIndex = moment.likes.indexOf('user');
-            if (likeIndex > -1) { moment.likes.splice(likeIndex, 1); } else { moment.likes.push('user'); }
-            saveAllData();
-            renderMoments();
-        }
-        
+        if (deleteCommentBtn) { const commentEl = e.target.closest('.comment'); const commentIdToDelete = commentEl.dataset.commentId; if (confirm('您确定要删除这条评论吗？')) { deleteCommentById(moment.comments, commentIdToDelete); saveAllData(); renderMoments(); } return; }
+        if (likeBtn) { const likeIndex = moment.likes.indexOf('user'); if (likeIndex > -1) { moment.likes.splice(likeIndex, 1); } else { moment.likes.push('user'); } saveAllData(); renderMoments(); }
         if (commentBtn || commentText) {
             const form = postEl.querySelector('.comment-input-form');
             const input = form.querySelector('.comment-input');
             const targetCommentEl = e.target.closest('.comment');
-
-            if(form.style.display === 'flex' && (targetCommentEl?.dataset.commentId === form.dataset.replyTo || !targetCommentEl)) {
-                form.style.display = 'none';
-            } else {
+            if(form.style.display === 'flex' && (targetCommentEl?.dataset.commentId === form.dataset.replyTo || !targetCommentEl)) { form.style.display = 'none'; } 
+            else {
                 form.style.display = 'flex';
                 if (targetCommentEl) {
                     form.dataset.replyTo = targetCommentEl.dataset.commentId;
-                    input.placeholder = `回复 ${targetCommentEl.querySelector('.comment-user').textContent}...`;
-                } else {
-                    form.dataset.replyTo = '';
-                    input.placeholder = '添加评论...';
-                }
+                    // TASK 11: Correctly find character name for placeholder
+                    const repliedToChar = characterSets.find(c => c.id === targetCommentEl.dataset.senderId);
+                    const repliedToName = targetCommentEl.dataset.senderId === 'user' ? userMomentsProfile.name : (repliedToChar?.config.characterName || '一位朋友');
+                    input.placeholder = `回复 ${repliedToName}...`;
+                } else { form.dataset.replyTo = ''; input.placeholder = '添加评论...'; }
                 input.focus();
             }
         }
@@ -3347,77 +3145,43 @@ const handleAiVote_dataOnly = (voteAction) => {
             const input = commentForm.querySelector('.comment-input');
             const text = input.value.trim();
             const replyToCommentId = commentForm.dataset.replyTo;
-
             if (text) {
                 const newCommentByUser = { id: generateId('cmt'), sender: 'user', text, replies: [] };
-                
+                let repliedToAiId = null; 
                 if (replyToCommentId) { 
                      const findAndPushReply = (comments) => {
                         for (const c of comments) {
                             if (c.id === replyToCommentId) {
                                 newCommentByUser.replyTo = c.sender;
-                                if(!c.replies) c.replies = [];
-                                c.replies.push(newCommentByUser);
-                                return true;
+                                if (c.sender !== 'user') repliedToAiId = c.sender; // The AI being replied to
+                                if(!c.replies) c.replies = []; c.replies.push(newCommentByUser);
+                                return c;
                             }
-                            if (c.replies && findAndPushReply(c.replies)) return true;
+                            if (c.replies) { const found = findAndPushReply(c.replies); if(found) return found; }
                         }
-                        return false;
+                        return null;
                     };
                     findAndPushReply(moment.comments);
                 } else { 
                     if (!moment.comments) moment.comments = [];
                     moment.comments.push(newCommentByUser);
+                    if(moment.senderId !== 'user') repliedToAiId = moment.senderId; // Replying to the main post
                 }
-                
-                input.value = '';
-                commentForm.style.display = 'none';
-                saveAllData();
-                renderMoments();
-                
-                const findCommentOwner = (comments, targetId) => {
-                    for (const c of comments) {
-                        if (c.id === targetId) return c.sender;
-                        if (c.replies) {
-                            const owner = findCommentOwner(c.replies, targetId);
-                            if (owner) return owner;
-                        }
-                    }
-                    return null;
-                };
-
-                const aiWhoShouldReply = (replyToCommentId ? findCommentOwner(moment.comments, replyToCommentId) : moment.senderId);
-
-                if (aiWhoShouldReply && aiWhoShouldReply !== 'user') {
-                    const commentForAIToReplyTo = newCommentByUser;
-                    setTimeout(() => triggerAiMomentReply(moment, commentForAIToReplyTo, aiWhoShouldReply, momentType), 2500);
+                input.value = ''; commentForm.style.display = 'none'; saveAllData(); renderMoments();
+                // Trigger AI reply if user replied to an AI
+                if (repliedToAiId) {
+                    const commentForAIToReplyTo = { ...newCommentByUser, sender: 'user' };
+                    setTimeout(() => triggerAiMomentReply(moment, commentForAIToReplyTo, repliedToAiId, momentType), 2500);
                 }
             }
         }
     };
 
         // --- Diary Logic ---
-        const openDiaryModal = async () => {
-            if (currentChat.type !== 'direct') return;
-            const character = getCurrentCharacter();
-            if (!character) return;
-
-            elements.diaryHeader.textContent = `${character.config.characterName}的日记本`;
-            const today = getCurrentDate();
-            const todaysEntry = (character.diary || []).find(e => e.date === today);
-
-            elements.diaryModal.classList.add('show');
-            if (todaysEntry) {
-                renderDiary(character);
-            } else {
-                elements.diaryEntries.innerHTML = '<p>正在写今天的日记...</p>';
-                await triggerAiDiaryEntry(character);
-            }
-        };
-        
-        const triggerAiDiaryEntry = async (character) => {
+        const openDiaryModal = async () => { if (currentChat.type !== 'direct') return; const character = getCurrentCharacter(); if (!character) return; elements.diaryHeader.textContent = `${character.config.characterName}的日记本`; renderDiary(character); elements.diaryModal.classList.add('show'); };
+        const triggerAiDiaryEntry = async (character, date) => {
             try {
-                const { config, chatHistory } = character;
+                 const { config, chatHistory } = character;
                 const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
                 const apiKey = elements.apiKeyInput.value.trim();
                 const model = elements.modelSelect.value;
@@ -3427,33 +3191,19 @@ const handleAiVote_dataOnly = (voteAction) => {
                 }
 
                 const prompt = `[Role]: You are ${config.characterName}.
-[Task]: It is the end of the day. Based on your conversations with the user today, write a short diary entry in Simplified Chinese, reflecting on your feelings and the day's events. Your personality must be consistent.
+[Task]: It is the end of the day (${date}). Based on your conversations with the user today, write a short diary entry in Simplified Chinese, reflecting on your feelings and the day's events. Your personality must be consistent.
 [CRITICAL: Output Format]: Your response MUST be a JSON array containing a single object like this:
 [{"type": "diary_entry", "content": "Your diary content here."}]
 ABSOLUTELY NO other text, markdown, or explanations outside the JSON array.`;
                 
                 const payload = getApiPayload(model, chatHistory.slice(-config.memorySize), prompt);
-
-                const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, 
-                    body: JSON.stringify(payload) 
-                });
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`服务器返回错误 (状态码: ${response.status})。响应内容: ${errorText}`);
-                }
-
+                const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify(payload) });
+                if (!response.ok) throw new Error(`服务器返回错误: ${await response.text()}`);
                 const responseData = await response.json();
-                
                 let rawContent = '';
                 const isGemini = apiBaseUrl.includes('google');
-                if (isGemini) {
-                    rawContent = responseData?.candidates?.[0]?.content?.parts?.[0]?.text;
-                } else {
-                    rawContent = responseData?.choices?.[0]?.message?.content;
-                }
+                if (isGemini) { rawContent = responseData?.candidates?.[0]?.content?.parts?.[0]?.text; } 
+                else { rawContent = responseData?.choices?.[0]?.message?.content; }
                 
                 if (rawContent) {
                     let diaryText = null;
@@ -3464,90 +3214,148 @@ ABSOLUTELY NO other text, markdown, or explanations outside the JSON array.`;
                         if (action && action.type === 'diary_entry' && action.content) {
                             diaryText = action.content;
                         }
-                    } catch (e) {
-                        console.warn("AI日记响应不是标准JSON，将作为纯文本处理:", rawContent);
-                    }
-
-                    if (diaryText === null) {
-                        diaryText = rawContent.replace(/^```json\s*/, '').replace(/```$/, '').trim();
-                    }
-
-                    if (diaryText) {
-                        addDiaryEntry(character.id, diaryText);
-                    } else {
-                        throw new Error(`AI返回了有效但空的响应，无法提取日记内容。原始响应: ${rawContent}`);
-                    }
+                    } catch (e) { diaryText = rawContent.replace(/^```json\s*/, '').replace(/```$/, '').trim(); }
+                    if (diaryText) addDiaryEntry(character.id, diaryText, date);
+                    else throw new Error('API返回了有效但空的响应。');
                 } else if (responseData.error) {
-                    throw new Error(`API返回了一个已知的错误: ${responseData.error.message || JSON.stringify(responseData.error)}`);
-                } else {
-                    elements.diaryEntries.innerHTML = '<p>今天没什么特别的想写...</p>';
+                    throw new Error(`API返回错误: ${responseData.error.message}`);
                 }
             } catch (e) {
-                console.error("写日记时发生了一个捕获到的错误:", e);
-                elements.diaryEntries.innerHTML = `<p style="color: red; font-weight: bold;">写日记时出错了:</p><p style="word-break: break-all;">${e.message || '发生了一个未知错误，请检查控制台获取详细信息。'}</p>`;
+                console.error("写日记时出错:", e);
             }
         };
-
-        const addDiaryEntry = (characterId, content) => {
+        const addDiaryEntry = (characterId, content, date) => {
             const character = characterSets.find(c => c.id === characterId);
             if (!character) return;
-            const today = getCurrentDate();
             if (!character.diary) character.diary = [];
-            const existingEntry = character.diary.find(e => e.date === today);
-            if(existingEntry) {
-                existingEntry.content = content;
+            const existingEntryIndex = character.diary.findIndex(e => e.date === date);
+            if (existingEntryIndex > -1) {
+                character.diary[existingEntryIndex].content = content;
             } else {
-                character.diary.unshift({ date: today, content });
+                character.diary.unshift({ date: date, content });
             }
             saveAllData();
-            if (elements.diaryModal.classList.contains('show')) {
-                renderDiary(character);
-            }
+            if (elements.diaryModal.classList.contains('show')) renderDiary(character);
         };
-
         const renderDiary = (character) => {
             const entries = (character.diary || []).sort((a,b) => new Date(b.date) - new Date(a.date));
             if (entries.length === 0) {
                  elements.diaryEntries.innerHTML = '<p style="text-align:center; color:#999;">日记本还是空的。</p>';
             } else {
                 elements.diaryEntries.innerHTML = entries.map(entry => `
-                    <div class="diary-entry">
+                    <div class="diary-entry" data-date="${entry.date}">
                         <div class="diary-date">${entry.date}</div>
-                        <div class="diary-content">${entry.content}</div>
+                        <div class="diary-content">${entry.content.replace(/\n/g, '<br>')}</div>
+                        <button class="diary-delete-btn" title="删除这篇日记">×</button>
                     </div>
                 `).join('');
             }
         };
+        const handleDeleteDiaryEntry = async (date) => {
+            if (!confirm(`确定要删除 ${date} 的日记吗？删除后AI会重新生成一篇。`)) return;
+            const character = getCurrentCharacter();
+            if (!character || !character.diary) return;
+            character.diary = character.diary.filter(entry => entry.date !== date);
+            saveAllData();
+            const entryEl = elements.diaryEntries.querySelector(`.diary-entry[data-date="${date}"]`);
+            if (entryEl) {
+                entryEl.innerHTML = `<div class="diary-date">${date}</div><div class="diary-content">正在重写中...</div>`;
+            } else {
+                renderDiary(character);
+            }
+            await triggerAiDiaryEntry(character, date);
+        };
+
 
         // --- Data Import/Export ---
-                const exportData = async () => { 
-            await saveCurrentSettings(); 
-            await saveAllData(); 
-            const data = localStorage.getItem('aiBoyfriendBackup_v6_meta'); 
-            const blob = new Blob([data], {type: 'application/json'}); 
-            const url = URL.createObjectURL(blob); 
-            const a = document.createElement('a'); 
-            a.href = url; a.download = `ai_boyfriend_backup_${new Date().toISOString().slice(0,10)}.json`; 
-            document.body.appendChild(a); 
-            a.click(); 
-            document.body.removeChild(a); 
-            URL.revokeObjectURL(url); 
-            alert('全部数据已导出！(请注意，导出的文件不包含图片本身，只包含文本数据)'); 
-        };
+        const exportData = async () => { await saveCurrentSettings(); await saveAllData(); const data = localStorage.getItem('aiBoyfriendBackup_v7_meta'); const blob = new Blob([data], {type: 'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `ai_boyfriend_backup_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); alert('全部数据已导出！'); };
         const importData = () => { if(confirm('确定要导入数据吗？这会覆盖所有当前数据。')) { elements.importDataInput.click(); } };
+      // 这是一个全新的函数，负责将任何旧版本数据升级到最新的v7格式
+const migrateDataToV7 = (oldData) => {
+    console.log("开始数据迁移程序...");
+    let newData = JSON.parse(JSON.stringify(oldData)); // 深拷贝一份，避免修改原始对象
+    
+    // 兼容最老版本 (v6)，它没有globalSettings
+    if (!newData.globalSettings) {
+        newData.globalSettings = {};
+    }
+
+    // 迁移主题和气泡样式到每个角色配置中
+    const globalTheme = newData.globalSettings.theme || '1';
+    const globalBubbleStyle = newData.globalSettings.bubbleStyle || 'default';
+    if (newData.characterSets) {
+        newData.characterSets.forEach(char => {
+            if (char.config) {
+                if (!char.config.theme) char.config.theme = globalTheme;
+                if (!char.config.bubbleStyle) char.config.bubbleStyle = globalBubbleStyle;
+            }
+        });
+    }
+    delete newData.globalSettings.theme;
+    delete newData.globalSettings.bubbleStyle;
+
+    // 迁移全局 userPrompt 到每个角色中 (针对v6版本)
+    if (newData.userMomentsProfile && newData.userMomentsProfile.userPrompt) {
+        if (newData.characterSets) {
+            newData.characterSets.forEach(char => {
+                if (!char.userPrompt) char.userPrompt = newData.userMomentsProfile.userPrompt;
+            });
+        }
+    }
+    
+    // 为旧数据添加新的默认设置
+    if (newData.globalSettings.uiScale === undefined) newData.globalSettings.uiScale = 1.0;
+    if (newData.globalSettings.fontSize === undefined) newData.globalSettings.fontSize = 13; // 您的默认值
+    if (newData.globalSettings.bubblePadding === undefined) newData.globalSettings.bubblePadding = 10;
+    if (newData.globalSettings.realTimeAwareness === undefined) newData.globalSettings.realTimeAwareness = false;
+    if (!newData.globalSettings.presets) newData.globalSettings.presets = [];
+
+    newData.version = '1.1'; // 标记为最新版本
+    console.log("数据迁移完成！");
+    return newData;
+};
         const handleDataImport = (event) => {
     const file = event.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
         try {
             const data = e.target.result;
-            const parsed = JSON.parse(data);
-            
+            let parsed = JSON.parse(data);
+
+            // 智能检测并进行必要的升级
+            if (!parsed.version || parsed.version !== '1.1') {
+                alert('检测到旧版本备份文件，将为您进行升级转换...');
+                parsed = migrateDataToV7(parsed); // 调用升级函数
+            }
+
             if (parsed.characterSets && parsed.globalSettings) {
-                localStorage.setItem('aiBoyfriendBackup_v6_meta', data);
-                alert('数据导入成功！页面即将刷新以应用您的备份。');
+                // 在保存前，将图片数据存入IndexedDB，以保持数据格式一致性
+                const isImage = (value) => typeof value === 'string' && value.startsWith('data:image');
+                const processObjectForSaving = async (obj) => {
+                    if (!obj || typeof obj !== 'object') return obj;
+                    const newObj = Array.isArray(obj) ? [] : {};
+                    for (const key in obj) {
+                        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                            const value = obj[key];
+                            if (isImage(value)) {
+                                const imageKey = `img_${generateId(key)}`;
+                                await dbSet(imageKey, value);
+                                newObj[key] = imageKey;
+                            } else if (typeof value === 'object') {
+                                newObj[key] = await processObjectForSaving(value);
+                            } else {
+                                newObj[key] = value;
+                            }
+                        }
+                    }
+                    return newObj;
+                };
+              // 这是一个全新的函数，负责将任何旧版本数据升级到最新的v7格式
+
+                const processedData = await processObjectForSaving(parsed);
+                localStorage.setItem('aiBoyfriendBackup_v7_meta', JSON.stringify(processedData));
+                alert('数据导入并升级成功！页面即将刷新以应用您的备份。');
                 location.reload();
             } else {
                 alert('导入失败：文件内容格式不正确，缺少核心数据。');
@@ -3557,168 +3365,103 @@ ABSOLUTELY NO other text, markdown, or explanations outside the JSON array.`;
             alert(`导入失败：文件可能已损坏或不是有效的JSON文件。\n错误详情: ${error.message}`);
         }
     };
-    
-    reader.onerror = () => {
-        alert('读取文件时发生错误。');
-        event.target.value = '';
-    };
-
     reader.readAsText(file);
     event.target.value = '';
 };
 
                 const setupEventListeners = () => {
                   elements.darkModeToggle.addEventListener('change', () => applyDarkMode(elements.darkModeToggle.checked));
-        elements.compactModeToggle.addEventListener('change', () => applyCompactMode(elements.compactModeToggle.checked)); // <-- 添加这一行          
-        elements.settingsBtn.onclick = openSettingsModal;
-        elements.closeSettingsBtn.onclick = () => closeModal(elements.settingsModal);
-        
-        elements.saveSettingsBtn.onclick = async () => {
-            await saveCurrentSettings();
-            alert('设置已保存！'); 
-            closeModal(elements.settingsModal); 
-        };
-        
-        elements.sendBtn.onclick = () => { const text = elements.messageInput.value.trim(); if (!text) return; handleUserAction({ sender: 'user', type: 'text', text, llmContent: text }); elements.messageInput.value = ''; autoResizeTextarea(); };
-        elements.messageInput.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); elements.sendBtn.click(); } };
-        
-        elements.videoSendBtn.onclick = () => { const text = elements.videoMessageInput.value.trim(); if (!text) return; addVideoChatMessageToUI({ sender: 'user', text: text }); elements.videoMessageInput.value = ''; triggerVideoCallAIResponse(); };
-        elements.videoMessageInput.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); elements.videoSendBtn.click(); } };
+                  elements.compactModeToggle.addEventListener('change', () => applyCompactMode(elements.compactModeToggle.checked));       
+                  elements.settingsBtn.onclick = openSettingsModal;
+                  elements.closeSettingsBtn.onclick = () => closeModal(elements.settingsModal);
+                  elements.saveSettingsBtn.onclick = async () => { await saveCurrentSettings(); alert('设置已保存！'); closeModal(elements.settingsModal); };
+                  elements.sendBtn.onclick = () => { const text = elements.messageInput.value.trim(); if (!text) return; handleUserAction({ sender: 'user', type: 'text', text, llmContent: text }); elements.messageInput.value = ''; autoResizeTextarea(); };
+                  elements.receiveBtn.onclick = triggerAiResponse; // TASK 5
+                  elements.messageInput.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); elements.sendBtn.click(); } };
+                  elements.videoSendBtn.onclick = () => { const text = elements.videoMessageInput.value.trim(); if (!text) return; addVideoChatMessageToUI({ sender: 'user', text: text }); elements.videoMessageInput.value = ''; triggerVideoCallAIResponse(); };
+                  elements.videoMessageInput.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); elements.videoSendBtn.click(); } };
+                  elements.mindVoiceCloseBtn.onclick = () => elements.mindVoiceModal.classList.remove('show');
+                  elements.diaryModalCloseBtn.onclick = () => closeModal(elements.diaryModal);
+                  
+                  // TASK 2: Add event listener for diary deletion
+                   elements.diaryEntries.addEventListener('click', (e) => {
+                       const deleteBtn = e.target.closest('.diary-delete-btn');
+                       if (deleteBtn) {
+                           const entryEl = deleteBtn.closest('.diary-entry');
+                           if (entryEl) handleDeleteDiaryEntry(entryEl.dataset.date);
+                       }
+                   });
 
-        elements.mindVoiceCloseBtn.onclick = () => elements.mindVoiceModal.classList.remove('show');
-        elements.diaryModalCloseBtn.onclick = () => closeModal(elements.diaryModal);
-
-        elements.actionBtn.onclick = () => toggleActionPanel();
-        elements.actionShowMoments.onclick = () => { openMoments(); toggleActionPanel(true); };
-        elements.actionShowDiary.onclick = () => { openDiaryModal(); toggleActionPanel(true); };
-        elements.actionSendTextImage.onclick = () => { handleTextImageSend(); toggleActionPanel(true); };
-        elements.actionSendRealImage.onclick = () => { elements.realImageUploadInput.click(); toggleActionPanel(true); };
-        elements.actionSendVoice.onclick = () => { handleVoiceSend(); toggleActionPanel(true); };
-        elements.actionSendTransfer.onclick = () => { handleTransferSend(); toggleActionPanel(true); };
-        elements.actionSendRedPacket.onclick = () => { openCreateRedPacketModal(); toggleActionPanel(true); };
-        elements.actionSendSticker.onclick = () => { handleStickerSend(); toggleActionPanel(true); };
-        elements.actionVideoCall.onclick = () => { startVideoCall(); toggleActionPanel(true); };
-        elements.actionCreatePoll.onclick = () => { openCreatePollModal(); toggleActionPanel(true); };
-
-        elements.fetchModelsBtn.onclick = async () => { const baseUrl = elements.apiBaseUrlInput.value.trim(); const apiKey = elements.apiKeyInput.value.trim(); if (!baseUrl || !apiKey) { alert('请输入API端点和API密钥'); return; } elements.fetchModelsBtn.textContent = '获取中...'; elements.fetchModelsBtn.disabled = true; try { const response = await fetch(`${baseUrl}/v1/models`, { headers: { 'Authorization': `Bearer ${apiKey}` } }); if (!response.ok) throw new Error(`获取模型列表失败, Status: ${response.status} ${await response.text()}`); const data = await response.json(); elements.modelSelect.innerHTML = ''; const models = data.data || data.models || data; if (!Array.isArray(models)) throw new Error('API返回的模型列表格式不正确'); models.sort((a, b) => (a.id || a.name).localeCompare(b.id || b.name)).forEach(model => { const modelId = model.id || model.name; if (modelId) elements.modelSelect.add(new Option(modelId, modelId)); }); const currentModel = elements.modelSelect.value; if(currentModel) elements.modelSelect.value = currentModel; } catch (error) { alert(`获取模型失败: ${error.message}`); } finally { elements.fetchModelsBtn.textContent = '获取模型列表'; elements.fetchModelsBtn.disabled = false; } };
-        elements.themeSelector.onclick = (e) => { const t = e.target.closest('.theme-option'); if (t) applyTheme(t.dataset.theme); };
-        
-        elements.fontSelect.addEventListener('change', () => applyFont(elements.fontSelect.value));   
-        
-        const avatarCompression = { compress: true, quality: 0.7, maxWidth: 300, maxHeight: 300 };
-        const backgroundCompression = { compress: true, quality: 0.8, maxWidth: 1280, maxHeight: 1280 };
-        const chatImageCompression = { compress: true, quality: 0.75, maxWidth: 600, maxHeight: 600 };
-
-        elements.backgroundUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.chatContainer.style.backgroundImage = `url(${d})`; }, backgroundCompression);
-        elements.aiAvatarUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.aiAvatarPreview.src = d; if(currentChat.type==='direct') elements.headerAvatar.src = d; }, avatarCompression);
-        elements.groupAvatarSettingsInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.groupAvatarPreview.src = d; }, avatarCompression);
-        elements.userAvatarUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.userAvatarPreview.src = d; }, avatarCompression);
-        elements.userMomentsAvatarInput.onchange = e => handleFileUpload(e.target.files[0], d => { elements.userMomentsAvatarPreview.src = d; }, avatarCompression);
-        elements.userMomentsCoverInput.onchange = e => handleFileUpload(e.target.files[0], d => { elements.userMomentsCoverPreview.src = d; }, backgroundCompression);
-        elements.realImageUploadInput.onchange = (e) => handleFileUpload(e.target.files[0], (d) => handleUserAction({ sender:'user', type:'image', imageUrl:d, llmContent:'[从相册发送了一张照片]' }), chatImageCompression);
-
-        elements.manageStickersBtn.onclick = () => openStickerManager('user');
-        elements.manageAiStickersBtn.onclick = () => openStickerManager('ai');
-        elements.clearHistoryBtn.onclick = clearChatHistory;
-        elements.deleteChatBtn.onclick = () => handleDeleteChat(currentChat.type, currentChat.id);
-        
-        elements.exportDataBtn.onclick = exportData;
-        elements.importDataBtn.onclick = importData;
-        elements.importDataInput.onchange = handleDataImport;
-        
-        elements.messageInput.addEventListener('input', autoResizeTextarea);
-        elements.featureModalCloseBtn.addEventListener('click', () => closeModal(elements.featureModal));
-        elements.featureModalSubmitBtn.addEventListener('click', () => { if (onFeatureModalSubmit) onFeatureModalSubmit(); });
-        
-        elements.chatManagerBtn.onclick = openChatManager;
-        elements.momentsCloseBtn.onclick = () => elements.momentsOverlay.classList.remove('show');
-        elements.postNewMomentBtn.onclick = openPostMomentModal;
-        elements.momentsFeed.addEventListener('click', handleMomentsInteraction);
-
-        elements.messagesContainer.addEventListener('click', e => {
-            const voteBtn = e.target.closest('.poll-vote-btn');
-            if (voteBtn && !voteBtn.disabled) {
-                handleUserVote(voteBtn.dataset.pollId, voteBtn.dataset.option);
-            }
-        });
-
-        window.addEventListener('click', (e) => { 
-            if (e.target === elements.settingsModal) closeModal(elements.settingsModal); 
-            if (e.target === elements.featureModal) closeModal(elements.featureModal);
-            if (e.target === elements.diaryModal) closeModal(elements.diaryModal);
-            if (e.target === elements.mindVoiceModal) elements.mindVoiceModal.classList.remove('show');
-        });
-        elements.chatNameHeader.addEventListener('blur', () => { 
-            const chatData = getCurrentChatData();
-            if(!chatData) return;
-            const newName = elements.chatNameHeader.textContent.trim(); 
-            const oldName = currentChat.type === 'direct' ? chatData.config.characterName : chatData.name;
-            if(newName && newName !== oldName){ 
-                if(currentChat.type === 'direct') chatData.config.characterName = newName;
-                else chatData.name = newName;
-                saveAllData();
-            } else { 
-                elements.chatNameHeader.textContent = oldName; 
-            }
-        });
-        elements.confirmDeleteBtn.onclick = deleteSelectedMessages;
-        elements.cancelDeleteBtn.onclick = () => toggleMultiSelectMode(false);
-
-        const populateCustomStyles = () => {
-            const advancedStylesText = getEl('advanced-bubble-styles').value;
-            const customSelect = getEl('custom-style-select');
-            const currentCustomVal = customSelect.value;
-            
-            customSelect.innerHTML = '<option value="">无 (仅使用主题颜色)</option>';
-            
-            const regex = /\/\*\s*Style Name:\s*([^/]+?)\s*\*\//g;
-            let match;
-            while ((match = regex.exec(advancedStylesText)) !== null) {
-                const styleName = match[1].trim();
-                if (styleName) {
-                    const option = document.createElement('option');
-                    option.value = styleName;
-                    option.textContent = styleName;
-                    customSelect.appendChild(option);
-                }
-            }
-            customSelect.value = currentCustomVal;
-        };
-
-                getEl('bubble-style-select').addEventListener('change', (e) => {
-    applyBubbleStyle(e.target.value);
-});
-        
-elements.applyCustomFontBtn.onclick = () => applyCustomFont(elements.customFontNameInput.value, elements.customFontUrlInput.value);
-    };
+                  elements.actionBtn.onclick = () => toggleActionPanel();
+                  elements.actionShowMoments.onclick = () => { openMoments(); toggleActionPanel(true); };
+                  elements.actionShowDiary.onclick = () => { openDiaryModal(); toggleActionPanel(true); };
+                  elements.actionSendTextImage.onclick = () => { handleTextImageSend(); toggleActionPanel(true); };
+                  elements.actionSendRealImage.onclick = () => { elements.realImageUploadInput.click(); toggleActionPanel(true); };
+                  elements.actionSendVoice.onclick = () => { handleVoiceSend(); toggleActionPanel(true); };
+                  elements.actionSendTransfer.onclick = () => { handleTransferSend(); toggleActionPanel(true); };
+                  elements.actionSendRedPacket.onclick = () => { openCreateRedPacketModal(); toggleActionPanel(true); };
+                  elements.actionSendSticker.onclick = () => { handleStickerSend(); toggleActionPanel(true); };
+                  elements.actionVideoCall.onclick = () => { startVideoCall(); toggleActionPanel(true); };
+                  elements.actionCreatePoll.onclick = () => { openCreatePollModal(); toggleActionPanel(true); };
+                  elements.fetchModelsBtn.onclick = async () => { const baseUrl = elements.apiBaseUrlInput.value.trim(); const apiKey = elements.apiKeyInput.value.trim(); if (!baseUrl || !apiKey) { alert('请输入API端点和API密钥'); return; } elements.fetchModelsBtn.textContent = '获取中...'; elements.fetchModelsBtn.disabled = true; try { const response = await fetch(`${baseUrl}/v1/models`, { headers: { 'Authorization': `Bearer ${apiKey}` } }); if (!response.ok) throw new Error(`获取模型列表失败, Status: ${response.status} ${await response.text()}`); const data = await response.json(); elements.modelSelect.innerHTML = ''; const models = data.data || data.models || data; if (!Array.isArray(models)) throw new Error('API返回的模型列表格式不正确'); models.sort((a, b) => (a.id || a.name).localeCompare(b.id || b.name)).forEach(model => { const modelId = model.id || model.name; if (modelId) elements.modelSelect.add(new Option(modelId, modelId)); }); const currentModel = elements.modelSelect.value; if(currentModel) elements.modelSelect.value = currentModel; } catch (error) { alert(`获取模型失败: ${error.message}`); } finally { elements.fetchModelsBtn.textContent = '获取模型列表'; elements.fetchModelsBtn.disabled = false; } };
+                  elements.themeSelector.onclick = (e) => { const t = e.target.closest('.theme-option'); if (t) applyTheme(t.dataset.theme, getCurrentCharacter()); };
+                  elements.fontSelect.addEventListener('change', () => applyFont(elements.fontSelect.value));   
+                  const avatarCompression = { compress: true, quality: 0.7, maxWidth: 300, maxHeight: 300 };
+                  const backgroundCompression = { compress: true, quality: 0.8, maxWidth: 1280, maxHeight: 1280 };
+                  const chatImageCompression = { compress: true, quality: 0.75, maxWidth: 600, maxHeight: 600 };
+                  elements.backgroundUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.chatContainer.style.backgroundImage = `url(${d})`; }, backgroundCompression);
+                  elements.aiAvatarUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.aiAvatarPreview.src = d; if(currentChat.type==='direct') elements.headerAvatar.src = d; }, avatarCompression);
+                  elements.groupAvatarSettingsInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.groupAvatarPreview.src = d; }, avatarCompression);
+                  elements.userAvatarUploadInput.onchange = e => handleFileUpload(e.target.files[0], (d) => { elements.userAvatarPreview.src = d; }, avatarCompression);
+                  elements.userMomentsAvatarInput.onchange = e => handleFileUpload(e.target.files[0], d => { elements.userMomentsAvatarPreview.src = d; }, avatarCompression);
+                  elements.userMomentsCoverInput.onchange = e => handleFileUpload(e.target.files[0], d => { elements.userMomentsCoverPreview.src = d; }, backgroundCompression);
+                  elements.realImageUploadInput.onchange = (e) => handleFileUpload(e.target.files[0], (d) => handleUserAction({ sender:'user', type:'image', imageUrl:d, llmContent:'[从相册发送了一张照片]' }), chatImageCompression);
+                  elements.manageStickersBtn.onclick = () => openStickerManager('user');
+                  elements.manageAiStickersBtn.onclick = () => openStickerManager('ai');
+                  elements.clearHistoryBtn.onclick = clearChatHistory;
+                  elements.deleteChatBtn.onclick = () => handleDeleteChat(currentChat.type, currentChat.id);
+                  elements.exportDataBtn.onclick = exportData;
+                  elements.importDataBtn.onclick = importData;
+                  elements.importDataInput.onchange = handleDataImport;
+                  elements.messageInput.addEventListener('input', autoResizeTextarea);
+                  elements.featureModalCloseBtn.addEventListener('click', () => closeModal(elements.featureModal));
+                  elements.featureModalSubmitBtn.addEventListener('click', () => { if (onFeatureModalSubmit) onFeatureModalSubmit(); });
+                  elements.chatManagerBtn.onclick = openChatManager;
+                  elements.momentsCloseBtn.onclick = () => elements.momentsOverlay.classList.remove('show');
+                  elements.postNewMomentBtn.onclick = openPostMomentModal;
+                  elements.momentsFeed.addEventListener('click', handleMomentsInteraction);
+                  elements.messagesContainer.addEventListener('click', e => { const voteBtn = e.target.closest('.poll-vote-btn'); if (voteBtn && !voteBtn.disabled) handleUserVote(voteBtn.dataset.pollId, voteBtn.dataset.option); });
+                  window.addEventListener('click', (e) => { if (e.target === elements.settingsModal) closeModal(elements.settingsModal); if (e.target === elements.featureModal) closeModal(elements.featureModal); if (e.target === elements.diaryModal) closeModal(elements.diaryModal); if (e.target === elements.mindVoiceModal) elements.mindVoiceModal.classList.remove('show'); });
+                  elements.chatNameHeader.addEventListener('blur', () => { const chatData = getCurrentChatData(); if(!chatData) return; const newName = elements.chatNameHeader.textContent.trim(); const oldName = currentChat.type === 'direct' ? chatData.config.characterName : chatData.name; if(newName && newName !== oldName){ if(currentChat.type === 'direct') chatData.config.characterName = newName; else chatData.name = newName; saveAllData(); } else { elements.chatNameHeader.textContent = oldName; } });
+                  elements.confirmDeleteBtn.onclick = deleteSelectedMessages;
+                  elements.cancelDeleteBtn.onclick = () => toggleMultiSelectMode(false);
+                  
+                  // TASK 9: Sizing slider event listeners
+                  const updateSizing = () => applySizing({ uiScale: parseFloat(elements.uiScaleSlider.value) / 100, fontSize: parseInt(elements.fontSizeSlider.value), bubblePadding: parseInt(elements.bubbleSizeSlider.value) });
+                  elements.uiScaleSlider.addEventListener('input', () => { elements.uiScaleValue.textContent = `${elements.uiScaleSlider.value}%`; updateSizing(); });
+                  elements.fontSizeSlider.addEventListener('input', () => { elements.fontSizeValue.textContent = `${elements.fontSizeSlider.value}px`; updateSizing(); });
+                  elements.bubbleSizeSlider.addEventListener('input', () => { elements.bubbleSizeValue.textContent = `${elements.bubbleSizeSlider.value}px`; updateSizing(); });
+                  
+                  elements.bubbleStyleSelect.addEventListener('change', (e) => { applyBubbleStyle(e.target.value, getCurrentCharacter()); });
+                  elements.applyCustomFontBtn.onclick = () => applyCustomFont(elements.customFontNameInput.value, elements.customFontUrlInput.value);
+                };
 
 const updatePresetsFromUI = () => {
     const presetItems = document.querySelectorAll('.preset-item');
-    if (presetItems.length === 0 && globalPresets.length > 0) {
-        globalPresets = [];
-        return;
-    }
-
+    if (presetItems.length === 0 && globalPresets.length > 0) { globalPresets = []; return; }
     const updatedPresets = [];
     presetItems.forEach(itemEl => {
         const id = itemEl.dataset.id;
         const nameInput = itemEl.querySelector('.preset-name-input');
         const contentInput = itemEl.querySelector('.preset-content-input');
         const enabledToggle = itemEl.querySelector('.preset-enabled-toggle');
-
         if (id && nameInput && contentInput && enabledToggle) {
-            updatedPresets.push({
-                id: id,
-                name: nameInput.value,
-                content: contentInput.value,
-                enabled: enabledToggle.checked
-            });
+            updatedPresets.push({ id: id, name: nameInput.value, content: contentInput.value, enabled: enabledToggle.checked });
         }
     });
     globalPresets = updatedPresets;
 };
       
-          // --- 全新的预设功能和模型参数控制 ---
     const renderPresets = () => {
         elements.presetListContainer.innerHTML = '';
         if (globalPresets.length === 0) {
@@ -3730,61 +3473,29 @@ const updatePresetsFromUI = () => {
                 presetEl.dataset.id = preset.id;
                 presetEl.innerHTML = `
                     <div class="preset-header">
-                        <div class="form-group">
-                            <input type="text" class="preset-name-input" placeholder="给这个预设起个名" value="${preset.name}">
-                        </div>
+                        <div class="form-group"><input type="text" class="preset-name-input" placeholder="给这个预设起个名" value="${preset.name || ''}"></div>
                         <div class="preset-actions">
-                            <label class="preset-toggle">
-                                <input type="checkbox" class="preset-enabled-toggle" ${preset.enabled ? 'checked' : ''}>
-                                <span class="slider"></span>
-                            </label>
+                            <label class="preset-toggle"><input type="checkbox" class="preset-enabled-toggle" ${preset.enabled ? 'checked' : ''}><span class="slider"></span></label>
                             <button class="preset-delete-btn">删除</button>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <textarea class="preset-content-input" rows="3" placeholder="在此输入预设的提示词内容">${preset.content}</textarea>
-                    </div>
-                `;
+                    <div class="form-group"><textarea class="preset-content-input" rows="3" placeholder="在此输入预设的提示词内容">${preset.content || ''}</textarea></div>`;
                 elements.presetListContainer.appendChild(presetEl);
             });
         }
     };
-
     const setupPresetEventListeners = () => {
-        elements.addPresetBtn.onclick = () => {
-    updatePresetsFromUI(); 
-
-    const newPreset = {
-        id: generateId('preset'),
-        name: '',
-        content: '',
-        enabled: true
-    };
-    globalPresets.push(newPreset);
-    renderPresets();
-};
-
-        elements.presetListContainer.addEventListener('click', (e) => {
-            if (e.target.classList.contains('preset-delete-btn')) {
-                const item = e.target.closest('.preset-item');
-                if (item && confirm('确定要删除这个预设条目吗？')) {
-                    globalPresets = globalPresets.filter(p => p.id !== item.dataset.id);
-                    renderPresets();
-                }
-            }
-        });
-
-        const updateSliderValue = (slider, valueEl) => {
-            valueEl.textContent = slider.value;
-        };
-
+        elements.addPresetBtn.onclick = () => { updatePresetsFromUI(); const newPreset = { id: generateId('preset'), name: '', content: '', enabled: true }; globalPresets.push(newPreset); renderPresets(); };
+        elements.presetListContainer.addEventListener('click', (e) => { if (e.target.classList.contains('preset-delete-btn')) { const item = e.target.closest('.preset-item'); if (item && confirm('确定要删除这个预设条目吗？')) { globalPresets = globalPresets.filter(p => p.id !== item.dataset.id); renderPresets(); } } });
+        const updateSliderValue = (slider, valueEl) => { valueEl.textContent = slider.value; };
         elements.temperatureSlider.addEventListener('input', () => updateSliderValue(elements.temperatureSlider, elements.temperatureValue));
         elements.topPSlider.addEventListener('input', () => updateSliderValue(elements.topPSlider, elements.topPValue));
     };
+
         // --- Initialization ---
         loadAllData();
         setupEventListeners();
-      setupPresetEventListeners();
+        setupPresetEventListeners();
         autoResizeTextarea();
     });
     </script>
