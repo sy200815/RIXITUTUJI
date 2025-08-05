@@ -2477,7 +2477,12 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
                         case 'transfer': addMessage({ ...messageData, type: 'transfer', transferAmount: msgObj.amount, transferMemo: msgObj.memo, transferCoverUrl: `https://files.catbox.moe/qwu221.jpg`, transferStatus: 'pending' }); break;
                         case 'video-call-request': if (currentChat.type === 'direct') handleIncomingVideoCall(msgObj.content); break;
                         case 'post_moment': if (character) { const momentType = currentChat.type === 'group' ? 'group' : 'direct'; addMomentByAI(character.id, { content: msgObj.content, image_query: msgObj.image_query }, momentType); } break;
-                        case 'diary_entry': if (character && msgObj.content) addDiaryEntry(character.id, msgObj.content); break;
+                                                case 'diary_entry':
+                            if (character && msgObj.content) {
+                                // 核心修复：在这里添加 getCurrentDate() 来传入当前日期
+                                addDiaryEntry(character.id, msgObj.content, getCurrentDate());
+                            }
+                            break;
                     }
                 }, index * 1200 + (dataChanged ? 200 : 0));
             });
@@ -2906,8 +2911,17 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
                     const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify(payload) });
                     if (!response.ok) { console.error("AI回复评论失败: ", await response.text()); return; }
                     const responseData = await response.json();
-                     if (responseData?.choices?.[0]?.message?.content) {
-                        processAiResponse(responseData.choices[0].message.content);
+                                          if (responseData?.choices?.[0]?.message?.content) {
+                        let parsed;
+                        try {
+                            const jsonMatch = responseData.choices[0].message.content.match(/\[\s*\{.*\}\s*\]/s);
+                            parsed = JSON.parse(jsonMatch ? jsonMatch[0] : responseData.choices[0].message.content);
+                        } catch (e) { return; }
+                        const action = parsed[0];
+                        if (action && action.type === 'moment_reply' && action.reply_text) {
+                            // 这就是关键的修复：我们在这里使用正确的“回复者ID”，而不是让别的函数去猜
+                            addCommentOrReplyByAI('reply', moment.id, action.reply_text, replierId, action.commentId, momentType);
+                        }
                     }
                 } catch (error) { console.error("AI触发回复时出错:", error); }
             };
