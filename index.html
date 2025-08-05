@@ -2340,7 +2340,18 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
                 systemPrompt = groupSystemPrompt; //  把写好的群聊任务书，正式地放进名叫 systemPrompt 的信封里！
                 history = group.chatHistory.slice(-memorySize);
             }
-            
+
+                      // 自动日记触发器：检查昨天是否写了日记，如果没写就补上
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayString = yesterday.toISOString().slice(0, 10);
+            if (currentChat.type === 'direct') {
+                const character = getCurrentCharacter();
+                if (character && (!character.diary || !character.diary.some(e => e.date === yesterdayString))) {
+                     // 异步触发，不阻塞当前对话
+                    triggerAiDiaryEntry(character, yesterdayString);
+                }
+            }
 
             const payload = getApiPayload(model, history, systemPrompt);
             
@@ -2767,55 +2778,74 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
         };
 
                const addMomentByAI = (characterId, momentData, momentType) => {
-        const character = characterSets.find(c => c.id === characterId);
-        if (!character) return;
-        const imageUrl = null;
-        const newMoment = { id: generateId('moment'), senderId: character.id, timestamp: getFullTimestamp(), likes: [], comments: [], content: momentData.content, imageUrl };
-        
-        showTopNotification(`${character.config.characterName} 发布了一条新动态`, character.config.aiAvatar);
+    const character = characterSets.find(c => c.id === characterId);
+    if (!character) return;
+    const imageUrl = null;
+    const newMoment = { id: generateId('moment'), senderId: character.id, timestamp: getFullTimestamp(), likes: [], comments: [], content: momentData.content, imageUrl };
+    
+    showTopNotification(`${character.config.characterName} 发布了一条新动态`, character.config.aiAvatar);
 
-        if (momentType === 'direct') {
-            if (!character.moments) character.moments = [];
-            character.moments.unshift(newMoment);
-        } else if (momentType === 'group') {
-            const group = getCurrentGroup();
-            if (group) {
-                if (!group.groupMoments) group.groupMoments = [];
-                group.groupMoments.unshift(newMoment);
+    if (momentType === 'direct') {
+        if (!character.moments) character.moments = [];
+        character.moments.unshift(newMoment);
+    } else if (momentType === 'group') {
+        const group = getCurrentGroup();
+        if (group) {
+            if (!group.groupMoments) group.groupMoments = [];
+            group.groupMoments.unshift(newMoment);
 
-                const otherMembers = group.memberIds.filter(id => id !== characterId && characterSets.some(c => c.id === id));
-                otherMembers.forEach((memberId, index) => {
-                    setTimeout(() => {
-                        if (Math.random() > 0.4) { 
-                            triggerAiMomentComment(newMoment, memberId, 'group');
-                        }
-                    }, (index + 1) * 5000 + Math.random() * 3000);
-                });
-            }
+            // **核心新增：触发其他群成员来评论**
+            const otherMembers = group.memberIds.filter(id => id !== characterId && characterSets.some(c => c.id === id));
+            otherMembers.forEach((memberId, index) => {
+                setTimeout(() => {
+                    if (Math.random() > 0.4) { // 60%的几率来评论
+                        triggerAiMomentComment(newMoment, memberId, 'group');
+                    }
+                }, (index + 1) * 5000 + Math.random() * 3000); // 错开时间，显得更自然
+            });
         }
-        saveAllData();
-        if(elements.momentsOverlay.classList.contains('show')) renderMoments();
-    };
-            const addMomentByUser = async (momentData) => { 
-                const newMoment = { id: generateId('moment'), senderId: 'user', timestamp: getFullTimestamp(), likes: [], comments: [], ...momentData }; 
-                userMomentsProfile.posts.unshift(newMoment); 
-                saveAllData();
-                openMoments(); 
-                
-                const relevantChars = currentChat.type === 'direct' 
-                    ? [getCurrentCharacter()].filter(Boolean)
-                    : (getCurrentGroup() ? getCurrentGroup().memberIds.map(id => characterSets.find(c => c.id === id)).filter(Boolean) : []);
-                
-                // TASK 1: Trigger AI comments on user's posts
-                for (let i = 0; i < relevantChars.length; i++) {
-                    const char = relevantChars[i];
-                    setTimeout(() => {
-                        if (Math.random() > 0.3) { // 70% chance to comment
-                            triggerAiMomentComment(newMoment, char.id, currentChat.type);
-                        }
-                    }, (i + 1) * 4000 + Math.random() * 2000); 
-                }
-            };
+    }
+    saveAllData();
+    if(elements.momentsOverlay.classList.contains('show')) renderMoments();
+};
+            const addMomentByUser = async (momentData) => {
+    const newMoment = { id: generateId('moment'), senderId: 'user', timestamp: getFullTimestamp(), likes: [], comments: [], ...momentData };
+    
+    let momentTypeForAI;
+    // 智能判断应该把动态发到哪里
+    if (currentChat.type === 'group') {
+        const group = getCurrentGroup();
+        if (group) {
+            if (!group.groupMoments) group.groupMoments = [];
+            group.groupMoments.unshift(newMoment);
+            momentTypeForAI = 'group';
+        }
+    } else {
+        // 默认发到个人朋友圈
+        if (!userMomentsProfile.posts) userMomentsProfile.posts = [];
+        userMomentsProfile.posts.unshift(newMoment);
+        momentTypeForAI = 'direct';
+    }
+
+    saveAllData();
+    openMoments(); // 重新打开朋友圈以刷新
+
+    // AI自动评论的逻辑保持不变，但确保触发逻辑更健壮
+    const relevantChars = currentChat.type === 'direct' 
+        ? [getCurrentCharacter()].filter(Boolean)
+        : (getCurrentGroup() ? getCurrentGroup().memberIds.map(id => characterSets.find(c => c.id === id)).filter(Boolean) : []);
+    
+    for (let i = 0; i < relevantChars.length; i++) {
+        const char = relevantChars[i];
+        setTimeout(() => {
+            // 在单人聊天中，有很大概率会评论
+            const shouldComment = (currentChat.type === 'direct') ? (Math.random() > 0.1) : (Math.random() > 0.3);
+            if (shouldComment) {
+                triggerAiMomentComment(newMoment, char.id, momentTypeForAI);
+            }
+        }, (i + 1) * 4000 + Math.random() * 2000); 
+    }
+};
             const triggerAiMomentComment = async (moment, commenterId, momentType) => {
                 const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
                 const apiKey = elements.apiKeyInput.value.trim();
@@ -2982,28 +3012,30 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
         const handleAiVote_dataOnly = (voteAction) => { const group = getCurrentGroup(); if (!group) return; const poll = (group.polls || []).find(p => p.pollId === voteAction.pollId); const voterId = voteAction.senderId; const option = voteAction.option; if (!poll || !voterId || !option || poll.status === 'closed' || !poll.options.includes(option)) return; Object.keys(poll.votes).forEach(key => { poll.votes[key] = (poll.votes[key] || []).filter(v => v !== voterId); }); if (!poll.votes[option]) poll.votes[option] = []; poll.votes[option].push(voterId); saveAllData(); };
         
         const renderMoments = () => {
-            const chatData = getCurrentChatData(); if(!chatData) { elements.momentsFeed.innerHTML = ''; return; }
-            let allPosts = [];
-            if (currentChat.type === 'direct') {
-                const character = chatData;
-                allPosts = [...(character.moments || []).map(m => ({ ...m, senderType: 'ai' })), ...(userMomentsProfile.posts || []).map(p => ({ ...p, senderType: 'user' }))];
-                elements.postNewMomentBtn.style.display = 'block';
-                elements.momentsUserAvatar.src = userMomentsProfile.momentsAvatar;
-                elements.momentsUserName.textContent = userMomentsProfile.name;
-                elements.momentsCoverArea.style.backgroundImage = `url(${userMomentsProfile.cover})`;
-            } else { // Group Chat
-                const group = chatData;
-                allPosts = [...(group.groupMoments || []).map(m => ({...m, senderType: 'ai'}))];
-                elements.postNewMomentBtn.style.display = 'none';
-                elements.momentsUserAvatar.src = group.avatar;
-                elements.momentsUserName.textContent = group.name;
-                elements.momentsCoverArea.style.backgroundImage = `url(${group.avatar})`;
-            }
-            allPosts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            elements.momentsFeed.innerHTML = allPosts.length === 0 
-                ? `<p style="text-align:center; padding: 40px; color: #999;">这里还没有任何动态。</p>`
-                : allPosts.map(post => renderSingleMoment(post)).join('');
-        };
+    const chatData = getCurrentChatData(); if(!chatData) { elements.momentsFeed.innerHTML = ''; return; }
+    let allPosts = [];
+    // 统一显示发动态按钮
+    elements.postNewMomentBtn.style.display = 'block';
+
+    if (currentChat.type === 'direct') {
+        const character = chatData;
+        allPosts = [...(character.moments || []).map(m => ({ ...m, senderType: 'ai' })), ...(userMomentsProfile.posts || []).map(p => ({ ...p, senderType: 'user' }))];
+        elements.momentsUserAvatar.src = userMomentsProfile.momentsAvatar;
+        elements.momentsUserName.textContent = userMomentsProfile.name;
+        elements.momentsCoverArea.style.backgroundImage = `url(${userMomentsProfile.cover})`;
+    } else { // Group Chat
+        const group = chatData;
+        // 在群聊动态中，同时显示群成员的动态和用户发的动态
+        allPosts = [...(group.groupMoments || [])];
+        elements.momentsUserAvatar.src = group.avatar;
+        elements.momentsUserName.textContent = group.name;
+        elements.momentsCoverArea.style.backgroundImage = `url(${group.avatar})`;
+    }
+    allPosts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    elements.momentsFeed.innerHTML = allPosts.length === 0 
+        ? `<p style="text-align:center; padding: 40px; color: #999;">这里还没有任何动态。</p>`
+        : allPosts.map(post => renderSingleMoment(post)).join('');
+};
         
             const renderSingleMoment = (post) => {
         const senderIsUser = post.senderId === 'user';
@@ -3070,60 +3102,60 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
     };
 
         const addCommentOrReplyByAI = (type, momentId, text, senderId, targetCommentId, momentType) => {
-            let momentSource;
-            if (momentType === 'direct') {
-                momentSource = [...userMomentsProfile.posts, ...characterSets.flatMap(c => c.moments || [])];
-            } else {
-                momentSource = (getCurrentGroup() || {}).groupMoments || [];
-            }
-            const moment = momentSource.find(m => m.id === momentId);
-            if (!moment) return;
-            
-            const newComment = { id: generateId('cmt'), sender: senderId, text, replies: [] };
-            
-            let parentComment = null;
-            if (type === 'comment') {
-                if (!moment.comments) moment.comments = [];
-                moment.comments.push(newComment);
-                parentComment = newComment; // The new comment itself is the parent for potential replies
-            } else if (type === 'reply' && targetCommentId) {
-                const findAndPushReply = (comments) => {
-                    for (const c of comments) {
-                        if (c.id === targetCommentId) {
-                            newComment.replyTo = c.sender;
-                            if (!c.replies) c.replies = [];
-                            c.replies.push(newComment);
-                            parentComment = c;
-                            return true;
-                        }
-                        if (c.replies && findAndPushReply(c.replies)) return true;
-                    }
-                    return false;
-                };
-                findAndPushReply(moment.comments);
-            }
-            
-            saveAllData();
-            if (elements.momentsOverlay.classList.contains('show')) renderMoments();
-            
-            // TASK 3: Trigger inter-AI replies in group moments
-            if (momentType === 'group' && senderId !== 'user') {
-                const group = getCurrentGroup();
-                const commentToReplyTo = parentComment;
-                if(group && commentToReplyTo) {
-                    // All other members in the group might reply
-                    const otherMembers = group.memberIds.filter(id => id !== senderId && id !== commentToReplyTo?.sender);
-                    otherMembers.forEach((memberId, index) => {
-                        // Small chance for another member to jump in
-                        if (Math.random() > 0.8) { 
-                            setTimeout(() => {
-                                triggerAiMomentReply(moment, commentToReplyTo, memberId, 'group');
-                            }, (index + 1) * 6000 + Math.random() * 3000); // Slower, more spaced out replies
-                        }
-                    });
+    let momentSource;
+    if (momentType === 'direct') {
+        momentSource = [...userMomentsProfile.posts, ...characterSets.flatMap(c => c.moments || [])];
+    } else {
+        momentSource = (getCurrentGroup() || {}).groupMoments || [];
+    }
+    const moment = momentSource.find(m => m.id === momentId);
+    if (!moment) return;
+    
+    const newComment = { id: generateId('cmt'), sender: senderId, text, replies: [] };
+    
+    let parentComment = null;
+    if (type === 'comment') {
+        if (!moment.comments) moment.comments = [];
+        moment.comments.push(newComment);
+        parentComment = newComment; 
+    } else if (type === 'reply' && targetCommentId) {
+        const findAndPushReply = (comments) => {
+            for (const c of comments) {
+                if (c.id === targetCommentId) {
+                    newComment.replyTo = c.sender;
+                    if (!c.replies) c.replies = [];
+                    c.replies.push(newComment);
+                    parentComment = c;
+                    return true;
                 }
+                if (c.replies && findAndPushReply(c.replies)) return true;
             }
+            return false;
         };
+        findAndPushReply(moment.comments);
+    }
+    
+    saveAllData();
+    if (elements.momentsOverlay.classList.contains('show')) renderMoments();
+    
+    // **核心新增：触发其他AI回复这条新评论**
+    if (momentType === 'group' && senderId !== 'user') {
+        const group = getCurrentGroup();
+        const commentToReplyTo = parentComment;
+        if(group && commentToReplyTo) {
+            // 其他所有群成员都有可能加入讨论
+            const otherMembers = group.memberIds.filter(id => id !== senderId && id !== commentToReplyTo?.sender);
+            otherMembers.forEach((memberId, index) => {
+                // 较小的几率加入对话，避免刷屏
+                if (Math.random() > 0.75) { 
+                    setTimeout(() => {
+                        triggerAiMomentReply(moment, newComment, memberId, 'group');
+                    }, (index + 1) * 6000 + Math.random() * 3000); 
+                }
+            });
+        }
+    }
+};
     const deleteCommentById = (commentsArray, idToDelete) => {
         for (let i = 0; i < commentsArray.length; i++) {
             if (commentsArray[i].id === idToDelete) { commentsArray.splice(i, 1); return true; }
@@ -3131,86 +3163,111 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
         }
         return false;
     };
-                        const handleMomentsInteraction = (e) => {
-        const postEl = e.target.closest('.moment-post'); if (!postEl) return;
-        const momentId = postEl.dataset.momentId;
-        const momentType = postEl.dataset.momentType;
-        let allVisiblePosts = [];
-        if (momentType === 'direct') { allVisiblePosts = [...userMomentsProfile.posts, ...characterSets.flatMap(c => c.moments || [])]; } 
-        else { const group = getCurrentGroup(); allVisiblePosts = group ? group.groupMoments || [] : []; }
-        const moment = allVisiblePosts.find(m => m.id === momentId); if (!moment) return;
-        const likeBtn = e.target.closest('.like-btn');
-        const commentBtn = e.target.closest('.comment-btn');
-        const commentText = e.target.closest('.comment-text');
-        const commentForm = e.target.closest('.comment-input-form');
-        const deleteMomentBtn = e.target.closest('.delete-moment-btn');
-        const deleteCommentBtn = e.target.closest('.delete-comment-btn');
+                       const handleMomentsInteraction = (e) => {
+    const postEl = e.target.closest('.moment-post'); if (!postEl) return;
+    const momentId = postEl.dataset.momentId;
+    const momentType = postEl.dataset.momentType || (currentChat.type === 'group' ? 'group' : 'direct');
 
-        if (deleteMomentBtn) {
-            if (confirm('您确定要删除这条动态吗？此操作无法撤销。')) {
-                if (moment.senderId === 'user') { userMomentsProfile.posts = userMomentsProfile.posts.filter(p => p.id !== momentId); } 
-                else if (momentType === 'direct') { const postChar = characterSets.find(c => c.id === moment.senderId); if (postChar && postChar.moments) postChar.moments = postChar.moments.filter(m => m.id !== momentId); } 
-                else if (momentType === 'group') { const group = getCurrentGroup(); if (group && group.groupMoments) group.groupMoments = group.groupMoments.filter(m => m.id !== momentId); }
-                saveAllData(); renderMoments();
-            }
-            return;
-        }
-        if (deleteCommentBtn) { const commentEl = e.target.closest('.comment'); const commentIdToDelete = commentEl.dataset.commentId; if (confirm('您确定要删除这条评论吗？')) { deleteCommentById(moment.comments, commentIdToDelete); saveAllData(); renderMoments(); } return; }
-        if (likeBtn) { const likeIndex = moment.likes.indexOf('user'); if (likeIndex > -1) { moment.likes.splice(likeIndex, 1); } else { moment.likes.push('user'); } saveAllData(); renderMoments(); }
-        if (commentBtn || commentText) {
-            const form = postEl.querySelector('.comment-input-form');
-            const input = form.querySelector('.comment-input');
-            const targetCommentEl = e.target.closest('.comment');
-            if(form.style.display === 'flex' && (targetCommentEl?.dataset.commentId === form.dataset.replyTo || !targetCommentEl)) { form.style.display = 'none'; } 
-            else {
-                form.style.display = 'flex';
-                if (targetCommentEl) {
-                    form.dataset.replyTo = targetCommentEl.dataset.commentId;
-                    // TASK 11: Correctly find character name for placeholder
-                    const repliedToChar = characterSets.find(c => c.id === targetCommentEl.dataset.senderId);
-                    const repliedToName = targetCommentEl.dataset.senderId === 'user' ? userMomentsProfile.name : (repliedToChar?.config.characterName || '一位朋友');
-                    input.placeholder = `回复 ${repliedToName}...`;
-                } else { form.dataset.replyTo = ''; input.placeholder = '添加评论...'; }
-                input.focus();
-            }
-        }
+    let allVisiblePosts = [];
+    if (momentType === 'direct') {
+         const character = getCurrentCharacter();
+         allVisiblePosts = [...(character?.moments || []), ...(userMomentsProfile.posts || [])];
+    } else { 
+        const group = getCurrentGroup(); 
+        allVisiblePosts = group ? [...(group.groupMoments || [])] : []; 
+    }
+    
+    // **修复您发的朋友圈角色不评论的bug的关键**
+    // 如果在群聊里找不到这个动态，就去个人动态里找，确保能处理您自己的动态
+    let moment = allVisiblePosts.find(m => m.id === momentId);
+    if (!moment && momentType === 'group') {
+         moment = userMomentsProfile.posts.find(p => p.id === momentId);
+    }
+    if (!moment) return;
+    
+    const likeBtn = e.target.closest('.like-btn');
+    const commentBtn = e.target.closest('.comment-btn');
+    const commentText = e.target.closest('.comment-text');
+    const commentForm = e.target.closest('.comment-input-form');
+    const deleteMomentBtn = e.target.closest('.delete-moment-btn');
+    const deleteCommentBtn = e.target.closest('.delete-comment-btn');
 
-        if (commentForm) {
-            e.preventDefault();
-            const input = commentForm.querySelector('.comment-input');
-            const text = input.value.trim();
-            const replyToCommentId = commentForm.dataset.replyTo;
-            if (text) {
-                const newCommentByUser = { id: generateId('cmt'), sender: 'user', text, replies: [] };
-                let repliedToAiId = null; 
-                if (replyToCommentId) { 
-                     const findAndPushReply = (comments) => {
-                        for (const c of comments) {
-                            if (c.id === replyToCommentId) {
-                                newCommentByUser.replyTo = c.sender;
-                                if (c.sender !== 'user') repliedToAiId = c.sender; // The AI being replied to
-                                if(!c.replies) c.replies = []; c.replies.push(newCommentByUser);
-                                return c;
-                            }
-                            if (c.replies) { const found = findAndPushReply(c.replies); if(found) return found; }
+    if (deleteMomentBtn) {
+        if (confirm('您确定要删除这条动态吗？此操作无法撤销。')) {
+            if (moment.senderId === 'user') { 
+                userMomentsProfile.posts = userMomentsProfile.posts.filter(p => p.id !== momentId);
+                if (momentType === 'group') { // 也从群聊里删除
+                     const group = getCurrentGroup();
+                     if (group && group.groupMoments) group.groupMoments = group.groupMoments.filter(m => m.id !== momentId);
+                }
+            } 
+            else if (momentType === 'direct') { const postChar = characterSets.find(c => c.id === moment.senderId); if (postChar && postChar.moments) postChar.moments = postChar.moments.filter(m => m.id !== momentId); } 
+            else if (momentType === 'group') { const group = getCurrentGroup(); if (group && group.groupMoments) group.groupMoments = group.groupMoments.filter(m => m.id !== momentId); }
+            saveAllData(); renderMoments();
+        }
+        return;
+    }
+    if (deleteCommentBtn) { const commentEl = e.target.closest('.comment'); const commentIdToDelete = commentEl.dataset.commentId; if (confirm('您确定要删除这条评论吗？')) { deleteCommentById(moment.comments, commentIdToDelete); saveAllData(); renderMoments(); } return; }
+    if (likeBtn) { const likeIndex = moment.likes.indexOf('user'); if (likeIndex > -1) { moment.likes.splice(likeIndex, 1); } else { moment.likes.push('user'); } saveAllData(); renderMoments(); }
+    if (commentBtn || commentText) {
+        const form = postEl.querySelector('.comment-input-form');
+        const input = form.querySelector('.comment-input');
+        const targetCommentEl = e.target.closest('.comment');
+        if(form.style.display === 'flex' && (targetCommentEl?.dataset.commentId === form.dataset.replyTo || !targetCommentEl)) { form.style.display = 'none'; } 
+        else {
+            form.style.display = 'flex';
+            if (targetCommentEl) {
+                form.dataset.replyTo = targetCommentEl.dataset.commentId;
+                const repliedToChar = characterSets.find(c => c.id === targetCommentEl.dataset.senderId);
+                const repliedToName = targetCommentEl.dataset.senderId === 'user' ? userMomentsProfile.name : (repliedToChar?.config.characterName || '一位朋友');
+                input.placeholder = `回复 ${repliedToName}...`;
+            } else { form.dataset.replyTo = ''; input.placeholder = '添加评论...'; }
+            input.focus();
+        }
+    }
+
+    if (commentForm) {
+        e.preventDefault();
+        const input = commentForm.querySelector('.comment-input');
+        const text = input.value.trim();
+        const replyToCommentId = commentForm.dataset.replyTo;
+        if (text) {
+            const newCommentByUser = { id: generateId('cmt'), sender: 'user', text, replies: [] };
+            
+            let repliedToAiId = null;
+
+            if (replyToCommentId) { 
+                 const findAndPushReply = (comments) => {
+                    for (const c of comments) {
+                        if (c.id === replyToCommentId) {
+                            newCommentByUser.replyTo = c.sender;
+                            if (c.sender !== 'user') repliedToAiId = c.sender;
+                            if(!c.replies) c.replies = []; c.replies.push(newCommentByUser);
+                            return true;
                         }
-                        return null;
-                    };
-                    findAndPushReply(moment.comments);
-                } else { 
-                    if (!moment.comments) moment.comments = [];
-                    moment.comments.push(newCommentByUser);
-                    if(moment.senderId !== 'user') repliedToAiId = moment.senderId; // Replying to the main post
-                }
-                input.value = ''; commentForm.style.display = 'none'; saveAllData(); renderMoments();
-                // Trigger AI reply if user replied to an AI
-                if (repliedToAiId) {
-                    const commentForAIToReplyTo = { ...newCommentByUser, sender: 'user' };
-                    setTimeout(() => triggerAiMomentReply(moment, commentForAIToReplyTo, repliedToAiId, momentType), 2500);
+                        if (c.replies) { if(findAndPushReply(c.replies)) return true; }
+                    }
+                    return false;
+                };
+                findAndPushReply(moment.comments);
+            } else { 
+                if (!moment.comments) moment.comments = [];
+                moment.comments.push(newCommentByUser);
+                if(moment.senderId !== 'user') {
+                    repliedToAiId = moment.senderId;
                 }
             }
+            
+            input.value = ''; commentForm.style.display = 'none'; saveAllData(); renderMoments();
+
+            // **核心升级：群聊里对AI的评论/回复，AI也会回应**
+            if (repliedToAiId) {
+                const finalCommentForAIToReplyTo = { ...newCommentByUser, sender: 'user' };
+                setTimeout(() => triggerAiMomentReply(moment, finalCommentForAIToReplyTo, repliedToAiId, momentType), 2500 + Math.random() * 2000);
+            }
         }
-    };
+    }
+};
 
         // --- Diary Logic ---
         const openDiaryModal = async () => { if (currentChat.type !== 'direct') return; const character = getCurrentCharacter(); if (!character) return; elements.diaryHeader.textContent = `${character.config.characterName}的日记本`; renderDiary(character); elements.diaryModal.classList.add('show'); };
