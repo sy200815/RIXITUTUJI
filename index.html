@@ -1457,12 +1457,13 @@ NEVER refer to the user as "用户". Use the information from their profile.`;
         const generateId = (prefix) => `${prefix}_${Date.now()}${Math.random().toString(36).substring(2, 9)}`;
 
         // --- API payload function ---
-        const getApiPayload = (model, history, systemPrompt) => {
+                const getApiPayload = (model, history, systemPrompt) => {
             const apiBaseUrl = elements.apiBaseUrlInput.value.trim().toLowerCase();
             const isGemini = apiBaseUrl.includes('google');
 
-            // TASK 10: Add real time awareness if enabled
+            // 【核心修正】新增了对真实时间的处理，确保它能被正确注入
             let finalSystemPrompt = systemPrompt;
+             if (!finalSystemPrompt || finalSystemPrompt.trim() === '') finalSystemPrompt = '请你回复一条评论';     
             if (elements.realTimeAwarenessToggle.checked) {
                 const currentTime = `[System Knowledge: The current real-world date and time is ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}]`;
                 finalSystemPrompt = `${currentTime}\n\n${systemPrompt}`;
@@ -1482,14 +1483,27 @@ NEVER refer to the user as "用户". Use the information from their profile.`;
                     return { role, parts: [{ text: content }] };
                 };
                 
-                const contents = [
-                    { role: 'user', parts: [{ text: finalSystemPrompt }] },
-                    { role: 'model', parts: [{ text: '好的，我会严格遵守以上所有指令。' }] },
-                    ...history.map(formatForGemini).filter(Boolean)
-                ];
+                // 【核心修正】重写了整个Gemini请求的构造逻辑
+                let contents;
+                
+                // 检查这是否是一个“一次性任务”（如朋友圈评论、写日记等），其特点是传入的history为空
+                if (history.length === 0) {
+                    // 对于一次性任务，我们只发送一条干净的、来自用户的指令
+                    contents = [
+                        { role: 'user', parts: [{ text: finalSystemPrompt }] }
+                    ];
+                } else {
+                    // 对于有上下文的连续聊天，我们构造一个包含“系统设定”对话的完整历史
+                    contents = [
+                        { role: 'user', parts: [{ text: finalSystemPrompt }] },
+                        { role: 'model', parts: [{ text: '好的，我会严格遵守以上所有指令。' }] },
+                        ...history.map(formatForGemini).filter(Boolean) // 再加上真实的聊天记录
+                    ];
+                }
+                
                 return { contents, "generationConfig": { "temperature": parseFloat(elements.temperatureSlider.value), "topP": parseFloat(elements.topPSlider.value) } };
 
-            } else {
+            } else { // OpenAI的逻辑保持不变
                 const formatForOpenAI = (msg) => {
                     if (!msg || typeof msg !== 'object' || msg.type === 'system' || typeof msg.sender !== 'string') return null;
                     const role = msg.sender === 'user' ? 'user' : 'assistant';
@@ -3002,6 +3016,7 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
 [输出格式]: 你的回复必须是JSON数组，里面只包含一个对象，像这样:
 [{"type": "moment_comment", "momentId": "${moment.id}", "comment_text": "你的评论内容"}]
 绝对不要在JSON数组前后添加任何多余的文字。`;
+              if (!prompt || prompt.trim() === '') prompt = '请你回复一条评论'; // 防止内容为空
                 const payload = getApiPayload(model, [], prompt);
                 try {
                     const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify(payload) });
