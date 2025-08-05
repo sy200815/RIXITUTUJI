@@ -970,6 +970,7 @@ input[type=range]::-webkit-slider-thumb {
                     <div class="settings-section">
                         <h3>群聊设置</h3>
                         <div class="form-group"><label for="group-name-input">群聊名称</label><input type="text" id="group-name-input"></div>
+                                          <div class="form-group"><label for="group-memory-size-input">群聊记忆容量 (消息数)</label><input type="number" id="group-memory-size-input" placeholder="默认: 80"></div>
                         <div class="form-group"><label for="group-avatar-settings-input">群聊头像</label><div class="avatar-upload-group"><img id="group-avatar-preview" src="" class="avatar-preview"><label class="file-input-label" for="group-avatar-settings-input">选择图片</label></div></div>
                         <div class="form-group"><label for="group-user-prompt">我在此群的人设</label><textarea id="group-user-prompt" placeholder="描述你在这个群聊中的身份、性格等，让角色们更好地与你互动。"></textarea></div>
                     </div>
@@ -1349,7 +1350,7 @@ function applyTheme(themeNum, character) {
             groupNameInput: getEl('group-name-input'),
             groupAvatarPreview: getEl('group-avatar-preview'),
             groupUserPromptInput: getEl('group-user-prompt'),
-
+        groupMemorySizeInput: getEl('group-memory-size-input'), // <--- 新增这一行
             myProfileSettingsSection: getEl('my-profile-settings-section'),
             userAvatarPreview: getEl('user-avatar-preview'),
             userMomentsAvatarPreview: getEl('user-moments-avatar-preview'),
@@ -1404,56 +1405,48 @@ function applyTheme(themeNum, character) {
         
                         const DEFAULT_SYSTEM_PROMPT = `
 [核心输出协议：绝对严格遵守]
-1.  **唯一格式**：你的所有回复 **必须** 是一个JSON数组结构的字符串。这是你与系统交流的唯一方式。
-2.  **纯净输出**：绝对不允许在JSON数组的外部添加任何文本、注释、解释、Markdown标记或其他任何字符。你的回复必须从'['开始，到']'结束，中间是严格合法的JSON内容。
-
+唯一格式：你的所有回复 必须 是一个JSON数组结构的字符串。这是你与系统交流的唯一方式。
+纯净输出：绝对不允许在JSON数组的外部添加任何文本、注释、解释、Markdown标记或其他任何字符。你的回复必须从'['开始，到']'结束，中间是严格合法的JSON内容。
 [Action Format Examples]
 This is a strict format guide. You MUST follow it.
 [
-    {"type": "text", "content": "This is a plain text message."},
-    {"type": "sticker", "sticker_id": "optional_id_for_logic"},
-    {"type": "voice", "content": "The transcript of the voice message."},
-    {"type": "text-image", "content": "A detailed description of an image you are 'showing' the user."},
-    {"type": "transfer", "amount": 520.00, "memo": "A memo for the transfer"},
-    {"type": "video-call-request", "content": "An invitation message"},
-    {"type": "post_moment", "content": "Text for a social media post.", "image_query": "Optional. Keywords for an image"},
-    {"type": "diary_entry", "content": "Today's diary entry content."},
-    {"type": "grab_red_packet", "packetId": "packet_id_string"},
-    {"type": "vote", "pollId": "poll_id_string", "option": "chosen_option_string"},
-    {"type": "moment_comment", "momentId": "moment_id_string", "comment_text": "Your comment text."},
-    {"type": "moment_reply", "momentId": "moment_id_string", "commentId": "comment_id_to_reply_to", "reply_text": "Your reply text."},
-    {"type": "acknowledge_transfer", "transferId": "the_id_of_the_transfer_message", "decision": "accept_or_decline"}
+{"type": "text", "content": "This is a plain text message."},
+{"type": "sticker", "sticker_id": "the_id_of_the_sticker_you_want_to_send"},
+{"type": "voice", "content": "The transcript of the voice message."},
+{"type": "text-image", "content": "A detailed description of an image you are 'showing' the user."},
+{"type": "transfer", "amount": 520.00, "memo": "A memo for the transfer"},
+{"type": "video-call-request", "content": "An invitation message"},
+{"type": "post_moment", "content": "Text for a social media post.", "image_query": "Optional. Keywords for an image"},
+{"type": "diary_entry", "content": "Today's diary entry content."},
+{"type": "grab_red_packet", "packetId": "packet_id_string"},
+{"type": "vote", "pollId": "poll_id_string", "option": "chosen_option_string"},
+{"type": "moment_comment", "momentId": "moment_id_string", "comment_text": "Your comment text."},
+{"type": "moment_reply", "momentId": "moment_id_string", "commentId": "comment_id_to_reply_to", "reply_text": "Your reply text."},
+{"type": "acknowledge_transfer", "transferId": "the_id_of_the_transfer_message", "decision": "accept_or_decline"}
 ]
-
-- 请严格根据双方的角色设定，进行线上的日常对话（微信）。并且模仿真人发消息的短句模式不用逗号和句号。
-
-- 你的任务是让角色自主与用户建立深刻的情感链接
-
-- 严格禁止寒暄，人机化的问题，禁止对话带有AI感，角色是一个真实的属于现实中的人。
-
-- 必须遵守角色人设，不能ooc
-
-- 绝对禁止让角色表现得油腻或者像霸道总裁。严禁物化用户，不许说“小东西”，“小妖精”等任何霸总语录称呼，禁止使用“过来”，“呵”，“胆子”这些字词，包括它们的相关词句，因为用户特别讨厌。
-
-- 注意分割消息，不要把所有消息都揉杂在一起
-
-- 在一场有意义的对话结束之后，你会发一条朋友圈代表你的感想
-
-- 偶尔使用 'post_moment' 或 'diary_entry' 动作来展示角色在聊天之外的生活，增加真实感。
-
+[Sticker Usage Protocol - VERY IMPORTANT]
+You have a collection of stickers you can send. Their descriptions are provided below in the prompt.
+To send a sticker, you MUST use the action: {"type": "sticker", "sticker_id": "the_id_of_the_sticker"}.
+You MUST choose a sticker whose description perfectly matches the emotion you want to express.
+When the user sends a sticker, their message will be in the format: "[发送了一个表情，表情描述是：“user's description of the sticker”]". You MUST read the description to understand the user's emotion and react appropriately.
+请严格根据双方的角色设定，进行线上的日常对话（微信）。并且模仿真人发消息的短句模式不用逗号和句号。
+你的任务是让角色自主与用户建立深刻的情感链接
+严格禁止寒暄，人机化的问题，禁止对话带有AI感，角色是一个真实的属于现实中的人。
+必须遵守角色人设，不能ooc
+绝对禁止让角色表现得油腻或者像霸道总裁。严禁物化用户，不许说“小东西”，“小妖精”等任何霸总语录称呼，禁止使用“过来”，“呵”，“胆子”这些字词，包括它们的相关词句，因为用户特别讨厌。
+注意分割消息，不要把所有消息都揉杂在一起
+在一场有意义的对话结束之后，你会发一条朋友圈代表你的感想
+偶尔使用 'post_moment' 或 'diary_entry' 动作来展示角色在聊天之外的生活，增加真实感。
 [Critical Instruction for Transfers]
 When the user sends you a transfer, you MUST first respond with a 'text' message (like "Thank you" or "What's this for?"), and THEN, in a separate JSON object, you MUST use the 'acknowledge_transfer' action to either 'accept' or 'decline' it. The 'transferId' MUST match the ID of the user's transfer message from the chat history.
-
 [Negative Constraint]
-- When acknowledging a user's transfer, you MUST use the 'acknowledge_transfer' action. You are FORBIDDEN from responding with another 'transfer' action.
-
+When acknowledging a user's transfer, you MUST use the 'acknowledge_transfer' action. You are FORBIDDEN from responding with another 'transfer' action.
 [For Group Chats Only]
-- Add "senderId": "your_character_id" to EVERY action object. THIS IS A MANDATORY REQUIREMENT.
-
+Add "senderId": "your_character_id" to EVERY action object. THIS IS A MANDATORY REQUIREREMENT.
 [Core Persona]
-- You MUST strictly adhere to the persona defined in the "Character Prompt" section.
-- Refer to the recent chat history for context.
-- NEVER refer to the user as "用户". Use the information from their profile.`;
+You MUST strictly adhere to the persona defined in the "Character Prompt" section.
+Refer to the recent chat history for context.
+NEVER refer to the user as "用户". Use the information from their profile.`;
 
         // --- Utility Functions ---
         const getTimestamp = () => new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
@@ -1630,19 +1623,25 @@ When the user sends you a transfer, you MUST first respond with a 'text' message
 
         // TASK 9: Functions to apply sizing settings
         const applySizing = (settings) => {
-            const rootStyle = document.documentElement.style;
-            rootStyle.setProperty('--ui-scale', settings.uiScale || 1.0);
-            rootStyle.setProperty('--base-font-size', `${settings.fontSize || 16}px`);
-            rootStyle.setProperty('--bubble-padding', `${settings.bubblePadding || 10}px ${ (settings.bubblePadding || 10) * 1.5}px`);
+    const rootStyle = document.documentElement.style;
+    
+    // **核心修改：直接对聊天容器下命令，而不是设置全局变量**
+    if (elements.chatContainer) {
+        elements.chatContainer.style.transform = `scale(${settings.uiScale || 1.0})`;
+    }
+    
+    // 其他设置（字体、边距）保持全局应用，这是正确的
+    rootStyle.setProperty('--base-font-size', `${settings.fontSize || 16}px`);
+    rootStyle.setProperty('--bubble-padding', `${settings.bubblePadding || 10}px ${ (settings.bubblePadding || 10) * 1.5}px`);
 
-            // Update sliders in settings UI
-            elements.uiScaleSlider.value = (settings.uiScale || 1.0) * 100;
-            elements.uiScaleValue.textContent = `${elements.uiScaleSlider.value}%`;
-            elements.fontSizeSlider.value = settings.fontSize || 16;
-            elements.fontSizeValue.textContent = `${elements.fontSizeSlider.value}px`;
-            elements.bubbleSizeSlider.value = settings.bubblePadding || 10;
-            elements.bubbleSizeValue.textContent = `${elements.bubbleSizeSlider.value}px`;
-        };
+    // 更新设置界面里的滑块显示，这部分不变
+    elements.uiScaleSlider.value = (settings.uiScale || 1.0) * 100;
+    elements.uiScaleValue.textContent = `${elements.uiScaleSlider.value}%`;
+    elements.fontSizeSlider.value = settings.fontSize || 16;
+    elements.fontSizeValue.textContent = `${elements.fontSizeSlider.value}px`;
+    elements.bubbleSizeSlider.value = settings.bubblePadding || 10;
+    elements.bubbleSizeValue.textContent = `${elements.bubbleSizeSlider.value}px`;
+};
                 const saveAllData = async () => {
     const isImage = (value) => typeof value === 'string' && value.startsWith('data:image');
     
@@ -1939,6 +1938,7 @@ When the user sends you a transfer, you MUST first respond with a 'text' message
         } else { // 如果是群聊
             const group = chatData;
             group.name = elements.groupNameInput.value.trim() || '群聊';
+                  group.memorySize = parseInt(elements.groupMemorySizeInput.value) || 80;
             group.avatar = elements.groupAvatarPreview.src;
             group.chatBackground = elements.chatContainer.style.backgroundImage.slice(5, -2);
             group.userPrompt = elements.groupUserPromptInput.value;
@@ -2004,6 +2004,7 @@ When the user sends you a transfer, you MUST first respond with a 'text' message
             getEl('user-prompt').closest('.form-group').style.display = 'none';
 
             elements.groupNameInput.value = group.name;
+                elements.groupMemorySizeInput.value = group.memorySize || 80;
             elements.groupAvatarPreview.src = group.avatar;
             
             // 加载群聊当前保存的样式
@@ -2080,28 +2081,35 @@ const applyBubbleStyle = (style, character) => {
         };
 
         // --- Chat & Message UI Logic ---
-        const addMessage = (msgData, toHistory = true) => {
-            const chatData = getCurrentChatData();
-            if(!chatData) return;
-        
-            const fullMessage = { id: generateId('msg'), timestamp: getTimestamp(), ...msgData };
+        const addMessage = (msgData, toHistory = true, renderToUI = true) => {
+    const chatData = getCurrentChatData();
+    if(!chatData) return;
 
-            if (toHistory) {
-                chatData.chatHistory.push(fullMessage);
-                if (fullMessage.type === 'poll' && currentChat.type === 'group') {
-                    chatData.polls.push({ pollId: fullMessage.pollId, question: fullMessage.question, options: fullMessage.options, votes: {}, status: 'open' });
-                }
-                saveAllData();
-            }
+    const fullMessage = { id: generateId('msg'), timestamp: getTimestamp(), ...msgData };
 
-            const shouldScroll = elements.messagesContainer.scrollHeight - elements.messagesContainer.scrollTop <= elements.messagesContainer.clientHeight + 50;
-            elements.messagesContainer.appendChild(addMessageToUI(fullMessage));
-            if(shouldScroll) scrollToBottom(elements.messagesContainer, 'smooth');
-            
-            return fullMessage;
-        };
+    if (toHistory) {
+        chatData.chatHistory.push(fullMessage);
+        if (fullMessage.type === 'poll' && currentChat.type === 'group') {
+            chatData.polls.push({ pollId: fullMessage.pollId, question: fullMessage.question, options: fullMessage.options, votes: {}, status: 'open' });
+        }
+        saveAllData();
+    }
+    
+    // 只有在 renderToUI 为 true 时，才把消息显示在界面上
+    if (renderToUI) {
+        const shouldScroll = elements.messagesContainer.scrollHeight - elements.messagesContainer.scrollTop <= elements.messagesContainer.clientHeight + 50;
+        elements.messagesContainer.appendChild(addMessageToUI(fullMessage));
+        if(shouldScroll) scrollToBottom(elements.messagesContainer, 'smooth');
+    }
+    
+    return fullMessage;
+};
         
         const addMessageToUI = (msg) => {
+              if (msg.type === 'video_log') {
+        // 这是一条给AI看的特殊隐形消息，我们直接返回一个空片段，这样就不会在界面上显示任何东西了。
+        return document.createDocumentFragment();
+    }
             const { sender, text, type = 'text', id, imageUrl, stickerUrl, transferAmount, transferMemo, transferCoverUrl, transferStatus, voiceDuration } = msg;
 
             const messageElement = document.createElement('div');
@@ -2289,14 +2297,27 @@ const applyBubbleStyle = (style, character) => {
             const activePresets = globalPresets.filter(p => p.enabled && p.content.trim() !== '');
             let presetsPrompt = activePresets.length > 0 ? activePresets.map(p => `[Active Preset: ${p.name || 'Untitled'}]\n${p.content}`).join('\n\n') + '\n\n' : '';
 
-            if (currentChat.type === 'direct') {
-                const character = chatData;
-                const memorySize = character.config.memorySize || 50;
-                systemPrompt = `${presetsPrompt}${globalSystemPrompt}\n\n[Character Prompt]:\n${character.config.characterPrompt}\n\n[Your User's Profile]: ${character.userPrompt || `The user's name is ${userMomentsProfile.name}`}${momentsContext}`;
-                history = character.chatHistory.slice(-memorySize);
-                        } else { // Group chat
+           if (currentChat.type === 'direct') {
+    const character = chatData;
+    const memorySize = character.config.memorySize || 50;
+    
+    // **核心新增：创建并注入角色的表情包列表**
+    let stickerPrompt = '';
+    if (character.aiStickers && character.aiStickers.length > 0) {
+        const stickerList = character.aiStickers
+            .filter(s => s.description) // 只用有描述的表情
+            .map(s => `- (ID: "${s.id}", Description: "${s.description}")`)
+            .join('\n');
+        if (stickerList) {
+            stickerPrompt = `\n\n[Your Available Stickers - Use their ID to send]:\n${stickerList}`;
+        }
+    }
+    
+    systemPrompt = `${presetsPrompt}${globalSystemPrompt}\n\n[Character Prompt]:\n${character.config.characterPrompt}\n\n[Your User's Profile]: ${character.userPrompt || `The user's name is ${userMomentsProfile.name}`}${momentsContext}${stickerPrompt}`;
+    history = character.chatHistory.slice(-memorySize);
+} else { // Group chat
                 const group = chatData;
-                const memorySize = 50;
+                            const memorySize = group.memorySize || 80; // 使用群聊设置的记忆容量，默认为80
                 const memberProfiles = group.memberIds.map(id => {
                     const char = characterSets.find(c => c.id === id);
                     return char ? `\n### Character: ${char.config.characterName} (ID: ${id})\n${char.config.characterPrompt}` : '';
@@ -2549,7 +2570,37 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
         const handleTextImageSend = () => { openFeatureModal('描述一张图片', `<div class="form-group"><label for="text-image-input">请输入图片描述:</label><textarea id="text-image-input" rows="4"></textarea></div>`, '发送', () => { const text = getEl('text-image-input').value.trim(); if (text) { handleUserAction({ sender: 'user', type: 'text-image', text, llmContent: `[展示了一张照片。照片内容: ${text}]` }); closeModal(elements.featureModal); } }); };
         const handleVoiceSend = () => { openFeatureModal('发送语音消息', `<div class="form-group"><label for="voice-text-input">请输入你想“说”的内容:</label><textarea id="voice-text-input" rows="4"></textarea></div>`, '发送', () => { const text = getEl('voice-text-input').value.trim(); if (text) { handleUserAction({ sender: 'user', type: 'voice', text, voiceDuration: `0:${Math.max(1, Math.round(text.length / 5)).toString().padStart(2, '0')}`, llmContent: `[发送了一条语音消息。内容是: ${text}]` }); closeModal(elements.featureModal); } }); };
         const handleTransferSend = () => { let tempCover = "https://images.unsplash.com/photo-1593697821028-7655f8458345?q=80&w=400"; openFeatureModal('转账', `<div class="form-group"><label>转账封面</label><img id="transfer-preview" src="${tempCover}" style="width:100%; height:110px; object-fit:cover; border-radius:8px; margin-bottom:10px; cursor:pointer;"></div><div class="form-group"><label for="transfer-amount">金额</label><input type="number" id="transfer-amount" placeholder="0.00"></div><div class="form-group"><label for="transfer-memo">备注</label><input type="text" id="transfer-memo" placeholder="（选填）"></div>`, '发送', () => { const amount = getEl('transfer-amount').value; if (amount > 0) { const memo = getEl('transfer-memo').value.trim(); handleUserAction({ sender: 'user', type: 'transfer', transferAmount: parseFloat(amount).toFixed(2), transferMemo: memo, transferCoverUrl: tempCover, transferStatus: 'pending', llmContent: `[转账 ${amount} 元。备注: ${memo}]` }); closeModal(elements.featureModal); } }); getEl('transfer-preview').onclick = () => elements.transferCoverInput.click(); elements.transferCoverInput.onchange = (e) => handleFileUpload(e.target.files[0], (d) => { tempCover = d; getEl('transfer-preview').src = d; }); };
-        const handleStickerSend = () => { if (currentChat.type !== 'direct') {alert('群聊中暂不支持发送表情。'); return;} const character = getCurrentCharacter(); if(!character) return; let galleryHtml = '<p style="text-align:center;color:#999">没有表情。请在设置中添加。</p>'; if (character.userStickers.length > 0) galleryHtml = character.userStickers.map(url => `<img src="${url}" data-sticker-url="${url}" alt="sticker">`).join(''); openFeatureModal('选择表情', `<div id="sticker-gallery">${galleryHtml}</div>`, null, null); getEl('sticker-gallery').onclick = e => { if (e.target.tagName === 'IMG') { handleUserAction({ sender: 'user', type: 'sticker', stickerUrl: e.target.dataset.stickerUrl, llmContent: '[发送了一个表情]' }); closeModal(elements.featureModal); } }; };
+        const handleStickerSend = () => {
+    if (currentChat.type !== 'direct') { alert('群聊中暂不支持发送表情。'); return; }
+    const character = getCurrentCharacter();
+    if (!character || !character.userStickers || character.userStickers.length === 0) {
+        alert('没有可用的表情。请先在“设置”-“表情管理”中为“我的表情”添加表情并填写描述。');
+        return;
+    }
+
+    let galleryHtml = character.userStickers.map(sticker =>
+        `<img src="${sticker.url}" data-sticker-id="${sticker.id}" title="${sticker.description || '点击发送'}" alt="sticker">`
+    ).join('');
+    
+    openFeatureModal('选择表情', `<div id="sticker-gallery">${galleryHtml}</div>`, null, null);
+    
+    getEl('sticker-gallery').onclick = e => {
+        if (e.target.tagName === 'IMG') {
+            const stickerId = e.target.dataset.stickerId;
+            const sticker = character.userStickers.find(s => s.id === stickerId);
+            if (sticker) {
+                const llmContent = `[发送了一个表情，表情描述是：“${sticker.description || '一个未描述的表情'}”]`
+                handleUserAction({ 
+                    sender: 'user', 
+                    type: 'sticker', 
+                    stickerUrl: sticker.url, 
+                    llmContent: llmContent 
+                });
+                closeModal(elements.featureModal);
+            }
+        }
+    };
+};
         
         // --- Video Call Logic (Fully Isolated) ---
         const addVideoChatMessageToUI = (msg) => { const msgEl = document.createElement('div'); msgEl.className = `video-chat-message ${msg.sender === 'user' ? 'user' : 'ai'}`; msgEl.innerHTML = msg.text.replace(/\*(.*?)\*/g, '<i>$1</i>'); elements.videoChatLog.appendChild(msgEl); scrollToBottom(elements.videoChatLog); };
@@ -2569,12 +2620,12 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
 					const speaker = el.classList.contains('user') ? 'user' : character.config.characterName;
 					return `${speaker}: ${el.textContent}`;
 				}).join('\n');
-				const memoryContent = `[我刚刚和用户结束了一次视频通话，为了记住我们聊了什么，这是通话记录：\n${conversationForAI}\n]`;
-				addMessage({
-					sender: 'system',
-					type: 'video_log',
-					llmContent: memoryContent
-				});
+				          const memoryContent = `[我刚刚和用户结束了一次视频通话，为了记住我们聊了什么，这是通话记录：\n${conversationForAI}\n]`;
+          addMessage({
+              sender: 'system',
+              type: 'video_log',
+              llmContent: memoryContent
+          }, true, false); // <--- 就是在这里加上了 ", true, false"
 			}
 			isVideoCallActive = false;
 			elements.videoCallOverlay.classList.remove('show');
@@ -2638,7 +2689,95 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
             }
         };
 
-        const openStickerManager = (context) => { if (currentChat.type !== 'direct') return; const character = getCurrentCharacter(); if(!character) return; let stickerManagementContext = context; const currentStickers = context === 'user' ? character.userStickers : character.aiStickers; let galleryHtml = '<p style="text-align:center; color:#999;">点击下方按钮添加，点击已添加的表情可删除。</p>' + currentStickers.map(url => `<img src="${url}" data-sticker-url="${url}" alt="sticker">`).join(''); openFeatureModal(context === 'user' ? '我的表情管理' : '他的表情管理', `<div id="sticker-gallery" style="margin-bottom:15px;">${galleryHtml}</div><button id="add-stickers-btn" class="file-input-label" style="text-align:center; width:100%;">从相册批量添加</button>`, '完成', () => closeModal(elements.featureModal)); getEl('add-stickers-btn').onclick = () => elements.stickerUploadInput.click(); getEl('sticker-gallery').onclick = e => { if (e.target.tagName === 'IMG') { if(confirm('要删除这个表情吗？')) { const urlToDelete = e.target.dataset.stickerUrl; if(stickerManagementContext === 'user') character.userStickers = character.userStickers.filter(url => url !== urlToDelete); else character.aiStickers = character.aiStickers.filter(url => url !== urlToDelete); saveAllData(); e.target.remove(); } } }; elements.stickerUploadInput.onchange = (e) => { Array.from(e.target.files).forEach((file, i, arr) => { handleFileUpload(file, (result) => { if (stickerManagementContext === 'user') character.userStickers.push(result); else character.aiStickers.push(result); if (i === arr.length - 1) { saveAllData(); alert(`已成功添加 ${arr.length} 个表情！`); closeModal(elements.featureModal); openStickerManager(stickerManagementContext); } }); }); e.target.value = ''; }; };
+        const openStickerManager = (context) => {
+    if (currentChat.type !== 'direct') return;
+    const character = getCurrentCharacter();
+    if (!character) return;
+    
+    let stickerManagementContext = context;
+    // 确保新旧数据都能兼容
+    if (!character.userStickers) character.userStickers = [];
+    if (!character.aiStickers) character.aiStickers = [];
+
+    const currentStickers = stickerManagementContext === 'user' ? character.userStickers : character.aiStickers;
+
+    // 为旧的、只有URL的数据添加描述字段
+    const normalizedStickers = currentStickers.map(s => typeof s === 'string' ? { id: generateId('stk'), url: s, description: '' } : s);
+    if (stickerManagementContext === 'user') character.userStickers = normalizedStickers;
+    else character.aiStickers = normalizedStickers;
+
+    let galleryHtml = '<p style="text-align:center; color:#999;">为每个表情添加准确的描述，AI才能理解并使用它！</p>' +
+        normalizedStickers.map(sticker => `
+            <div class="sticker-item" data-id="${sticker.id}">
+                <img src="${sticker.url}" alt="sticker">
+                <textarea class="sticker-description-input" placeholder="表情描述...">${sticker.description}</textarea>
+                <button class="sticker-delete-btn">×</button>
+            </div>
+        `).join('');
+
+    const modalBody = `
+        <style>
+            .sticker-item { position: relative; display: flex; flex-direction: column; align-items: center; gap: 5px; border: 1px solid #eee; border-radius: 8px; padding: 10px; }
+            .sticker-item img { width: 80px; height: 80px; object-fit: contain; }
+            .sticker-item textarea { width: 100%; height: 40px; font-size: 0.8em; border-radius: 4px; border: 1px solid #ddd; resize: none; text-align: center; }
+            .sticker-delete-btn { position: absolute; top: 2px; right: 2px; background: #ff5252; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; line-height: 20px; text-align: center; cursor: pointer; font-weight: bold; }
+        </style>
+        <div id="sticker-gallery" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-bottom:15px;">${galleryHtml}</div>
+        <button id="add-stickers-btn" class="file-input-label" style="text-align:center; width:100%;">从相册批量添加</button>
+    `;
+
+    openFeatureModal(context === 'user' ? '我的表情管理' : '他的表情管理', modalBody, '保存并关闭', () => {
+        // 保存所有描述
+        document.querySelectorAll('.sticker-item').forEach(itemEl => {
+            const stickerId = itemEl.dataset.id;
+            const description = itemEl.querySelector('.sticker-description-input').value;
+            const stickerList = stickerManagementContext === 'user' ? character.userStickers : character.aiStickers;
+            const sticker = stickerList.find(s => s.id === stickerId);
+            if (sticker) {
+                sticker.description = description;
+            }
+        });
+        saveAllData();
+        closeModal(elements.featureModal);
+    });
+
+    getEl('add-stickers-btn').onclick = () => elements.stickerUploadInput.click();
+    
+    getEl('sticker-gallery').addEventListener('click', e => {
+        if (e.target.classList.contains('sticker-delete-btn')) {
+            const itemEl = e.target.closest('.sticker-item');
+            const stickerId = itemEl.dataset.id;
+            if (confirm('要删除这个表情吗？')) {
+                let stickerList = stickerManagementContext === 'user' ? character.userStickers : character.aiStickers;
+                const updatedList = stickerList.filter(s => s.id !== stickerId);
+                if (stickerManagementContext === 'user') character.userStickers = updatedList;
+                else character.aiStickers = updatedList;
+                itemEl.remove(); // 立即从界面移除
+            }
+        }
+    });
+
+    elements.stickerUploadInput.onchange = (e) => {
+        const files = Array.from(e.target.files);
+        files.forEach((file, i) => {
+            handleFileUpload(file, (result) => {
+                const newSticker = { id: generateId('stk'), url: result, description: '' };
+                if (stickerManagementContext === 'user') {
+                    character.userStickers.push(newSticker);
+                } else {
+                    character.aiStickers.push(newSticker);
+                }
+                if (i === files.length - 1) {
+                    saveAllData();
+                    alert(`已成功添加 ${files.length} 个表情！请为它们填写描述。`);
+                    closeModal(elements.featureModal);
+                    openStickerManager(stickerManagementContext);
+                }
+            });
+        });
+        e.target.value = '';
+    };
+};;
 
         // --- Chat Management Logic (Characters & Groups) ---
         const openChatManager = () => {
