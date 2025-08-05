@@ -2916,7 +2916,7 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
              closeModal(elements.settingsModal);
         };
 
-               const addMomentByAI = (characterId, momentData, momentType) => {
+                              const addMomentByAI = (characterId, momentData, momentType) => {
     const character = characterSets.find(c => c.id === characterId);
     if (!character) return;
     const imageUrl = null;
@@ -2933,25 +2933,25 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
             if (!group.groupMoments) group.groupMoments = [];
             group.groupMoments.unshift(newMoment);
 
-            // **核心新增：触发其他群成员来评论**
+            // 【核心修改】让其他群成员立即在后台开始思考评论
             const otherMembers = group.memberIds.filter(id => id !== characterId && characterSets.some(c => c.id === id));
-            otherMembers.forEach((memberId, index) => {
-                setTimeout(() => {
-                    if (Math.random() > 0.4) { // 60%的几率来评论
-                        triggerAiMomentComment(newMoment, memberId, 'group');
-                    }
-                }, (index + 1) * 5000 + Math.random() * 3000); // 错开时间，显得更自然
-            });
+            for (const memberId of otherMembers) {
+                if (Math.random() > 0.4) { // 60%的几率来评论
+                    // 直接调用，不再等待
+                    triggerAiMomentComment(newMoment, memberId, 'group');
+                }
+            }
         }
     }
+    // 立即保存数据
     saveAllData();
+    // 如果您正好在朋友圈界面，就刷新它
     if(elements.momentsOverlay.classList.contains('show')) renderMoments();
 };
-            const addMomentByUser = async (momentData) => {
+                        const addMomentByUser = async (momentData) => {
     const newMoment = { id: generateId('moment'), senderId: 'user', timestamp: getFullTimestamp(), likes: [], comments: [], ...momentData };
     
     let momentTypeForAI;
-    // 智能判断应该把动态发到哪里
     if (currentChat.type === 'group') {
         const group = getCurrentGroup();
         if (group) {
@@ -2960,29 +2960,29 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
             momentTypeForAI = 'group';
         }
     } else {
-        // 默认发到个人朋友圈
         if (!userMomentsProfile.posts) userMomentsProfile.posts = [];
         userMomentsProfile.posts.unshift(newMoment);
         momentTypeForAI = 'direct';
     }
 
-    saveAllData();
-    openMoments(); // 重新打开朋友圈以刷新
+    // 立即保存您的动态
+    await saveAllData();
+    // 刷新朋友圈界面
+    openMoments(); 
 
-    // AI自动评论的逻辑保持不变，但确保触发逻辑更健壮
+    // 获取需要做出反应的AI角色
     const relevantChars = currentChat.type === 'direct' 
         ? [getCurrentCharacter()].filter(Boolean)
         : (getCurrentGroup() ? getCurrentGroup().memberIds.map(id => characterSets.find(c => c.id === id)).filter(Boolean) : []);
     
-    for (let i = 0; i < relevantChars.length; i++) {
-        const char = relevantChars[i];
-        setTimeout(() => {
-            // 在单人聊天中，有很大概率会评论
-            const shouldComment = (currentChat.type === 'direct') ? (Math.random() > 0.1) : (Math.random() > 0.3);
-            if (shouldComment) {
-                triggerAiMomentComment(newMoment, char.id, momentTypeForAI);
-            }
-        }, (i + 1) * 4000 + Math.random() * 2000); 
+    // 【核心修改】使用 for...of 循环，立即、异步地触发所有AI的评论行为
+    for (const char of relevantChars) {
+        const shouldComment = (currentChat.type === 'direct') ? (Math.random() > 0.1) : (Math.random() > 0.3);
+        if (shouldComment) {
+            // 不再使用 setTimeout，直接调用！
+            // 这个调用是异步的，不会阻塞您做其他任何事。
+            triggerAiMomentComment(newMoment, char.id, momentTypeForAI);
+        }
     }
 };
             const triggerAiMomentComment = async (moment, commenterId, momentType) => {
