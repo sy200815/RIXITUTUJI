@@ -1457,19 +1457,25 @@ NEVER refer to the user as "用户". Use the information from their profile.`;
         const generateId = (prefix) => `${prefix}_${Date.now()}${Math.random().toString(36).substring(2, 9)}`;
 
         // --- API payload function ---
-                const getApiPayload = (model, history, systemPrompt) => {
+                                        const getApiPayload = (model, history, systemPrompt) => {
+            // 【决定性修改】 我们在这里定义你的代理URL
+            const yourProxyUrl = "c.bt6.top";
+            
             const apiBaseUrl = elements.apiBaseUrlInput.value.trim().toLowerCase();
-            const isGemini = apiBaseUrl.includes('google');
+            
+            // 【核心判断逻辑变更】
+            // 我们现在判断，URL里是包含'google'，还是包含你定义的代理URL
+            const isGemini = apiBaseUrl.includes('google') || apiBaseUrl.includes(yourProxyUrl);
 
-            // 【核心修正】新增了对真实时间的处理，确保它能被正确注入
             let finalSystemPrompt = systemPrompt;
-             if (!finalSystemPrompt || finalSystemPrompt.trim() === '') finalSystemPrompt = '请你回复一条评论';     
             if (elements.realTimeAwarenessToggle.checked) {
                 const currentTime = `[System Knowledge: The current real-world date and time is ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}]`;
                 finalSystemPrompt = `${currentTime}\n\n${systemPrompt}`;
             }
 
             if (isGemini) {
+                console.log("检测到Gemini或代理模式，正在使用'contents'格式准备数据..."); // 增加一条日志，方便我们确认
+                
                 const formatForGemini = (msg) => {
                     if (!msg || typeof msg !== 'object' || msg.type === 'system' || typeof msg.sender !== 'string') return null;
                     const role = msg.sender === 'user' ? 'user' : 'model';
@@ -1483,27 +1489,30 @@ NEVER refer to the user as "用户". Use the information from their profile.`;
                     return { role, parts: [{ text: content }] };
                 };
                 
-                // 【核心修正】重写了整个Gemini请求的构造逻辑
                 let contents;
-                
-                // 检查这是否是一个“一次性任务”（如朋友圈评论、写日记等），其特点是传入的history为空
-                if (history.length === 0) {
-                    // 对于一次性任务，我们只发送一条干净的、来自用户的指令
-                    contents = [
-                        { role: 'user', parts: [{ text: finalSystemPrompt }] }
-                    ];
-                } else {
-                    // 对于有上下文的连续聊天，我们构造一个包含“系统设定”对话的完整历史
+                if (history && history.length > 0) {
                     contents = [
                         { role: 'user', parts: [{ text: finalSystemPrompt }] },
                         { role: 'model', parts: [{ text: '好的，我会严格遵守以上所有指令。' }] },
-                        ...history.map(formatForGemini).filter(Boolean) // 再加上真实的聊天记录
+                        ...history.map(formatForGemini).filter(Boolean).filter(c => c.parts && c.parts.length > 0)
+                    ];
+                } else {
+                    contents = [
+                         { role: 'user', parts: [{ text: finalSystemPrompt }] }
                     ];
                 }
                 
+                if (!contents || contents.length === 0 || !contents[0].parts || contents[0].parts.length === 0) {
+                     console.error("致命错误：即将发送一个空的'contents'，请求将被中止。");
+                     return null;
+                }
+
+                // 【重要】Gemini的请求体里不应该包含model和stream字段，这些要放在URL里或者由代理处理
                 return { contents, "generationConfig": { "temperature": parseFloat(elements.temperatureSlider.value), "topP": parseFloat(elements.topPSlider.value) } };
 
-            } else { // OpenAI的逻辑保持不变
+            } else { // 这是为真正的 OpenAI API 准备数据的逻辑
+                 console.log("检测到OpenAI模式，正在使用'messages'格式准备数据...");
+                 
                 const formatForOpenAI = (msg) => {
                     if (!msg || typeof msg !== 'object' || msg.type === 'system' || typeof msg.sender !== 'string') return null;
                     const role = msg.sender === 'user' ? 'user' : 'assistant';
@@ -3013,11 +3022,17 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
                 const prompt = `[角色]: 你是 ${commenterChar.config.characterName} (ID: ${commenterId})。你的性格是: ${commenterChar.config.characterPrompt}
 [情景]: ${postedBy} 刚刚发了条朋友圈，内容是: "${moment.content}"。${imageContext}
 [任务]: 根据你的性格、和发帖人的关系，以及帖子的图文内容，写一条自然的、口语化的中文评论。
-[输出格式]: 你的回复必须是JSON数组，里面只包含一个对象，像这样:
-[{"type": "moment_comment", "momentId": "${moment.id}", "comment_text": "你的评论内容"}]
-绝对不要在JSON数组前后添加任何多余的文字。`;
+
+[极端重要的输出规则]
+1.  你 **必须** 输出内容。不允许输出空字符串或无效的回复。
+2.  你的回复 **必须** 是一个严格合法的JSON数组，里面只包含一个JSON对象。
+3.  最终格式必须是: [{"type": "moment_comment", "momentId": "${moment.id}", "comment_text": "这里是你的评论内容"}]
+4.  绝对不允许在JSON数组的外部或内部添加任何多余的文字、解释或Markdown标记。你的回复必须从'['开始，到']'结束。`;
               if (!prompt || prompt.trim() === '') prompt = '请你回复一条评论'; // 防止内容为空
                 const payload = getApiPayload(model, [], prompt);
+              // 【新增的终极调试代码】
+console.log('即将发送给AI用于评论的Payload:', JSON.stringify(payload, null, 2));
+if (!payload) { console.error("Payload生成失败，无法发送请求！"); return; }
                 try {
                     const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify(payload) });
                     if (!response.ok) { console.error("AI comment failed: ", await response.text()); return; }
@@ -3060,6 +3075,7 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
                     const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify(payload) });
                     if (!response.ok) { console.error("AI回复评论失败: ", await response.text()); return; }
                     const responseData = await response.json();
+                  console.log("AI对朋友圈评论的原始回复:", responseData);
                      if (responseData?.choices?.[0]?.message?.content) {
                         processAiResponse(responseData.choices[0].message.content);
                     }
@@ -3649,7 +3665,66 @@ const migrateDataToV7 = (oldData) => {
                   elements.actionSendSticker.onclick = () => { handleStickerSend(); toggleActionPanel(true); };
                   elements.actionVideoCall.onclick = () => { startVideoCall(); toggleActionPanel(true); };
                   elements.actionCreatePoll.onclick = () => { openCreatePollModal(); toggleActionPanel(true); };
-                  elements.fetchModelsBtn.onclick = async () => { const baseUrl = elements.apiBaseUrlInput.value.trim(); const apiKey = elements.apiKeyInput.value.trim(); if (!baseUrl || !apiKey) { alert('请输入API端点和API密钥'); return; } elements.fetchModelsBtn.textContent = '获取中...'; elements.fetchModelsBtn.disabled = true; try { const response = await fetch(`${baseUrl}/v1/models`, { headers: { 'Authorization': `Bearer ${apiKey}` } }); if (!response.ok) throw new Error(`获取模型列表失败, Status: ${response.status} ${await response.text()}`); const data = await response.json(); elements.modelSelect.innerHTML = ''; const models = data.data || data.models || data; if (!Array.isArray(models)) throw new Error('API返回的模型列表格式不正确'); models.sort((a, b) => (a.id || a.name).localeCompare(b.id || b.name)).forEach(model => { const modelId = model.id || model.name; if (modelId) elements.modelSelect.add(new Option(modelId, modelId)); }); const currentModel = elements.modelSelect.value; if(currentModel) elements.modelSelect.value = currentModel; } catch (error) { alert(`获取模型失败: ${error.message}`); } finally { elements.fetchModelsBtn.textContent = '获取模型列表'; elements.fetchModelsBtn.disabled = false; } };
+                                    elements.fetchModelsBtn.onclick = async () => {
+                      const baseUrl = elements.apiBaseUrlInput.value.trim();
+                      const apiKey = elements.apiKeyInput.value.trim();
+                      if (!baseUrl || !apiKey) {
+                          alert('请输入API端点和API密钥');
+                          return;
+                      }
+
+                      // --- 智能判断逻辑 ---
+                      const yourProxyUrl = "c.bt6.top";
+                      const lowerCaseBaseUrl = baseUrl.toLowerCase();
+                      const isOfficialGoogleApi = lowerCaseBaseUrl.includes('google');
+                      const isProxy = lowerCaseBaseUrl.includes(yourProxyUrl);
+
+                      elements.fetchModelsBtn.textContent = '获取中...';
+                      elements.fetchModelsBtn.disabled = true;
+
+                      try {
+                          let models = [];
+                          
+                          if (isOfficialGoogleApi) {
+                              // --- Google 官方 API 的获取剧本 ---
+                              console.log("检测到Google官方API，正在使用Gemini方式获取模型列表...");
+                              const response = await fetch(`${baseUrl}/v1beta/models?key=${apiKey}`);
+                              if (!response.ok) throw new Error(`Google API请求失败, Status: ${response.status} ${await response.text()}`);
+                              const data = await response.json();
+                              if (!data.models) throw new Error('Google API返回的模型列表格式不正确');
+                              // Google返回的模型名称是 'models/gemini-1.5-pro-latest' 这种，我们需要保留全名
+                              models = data.models.map(model => ({ id: model.name, name: model.displayName || model.name }));
+
+                          } else {
+                              // --- OpenAI 或 兼容代理 的获取剧本 ---
+                              // 注意：您当前的 c.bt6.top 代理可能没有实现这个功能!
+                              console.log("检测到OpenAI或代理，正在使用OpenAI方式获取模型列表...");
+                              const response = await fetch(`${baseUrl}/v1/models`, {
+                                  headers: { 'Authorization': `Bearer ${apiKey}` }
+                              });
+                              if (!response.ok) throw new Error(`OpenAI-compatible API请求失败, Status: ${response.status} ${await response.text()}`);
+                              const data = await response.json();
+                              const modelList = data.data || data.models || data;
+                              if (!Array.isArray(modelList)) throw new Error('API返回的模型列表格式不正确');
+                              models = modelList.map(model => ({ id: model.id || model.name, name: model.id || model.name }));
+                          }
+
+                          elements.modelSelect.innerHTML = '';
+                          models.sort((a, b) => a.name.localeCompare(b.name)).forEach(model => {
+                              elements.modelSelect.add(new Option(model.name, model.id));
+                          });
+                          
+                          // 尝试恢复之前的选择
+                          const currentModel = elements.modelSelect.value; 
+                          if(currentModel) elements.modelSelect.value = currentModel;
+                          
+                      } catch (error) {
+                          alert(`获取模型失败: ${error.message}\n\n重要提示：很多代理服务只支持聊天而不支持获取模型列表，这是常见情况。您可以手动在模型选择框中输入模型名称。`);
+                      } finally {
+                          elements.fetchModelsBtn.textContent = '获取模型列表';
+                          elements.fetchModelsBtn.disabled = false;
+                      }
+                  };
                   elements.themeSelector.onclick = (e) => { const t = e.target.closest('.theme-option'); if (t) applyTheme(t.dataset.theme, getCurrentChatData()); };
                   elements.fontSelect.addEventListener('change', () => applyFont(elements.fontSelect.value));   
                   const avatarCompression = { compress: true, quality: 0.7, maxWidth: 300, maxHeight: 300 };
