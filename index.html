@@ -3008,7 +3008,7 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
         }
     }
 };
-            const triggerAiMomentComment = async (moment, commenterId, momentType) => {
+                        const triggerAiMomentComment = async (moment, commenterId, momentType) => {
                 const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
                 const apiKey = elements.apiKeyInput.value.trim();
                 const model = elements.modelSelect.value;
@@ -3022,33 +3022,58 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
                 const prompt = `[角色]: 你是 ${commenterChar.config.characterName} (ID: ${commenterId})。你的性格是: ${commenterChar.config.characterPrompt}
 [情景]: ${postedBy} 刚刚发了条朋友圈，内容是: "${moment.content}"。${imageContext}
 [任务]: 根据你的性格、和发帖人的关系，以及帖子的图文内容，写一条自然的、口语化的中文评论。
-
-[极端重要的输出规则]
-1.  你 **必须** 输出内容。不允许输出空字符串或无效的回复。
-2.  你的回复 **必须** 是一个严格合法的JSON数组，里面只包含一个JSON对象。
-3.  最终格式必须是: [{"type": "moment_comment", "momentId": "${moment.id}", "comment_text": "这里是你的评论内容"}]
-4.  绝对不允许在JSON数组的外部或内部添加任何多余的文字、解释或Markdown标记。你的回复必须从'['开始，到']'结束。`;
-              if (!prompt || prompt.trim() === '') prompt = '请你回复一条评论'; // 防止内容为空
+[输出格式]: 你的回复必须是JSON数组，里面只包含一个对象，像这样:
+[{"type": "moment_comment", "momentId": "${moment.id}", "comment_text": "你的评论内容"}]
+绝对不要在JSON数组前后添加任何多余的文字。`;
+                
                 const payload = getApiPayload(model, [], prompt);
-              // 【新增的终极调试代码】
-console.log('即将发送给AI用于评论的Payload:', JSON.stringify(payload, null, 2));
-if (!payload) { console.error("Payload生成失败，无法发送请求！"); return; }
+                if (!payload) return; // 如果payload生成失败则中止
+
                 try {
                     const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify(payload) });
-                    if (!response.ok) { console.error("AI comment failed: ", await response.text()); return; }
+                    if (!response.ok) { 
+                        console.error("AI comment API returned an error:", await response.text()); 
+                        return;
+                    }
                     const responseData = await response.json();
-                    if (responseData?.choices?.[0]?.message?.content) {
+                    
+                    // 【核心修正】让函数学会“双语”解析
+                    let rawContent = '';
+                    const yourProxyUrl = "c.bt6.top";
+                    const lowerCaseApiUrl = apiBaseUrl.toLowerCase();
+                    const isGemini = lowerCaseApiUrl.includes('google') || lowerCaseApiUrl.includes(yourProxyUrl);
+
+                    if (isGemini) {
+                        // Gemini 响应处理
+                        rawContent = responseData?.candidates?.[0]?.content?.parts?.[0]?.text;
+                    } else {
+                        // OpenAI 响应处理
+                        rawContent = responseData?.choices?.[0]?.message?.content;
+                    }
+
+                    if (rawContent) {
                         let parsed;
                         try { 
-                            const jsonMatch = responseData.choices[0].message.content.match(/\[\s*\{.*\}\s*\]/s);
-                            parsed = JSON.parse(jsonMatch ? jsonMatch[0] : responseData.choices[0].message.content);
-                        } catch (e) { return; }
-                        const action = parsed[0];
+                            const jsonMatch = rawContent.match(/\[\s*\{.*\}\s*\]/s);
+                            parsed = JSON.parse(jsonMatch ? jsonMatch[0] : rawContent);
+                        } catch (e) { 
+                            console.error("Failed to parse AI comment response JSON:", e);
+                            return; 
+                        }
+                        const action = Array.isArray(parsed) ? parsed[0] : parsed;
                         if (action && action.type === 'moment_comment' && action.comment_text) {
                             addCommentOrReplyByAI('comment', moment.id, action.comment_text, commenterId, null, momentType);
+                        } else {
+                            console.error("Parsed AI response for comment is not in the correct format:", action);
                         }
+                    } else {
+                        console.error("AI response for comment was empty or in an unexpected format.", responseData);
                     }
-                } catch (error) { console.error("Moment comment AI trigger error:", error); }
+
+                } catch (error) { 
+                    // 这里的error才是真正的网络或代码执行错误
+                    console.error("An unexpected error occurred in triggerAiMomentComment:", error); 
+                }
             };
 
             const triggerAiMomentReply = async (moment, commentToReply, replierId, momentType) => {
