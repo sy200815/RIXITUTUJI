@@ -2939,7 +2939,7 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
         }, (i + 1) * 4000 + Math.random() * 2000); 
     }
 };
-                                    const triggerAiMomentComment = async (moment, commenterId, momentType) => {
+                                                const triggerAiMomentComment = async (moment, commenterId, momentType) => {
                 const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
                 const apiKey = elements.apiKeyInput.value.trim();
                 const model = elements.modelSelect.value;
@@ -2971,9 +2971,12 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
 
                     const response = await fetch(fetchUrl, { method: 'POST', headers: headers, body: JSON.stringify(payload) });
 
-                    if (!response.ok) { console.error("AI comment failed: ", await response.text()); return; }
-                    const responseData = await response.json();
+                    // --- 核心修改在这里！我们先获取纯文本 ---
+                    const rawText = await response.text();
+                    if (!response.ok) { console.error("AI comment failed: ", rawText); return; }
                     
+                    // 然后再自己解析
+                    const responseData = JSON.parse(rawText);
                     if (responseData.error) throw new Error(responseData.error.message);
 
                     let rawContent = '';
@@ -2999,7 +3002,7 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
                 } catch (error) { console.error("Moment comment AI trigger error:", error); }
             };
 
-                                    const triggerAiMomentReply = async (moment, commentToReply, replierId, momentType) => {
+                                                const triggerAiMomentReply = async (moment, commentToReply, replierId, momentType) => {
                 const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
                 const apiKey = elements.apiKeyInput.value.trim();
                 const model = elements.modelSelect.value;
@@ -3033,9 +3036,12 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
 
                     const response = await fetch(fetchUrl, { method: 'POST', headers: headers, body: JSON.stringify(payload) });
 
-                    if (!response.ok) { console.error("AI回复评论失败: ", await response.text()); return; }
-                    const responseData = await response.json();
-                     
+                    // --- 核心修改在这里！我们先获取纯文本 ---
+                    const rawText = await response.text();
+                    if (!response.ok) { console.error("AI回复评论失败: ", rawText); return; }
+                    
+                    // 然后再自己解析
+                    const responseData = JSON.parse(rawText);
                     if (responseData.error) throw new Error(responseData.error.message);
                     
                     let rawContent = '';
