@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -905,7 +904,7 @@ input[type=range]::-webkit-slider-thumb {
                 <div id="common-settings-section">
                     <div class="settings-section">
                         <h3>API & 模型设置</h3>
-                        <div class="form-group"><label for="api-base-url">API端点 (Base URL)</label><input type="text" id="api-base-url" placeholder="例如: https://api.openai.com 或 https://generativelanguage.googleapis.com"></div>
+                        <div class="form-group"><label for="api-base-url">API端点 (Base URL)</label><input type="text" id="api-base-url" placeholder="OpenAI: https://api.openai.com | Gemini: https://generativelanguage.googleapis.com"></div>
                         <div class="form-group"><label for="api-key">API密钥 (API Key)</label><input type="password" id="api-key" placeholder="在此输入您的API密钥"></div>
                         <div class="form-group"><label for="model-select">模型选择 (提示: 图片识别请用gpt-4o等vision模型)</label><div class="model-group"><select id="model-select"></select><button id="fetch-models-btn">获取模型列表</button></div></div>
                     </div>
@@ -1465,11 +1464,10 @@ When the user sends you a transfer, you MUST first respond with a 'text' message
         const generateId = (prefix) => `${prefix}_${Date.now()}${Math.random().toString(36).substring(2, 9)}`;
 
         // --- API payload function ---
-        const getApiPayload = (model, history, systemPrompt) => {
+                const getApiPayload = (model, history, systemPrompt) => {
             const apiBaseUrl = elements.apiBaseUrlInput.value.trim().toLowerCase();
             const isGemini = apiBaseUrl.includes('google');
 
-            // TASK 10: Add real time awareness if enabled
             let finalSystemPrompt = systemPrompt;
             if (elements.realTimeAwarenessToggle.checked) {
                 const currentTime = `[System Knowledge: The current real-world date and time is ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}]`;
@@ -1480,35 +1478,54 @@ When the user sends you a transfer, you MUST first respond with a 'text' message
                 const formatForGemini = (msg) => {
                     if (!msg || typeof msg !== 'object' || msg.type === 'system' || typeof msg.sender !== 'string') return null;
                     const role = msg.sender === 'user' ? 'user' : 'model';
-                    if (msg.sender === 'user' && msg.type === 'image' && msg.imageUrl) {
-                        const textContent = msg.llmContent || msg.text || '用户发送了一张图片。';
-                        const mimeType = msg.imageUrl.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
-                        return { role, parts: [ { text: textContent }, { inline_data: { mime_type: mimeType, data: msg.imageUrl.split(',')[1] } } ]};
+                    let parts = [];
+                    
+                    const textContent = msg.llmContent || msg.text || '';
+                    if (textContent) {
+                        parts.push({ text: textContent });
                     }
-                    const content = msg.llmContent || msg.text || '';
-                    if (!content.trim()) return null;
-                    return { role, parts: [{ text: content }] };
+
+                    if (msg.sender === 'user' && msg.type === 'image' && msg.imageUrl) {
+                        if (!textContent) { // 如果图片没有附带文字，给一个默认说明
+                           parts.push({ text: '用户发送了一张图片。' });
+                        }
+                        const mimeType = msg.imageUrl.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+                        parts.push({ inline_data: { mime_type: mimeType, data: msg.imageUrl.split(',')[1] } });
+                    }
+
+                    if (parts.length === 0) return null;
+                    return { role, parts };
                 };
                 
                 const contents = [
+                    // Gemini没有system角，我们用user/model对话来模拟
                     { role: 'user', parts: [{ text: finalSystemPrompt }] },
                     { role: 'model', parts: [{ text: '好的，我会严格遵守以上所有指令。' }] },
                     ...history.map(formatForGemini).filter(Boolean)
                 ];
-                return { contents, "generationConfig": { "temperature": parseFloat(elements.temperatureSlider.value), "topP": parseFloat(elements.topPSlider.value) } };
 
-            } else {
+                return { 
+                    contents, 
+                    "generationConfig": { 
+                        "temperature": parseFloat(elements.temperatureSlider.value), 
+                        "topP": parseFloat(elements.topPSlider.value) 
+                    } 
+                };
+
+            } else { // OpenAI 的逻辑
                 const formatForOpenAI = (msg) => {
                     if (!msg || typeof msg !== 'object' || msg.type === 'system' || typeof msg.sender !== 'string') return null;
                     const role = msg.sender === 'user' ? 'user' : 'assistant';
-                    let content = msg.llmContent || msg.text || '';
+                    
                     if (msg.sender === 'user' && msg.type === 'image' && msg.imageUrl) {
-                        const imageContent = [
-                            { type: 'text', text: content || '用户发送了一张图片。' },
+                        const content = [
+                            { type: 'text', text: msg.llmContent || msg.text || '用户发送了一张图片。' },
                             { type: 'image_url', image_url: { url: msg.imageUrl } }
                         ];
-                        return { role, content: imageContent };
+                        return { role, content };
                     }
+
+                    const content = msg.llmContent || msg.text || '';
                     if (!content.trim()) return null;
                     return { role, content };
                 };
@@ -1519,7 +1536,6 @@ When the user sends you a transfer, you MUST first respond with a 'text' message
                 return { model, messages, stream: false, temperature: parseFloat(elements.temperatureSlider.value), top_p: parseFloat(elements.topPSlider.value) };
             }
         };
-
 
               // --- IndexedDB (相册) 帮助函数 ---
         const DB_NAME = 'AI_Boyfriend_ImageStore';
@@ -1677,26 +1693,31 @@ When the user sends you a transfer, you MUST first respond with a 'text' message
 
         // 只有在点击“保存设置”时，我们才从UI更新这些值。
         // 在普通发消息时，我们使用内存中已有的值，避免了读取不存在元素的错误。
-        const backupData = {
-            version: '1.1',
-            characterSets,
-            groupChats,
-            currentChat,
-            userMomentsProfile,
-            globalSettings: {
-                ...currentGlobalSettings, // 先加载已有的设置
-                apiBaseUrl: elements.apiBaseUrlInput.value, // 这些是安全的，可以随时读取
-                apiKey: elements.apiKeyInput.value,
-                model: elements.modelSelect.value,
-                fontFamily: elements.fontSelect.value,
-                advancedBubbleStyles: elements.advancedBubbleStylesInput.value,
-                temperature: parseFloat(elements.temperatureSlider.value),
-                topP: parseFloat(elements.topPSlider.value),
-                customFontName: elements.customFontNameInput.value,
-                customFontUrl: elements.customFontUrlInput.value,
-                presets: globalPresets
-            }
-        };
+           const backupData = {
+        version: '1.1',
+        characterSets,
+        groupChats,
+        currentChat,
+        userMomentsProfile,
+        globalSettings: {
+            ...currentGlobalSettings,
+            apiBaseUrl: elements.apiBaseUrlInput.value, 
+            apiKey: elements.apiKeyInput.value,
+            model: elements.modelSelect.value,
+            fontFamily: elements.fontSelect.value,
+            advancedBubbleStyles: elements.advancedBubbleStylesInput.value,
+            temperature: parseFloat(elements.temperatureSlider.value),
+            topP: parseFloat(elements.topPSlider.value),
+            customFontName: elements.customFontNameInput.value,
+            customFontUrl: elements.customFontUrlInput.value,
+            presets: globalPresets,
+            // --- 新增的保存代码在这里！ ---
+            uiScale: parseFloat(elements.uiScaleSlider.value) / 100,
+            fontSize: parseInt(elements.fontSizeSlider.value),
+            bubblePadding: parseInt(elements.bubbleSizeSlider.value),
+            realTimeAwareness: elements.realTimeAwarenessToggle.checked
+        }
+    };
         
         const processedData = await processObjectForSaving(backupData);
         localStorage.setItem('aiBoyfriendBackup_v7_meta', JSON.stringify(processedData));
@@ -2103,6 +2124,13 @@ const applyBubbleStyle = (style, character) => {
         };
         
         const addMessageToUI = (msg) => {
+                  // --- 新增代码开始 ---
+        // 如果消息类型是视频通话记录，就不要将它显示在界面上。
+        // 我们返回一个空的文档片段，这样就不会有任何东西被画出来了。
+        if (msg.type === 'video_log') {
+            return document.createDocumentFragment();
+        }
+        // --- 新增代码结束 ---
             const { sender, text, type = 'text', id, imageUrl, stickerUrl, transferAmount, transferMemo, transferCoverUrl, transferStatus, voiceDuration } = msg;
 
             const messageElement = document.createElement('div');
@@ -2265,26 +2293,28 @@ const applyBubbleStyle = (style, character) => {
             return `\n\n[Recent Social Media Posts (朋友圈动态) for context]:\n${context}`;
         };
 
-        const triggerAiResponse = async () => {
+                const triggerAiResponse = async () => {
             elements.receiveBtn.disabled = true; // Prevent spamming
             const chatData = getCurrentChatData();
             const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
             const apiKey = elements.apiKeyInput.value.trim();
             const model = elements.modelSelect.value;
 
-            if (!chatData || isVideoCallActive || !apiBaseUrl || !apiKey || !model) {
+            // 关键：在这里提前获取API类型，因为后面所有逻辑都依赖它
+            const isGemini = apiBaseUrl.includes('google');
+
+            if (!chatData || isVideoCallActive || !apiBaseUrl || (!apiKey && !isGemini) || !model) {
+                // Gemini 的 key 在URL里，所以可以不检查apiKey
                 elements.receiveBtn.disabled = false;
                 return;
             }
             
-            // TASK 6: Show notification instead of typing indicator
             const avatarForNotif = (chatData.config && chatData.config.aiAvatar) ? chatData.config.aiAvatar : (chatData.avatar || '');
             showTopNotification("对方正在快速积极地敲键盘哦…", avatarForNotif, 5000);
 
-
+            // --- 这部分准备"发送内容"的逻辑保持不变 ---
             let systemPrompt;
             let history;
-
             const globalSystemPrompt = DEFAULT_SYSTEM_PROMPT;
             const momentsContext = getRecentMomentsContext();
             const activePresets = globalPresets.filter(p => p.enabled && p.content.trim() !== '');
@@ -2295,7 +2325,7 @@ const applyBubbleStyle = (style, character) => {
                 const memorySize = character.config.memorySize || 50;
                 systemPrompt = `${presetsPrompt}${globalSystemPrompt}\n\n[Character Prompt]:\n${character.config.characterPrompt}\n\n[Your User's Profile]: ${character.userPrompt || `The user's name is ${userMomentsProfile.name}`}${momentsContext}`;
                 history = character.chatHistory.slice(-memorySize);
-                        } else { // Group chat
+            } else { 
                 const group = chatData;
                 const memorySize = 50;
                 const memberProfiles = group.memberIds.map(id => {
@@ -2306,7 +2336,6 @@ const applyBubbleStyle = (style, character) => {
                 const openPollsInfo = (group.polls || []).filter(p => p.status === 'open').map(p => `\n[Ongoing Poll: "${p.question}" (ID: ${p.pollId})]`).join('');
                 const openRedPacketsInfo = group.chatHistory.filter(m => m.type === 'red-packet' && m.status === 'open').map(p => `\n[Open Red Packet: "${p.memo}" (ID: ${p.packetId})]`).join('');
                 
-                // 【关键修正】重写了整个群聊提示词，并重新加入了核心的 globalSystemPrompt
                 const groupSystemPrompt = `${presetsPrompt}
 ${globalSystemPrompt}
 [!!当前为群聊模式，请遵守以下额外规则!!]
@@ -2338,40 +2367,63 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
     { "senderId": "char_B_456", "type": "text", "content": "我反对！" },
     { "senderId": "char_B_456", "type": "vote", "pollId": "poll_xyz", "option": "选项2" }
 ]`;
-                systemPrompt = groupSystemPrompt; //  把写好的群聊任务书，正式地放进名叫 systemPrompt 的信封里！
+                systemPrompt = groupSystemPrompt; 
                 history = group.chatHistory.slice(-memorySize);
             }
 
-                      // 自动日记触发器：检查昨天是否写了日记，如果没写就补上
+            // --- 自动日记触发器的日期修正 ---
             const yesterday = new Date();
             yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayString = yesterday.toISOString().slice(0, 10);
+            const year = yesterday.getFullYear();
+            const month = String(yesterday.getMonth() + 1).padStart(2, '0');
+            const day = String(yesterday.getDate()).padStart(2, '0');
+            const yesterdayString = `${year}-${month}-${day}`;
+
             if (currentChat.type === 'direct') {
                 const character = getCurrentCharacter();
                 if (character && (!character.diary || !character.diary.some(e => e.date === yesterdayString))) {
-                     // 异步触发，不阻塞当前对话
                     triggerAiDiaryEntry(character, yesterdayString);
                 }
             }
 
             const payload = getApiPayload(model, history, systemPrompt);
             
+            // --- 这是本次修改的核心：发送请求和处理回复 ---
             try {
-                const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { 
+                // 根据API类型准备不同的URL和请求头
+                const fetchUrl = isGemini 
+                    ? `${apiBaseUrl}/v1beta/models/${model}:generateContent?key=${apiKey}`
+                    : `${apiBaseUrl}/v1/chat/completions`;
+                const headers = isGemini 
+                    ? { 'Content-Type': 'application/json' }
+                    : { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` };
+
+                // 发送请求
+                const response = await fetch(fetchUrl, { 
                     method: 'POST', 
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, 
+                    headers: headers, 
                     body: JSON.stringify(payload) 
                 });
                 
                 if (!response.ok) { const errorData = await response.text(); throw new Error(`HTTP Error ${response.status}: ${errorData}`); }
                 const responseData = await response.json();
                 
+                // 检查API是否直接返回了错误信息
+                if (responseData.error) {
+                    throw new Error(`API Error: ${responseData.error.message || JSON.stringify(responseData.error)}`);
+                }
+
                 let content = '';
-                const isGemini = apiBaseUrl.includes('google');
                 if (isGemini) {
-                    content = responseData?.candidates?.[0]?.content?.parts?.[0]?.text;
+                    // 专门处理Gemini因为安全设置而不返回内容的情况
+                    if (!responseData.candidates || responseData.candidates.length === 0) {
+                        const safetyFeedback = responseData.promptFeedback?.blockReason || '未知安全原因';
+                        const finishReason = responseData.candidates?.[0]?.finishReason || '未知';
+                        throw new Error(`Gemini由于 (${safetyFeedback}/${finishReason}) 阻止了回复，请检查您的提示词或API安全设置。`);
+                    }
+                    content = responseData.candidates[0]?.content?.parts?.[0]?.text;
                 } else {
-                    content = responseData?.choices?.[0]?.message?.content;
+                    content = responseData.choices?.[0]?.message?.content;
                 }
 
                 if (content) {
@@ -2554,7 +2606,72 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
         
         // --- Video Call Logic (Fully Isolated) ---
         const addVideoChatMessageToUI = (msg) => { const msgEl = document.createElement('div'); msgEl.className = `video-chat-message ${msg.sender === 'user' ? 'user' : 'ai'}`; msgEl.innerHTML = msg.text.replace(/\*(.*?)\*/g, '<i>$1</i>'); elements.videoChatLog.appendChild(msgEl); scrollToBottom(elements.videoChatLog); };
-        const triggerVideoCallAIResponse = async () => { if (currentChat.type !== 'direct') return; const character = getCurrentCharacter(); if(!character) return; const { config } = character; const apiBaseUrl = elements.apiBaseUrlInput.value.trim(); const apiKey = elements.apiKeyInput.value.trim(); const model = elements.modelSelect.value; if (!apiBaseUrl || !apiKey || !model) return; elements.videoStatusText.textContent = `${config.characterName}正在输入...`; const videoCallSystemPrompt = `${config.characterPrompt}\n[Current Situation: You are in a video call with the user.]\n[Special Instruction]\n- Your entire reply must be plain text, strictly following the format: "*expression or action* dialogue content".\n- Keep the dialogue short and natural, around 20-30 characters.`; const videoHistory = Array.from(elements.videoChatLog.children).map(el => ({ role: el.classList.contains('user') ? 'user' : 'assistant', content: el.textContent })); const messagesPayload = [{ role: 'system', content: videoCallSystemPrompt }, ...videoHistory.slice(-10)]; try { const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages: messagesPayload }) }); if (!response.ok) throw new Error(`HTTP Error ${response.status}: ${await response.text()}`); const responseData = await response.json(); if (responseData?.choices?.[0]?.message) { addVideoChatMessageToUI({ sender: character.id, text: responseData.choices[0].message.content }); elements.videoStatusText.textContent = "通话中"; } else { throw new Error('Invalid video call API response format.'); } } catch (error) { addVideoChatMessageToUI({ sender: character.id, text: `(连接错误)` }); elements.videoStatusText.textContent = "连接错误"; } };
+                const triggerVideoCallAIResponse = async () => {
+            if (currentChat.type !== 'direct') return;
+            const character = getCurrentCharacter();
+            if(!character) return;
+            const { config } = character;
+            const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
+            const apiKey = elements.apiKeyInput.value.trim();
+            const model = elements.modelSelect.value;
+            const isGemini = apiBaseUrl.includes('google');
+
+            if (!apiBaseUrl || (!apiKey && !isGemini) || !model) return;
+            
+            elements.videoStatusText.textContent = `${config.characterName}正在输入...`;
+            const videoCallSystemPrompt = `${config.characterPrompt}\n[Current Situation: You are in a video call with the user.]\n[Special Instruction]\n- Your entire reply must be plain text, strictly following the format: "*expression or action* dialogue content".\n- Keep the dialogue short and natural, around 20-30 characters.`;
+            const videoHistory = Array.from(elements.videoChatLog.children).map(el => ({ role: el.classList.contains('user') ? 'user' : 'assistant', content: el.textContent }));
+            const messagesPayload = [{ role: 'system', content: videoCallSystemPrompt }, ...videoHistory.slice(-10)];
+            
+            // 为了适配Gemini，我们需要将简单的messagesPayload转换成我们标准化的格式
+            const historyForPayload = videoHistory.slice(-10).map(msg => ({
+                sender: msg.role === 'user' ? 'user' : 'ai',
+                text: msg.content
+            }));
+            const payload = getApiPayload(model, historyForPayload, videoCallSystemPrompt);
+
+            try {
+                const fetchUrl = isGemini
+                    ? `${apiBaseUrl}/v1beta/models/${model}:generateContent?key=${apiKey}`
+                    : `${apiBaseUrl}/v1/chat/completions`;
+                const headers = isGemini
+                    ? { 'Content-Type': 'application/json' }
+                    : { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` };
+
+                const response = await fetch(fetchUrl, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error(`HTTP Error ${response.status}: ${await response.text()}`);
+                const responseData = await response.json();
+                
+                if (responseData.error) {
+                    throw new Error(`API Error: ${responseData.error.message || JSON.stringify(responseData.error)}`);
+                }
+
+                let content = '';
+                if (isGemini) {
+                    if (!responseData.candidates || responseData.candidates.length === 0) {
+                        throw new Error(`Gemini由于安全原因阻止了回复。`);
+                    }
+                    content = responseData.candidates[0]?.content?.parts?.[0]?.text;
+                } else {
+                    content = responseData.choices?.[0]?.message?.content;
+                }
+
+                if (content) {
+                    addVideoChatMessageToUI({ sender: character.id, text: content });
+                    elements.videoStatusText.textContent = "通话中";
+                } else {
+                    throw new Error('Invalid video call API response format.');
+                }
+            } catch (error) {
+                addVideoChatMessageToUI({ sender: character.id, text: `(连接错误: ${error.message})` });
+                elements.videoStatusText.textContent = "连接错误";
+            }
+        };
         const startVideoCall = () => { if (currentChat.type !== 'direct') return; const character = getCurrentCharacter(); if(!character) return; const { config } = character; const apiBaseUrl = elements.apiBaseUrlInput.value.trim(); const apiKey = elements.apiKeyInput.value.trim(); const model = elements.modelSelect.value; if (!apiBaseUrl || !apiKey || !model) { alert('请先在设置中填写API信息。'); return; } isVideoCallActive = true; elements.videoMainView.src = config.aiAvatar; elements.videoSelfView.src = userMomentsProfile.chatAvatar; elements.videoCharacterAvatar.src = config.aiAvatar; elements.videoCharacterName.textContent = config.characterName; elements.videoStatusText.textContent = "正在呼叫..."; elements.videoChatLog.innerHTML = ''; elements.videoControls.innerHTML = `<button class="video-btn decline"><svg viewBox="0 0 24 24"><path d="M12 9c-1.6 0-3.15.25-4.62.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.1-2.69 1.8l-1.1-1.1c.99-.99 2.1-1.82 3.31-2.48C7.06 10.72 9.03 10 12 10c.05 0 .1 0 .16.01l2.4-2.4C13.84 7.23 12.95 7 12 7c-4.97 0-9 4.03-9 9H0c0-6.08 4.92-11 11-11 .34 0 .67.02 1 .05l-1.43 1.43C12.21 9.02 12.11 9 12 9zM1.39 4.22l2.27 2.27C2.63 7.62 2 8.91 2 10.31v3.1c1.53-.69 3.23-1.14 5.08-1.28l3.43 3.43c-3.11.3-6.01 1.54-7.96 3.4l1.41 1.41c2.19-2.19 5.08-3.48 8.04-3.83l2.84 2.84c.32.32.88.1.88-.36V13.5c.75-.24 1.46-.56 2.12-.95l2.07 2.07 1.41-1.41L2.81 2.81 1.39 4.22zM21 5h-2.59l4.59 4.59-1.41 1.41L12 1.41 2.81 11.59l-1.41-1.41L6 5.59V5h2v.59l4-4 4 4V5h2v3.41l2.29-2.29C23.36 5.64 22.25 5 21 5z"/></svg></button>`; elements.videoControls.querySelector('.decline').onclick = endVideoCall; elements.videoCallOverlay.classList.add('show'); addVideoChatMessageToUI({ sender: 'user', text: '[发起视频通话]' }); triggerVideoCallAIResponse(); };
         const handleIncomingVideoCall = (text) => { if (currentChat.type !== 'direct') return; const { config } = getCurrentCharacter(); elements.videoMainView.src = config.aiAvatar; elements.videoSelfView.src = userMomentsProfile.chatAvatar; elements.videoCharacterAvatar.src = config.aiAvatar; elements.videoCharacterName.textContent = config.characterName; elements.videoStatusText.textContent = text || "视频来电..."; elements.videoChatLog.innerHTML = ''; elements.videoControls.innerHTML = `<button class="video-btn accept"><svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.21-3.72-6.56-6.56l1.97-1.57c.27-.27.36-.66.24-1.01-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19c-.55 0-.99.45-.99.99 0 9.02 7.38 16.4 16.4 16.4.55 0 .99-.45.99-.99v-3.47c0-.54-.45-.99-.99-.99z"/></svg></button> <button class="video-btn decline"><svg viewBox="0 0 24 24"><path d="M12 9c-1.6 0-3.15.25-4.62.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.1-2.69 1.8l-1.1-1.1c.99-.99 2.1-1.82 3.31-2.48C7.06 10.72 9.03 10 12 10c.05 0 .1 0 .16.01l2.4-2.4C13.84 7.23 12.95 7 12 7c-4.97 0-9 4.03-9 9H0c0-6.08 4.92-11 11-11 .34 0 .67.02 1 .05l-1.43 1.43C12.21 9.02 12.11 9 12 9zM1.39 4.22l2.27 2.27C2.63 7.62 2 8.91 2 10.31v3.1c1.53-.69 3.23-1.14 5.08-1.28l3.43 3.43c-3.11.3-6.01 1.54-7.96 3.4l1.41 1.41c2.19-2.19 5.08-3.48 8.04-3.83l2.84 2.84c.32.32.88.1.88-.36V13.5c.75-.24 1.46-.56 2.12-.95l2.07 2.07 1.41-1.41L2.81 2.81 1.39 4.22zM21 5h-2.59l4.59 4.59-1.41 1.41L12 1.41 2.81 11.59l-1.41-1.41L6 5.59V5h2v.59l4-4 4 4V5h2v3.41l2.29-2.29C23.36 5.64 22.25 5 21 5z"/></svg></button>`; elements.videoControls.querySelector('.accept').onclick = () => { isVideoCallActive = true; elements.videoStatusText.textContent = "已接通"; elements.videoControls.innerHTML = elements.videoControls.innerHTML.replace(/<button class="video-btn accept">.*?<\/button>/, ''); addVideoChatMessageToUI({sender:'user', text:'[接听了视频通话]'}); triggerVideoCallAIResponse(); }; elements.videoControls.querySelector('.decline').onclick = () => { elements.videoCallOverlay.classList.remove('show'); }; elements.videoCallOverlay.classList.add('show'); };
         const endVideoCall = () => {
@@ -2581,7 +2698,7 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
 			elements.videoCallOverlay.classList.remove('show');
 		};
         
-        const showMindVoice = async () => {
+                const showMindVoice = async () => {
             if (currentChat.type !== 'direct') return;
             const character = getCurrentCharacter();
             if (!character) return;
@@ -2589,7 +2706,9 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
             const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
             const apiKey = elements.apiKeyInput.value.trim();
             const model = elements.modelSelect.value;
-            if (!apiBaseUrl || !apiKey || !model) {
+            const isGemini = apiBaseUrl.includes('google');
+
+            if (!apiBaseUrl || (!apiKey && !isGemini) || !model) {
                 elements.mindVoiceContent.textContent = '请先在设置中填写API信息。';
                 elements.mindVoiceModal.classList.add('show');
                 return;
@@ -2611,26 +2730,39 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
             const payload = getApiPayload(model, chatHistory.slice(-config.memorySize), mindVoiceSystemPrompt);
 
             try {
-                const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, 
-                    body: JSON.stringify(payload) 
+                const fetchUrl = isGemini
+                    ? `${apiBaseUrl}/v1beta/models/${model}:generateContent?key=${apiKey}`
+                    : `${apiBaseUrl}/v1/chat/completions`;
+                const headers = isGemini
+                    ? { 'Content-Type': 'application/json' }
+                    : { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` };
+
+                const response = await fetch(fetchUrl, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(payload)
                 });
+
                 if (!response.ok) throw new Error(`服务器错误 ${response.status}: ${await response.text()}`);
                 const responseData = await response.json();
                 
+                if (responseData.error) {
+                    throw new Error(`API返回错误: ${responseData.error.message || JSON.stringify(responseData.error)}`);
+                }
+
                 let content = '';
-                const isGemini = apiBaseUrl.includes('google');
                 if (isGemini) {
-                    content = responseData?.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (!responseData.candidates || responseData.candidates.length === 0) {
+                        const safetyFeedback = responseData.promptFeedback?.blockReason || '未知';
+                        throw new Error(`Gemini由于安全原因 (${safetyFeedback}) 阻止了回复。`);
+                    }
+                    content = responseData.candidates[0]?.content?.parts?.[0]?.text;
                 } else {
-                    content = responseData?.choices?.[0]?.message?.content;
+                    content = responseData.choices?.[0]?.message?.content;
                 }
 
                 if (content) {
                     elements.mindVoiceContent.textContent = content;
-                } else if (responseData.error) {
-                    throw new Error(`API返回错误: ${responseData.error.message}`);
                 } else {
                     throw new Error('API没有返回有效的心声内容。');
                 }
@@ -2847,12 +2979,14 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
         }, (i + 1) * 4000 + Math.random() * 2000); 
     }
 };
-            const triggerAiMomentComment = async (moment, commenterId, momentType) => {
+                        const triggerAiMomentComment = async (moment, commenterId, momentType) => {
                 const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
                 const apiKey = elements.apiKeyInput.value.trim();
                 const model = elements.modelSelect.value;
                 const commenterChar = characterSets.find(c => c.id === commenterId);
-                if (!apiBaseUrl || !apiKey || !model || !commenterChar) return;
+                const isGemini = apiBaseUrl.includes('google');
+
+                if (!apiBaseUrl || (!apiKey && !isGemini) || !model || !commenterChar) return;
                 
                 const postedByChar = characterSets.find(c => c.id === moment.senderId);
                 const postedBy = moment.senderId === 'user' ? (userMomentsProfile.name || '我') : (postedByChar?.config.characterName || '一位朋友');
@@ -2864,18 +2998,44 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
 [输出格式]: 你的回复必须是JSON数组，里面只包含一个对象，像这样:
 [{"type": "moment_comment", "momentId": "${moment.id}", "comment_text": "你的评论内容"}]
 绝对不要在JSON数组前后添加任何多余的文字。`;
+                
                 const payload = getApiPayload(model, [], prompt);
+                
                 try {
-                    const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify(payload) });
+                    const fetchUrl = isGemini
+                        ? `${apiBaseUrl}/v1beta/models/${model}:generateContent?key=${apiKey}`
+                        : `${apiBaseUrl}/v1/chat/completions`;
+                    const headers = isGemini
+                        ? { 'Content-Type': 'application/json' }
+                        : { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` };
+
+                    const response = await fetch(fetchUrl, {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify(payload)
+                    });
+
                     if (!response.ok) { console.error("AI comment failed: ", await response.text()); return; }
                     const responseData = await response.json();
-                    if (responseData?.choices?.[0]?.message?.content) {
+                    
+                    if (responseData.error) throw new Error(responseData.error.message);
+
+                    let rawContent = '';
+                     if (isGemini) {
+                        if (!responseData.candidates || responseData.candidates.length === 0) return; // 静默失败
+                        rawContent = responseData.candidates[0]?.content?.parts?.[0]?.text;
+                    } else {
+                        rawContent = responseData.choices?.[0]?.message?.content;
+                    }
+
+                    if (rawContent) {
                         let parsed;
                         try { 
-                            const jsonMatch = responseData.choices[0].message.content.match(/\[\s*\{.*\}\s*\]/s);
-                            parsed = JSON.parse(jsonMatch ? jsonMatch[0] : responseData.choices[0].message.content);
-                        } catch (e) { return; }
-                        const action = parsed[0];
+                            const jsonMatch = rawContent.match(/\[\s*\{.*\}\s*\]/s);
+                            parsed = JSON.parse(jsonMatch ? jsonMatch[0] : rawContent);
+                        } catch (e) { console.error("Failed to parse AI moment comment:", e); return; }
+                        
+                        const action = Array.isArray(parsed) ? parsed[0] : parsed;
                         if (action && action.type === 'moment_comment' && action.comment_text) {
                             addCommentOrReplyByAI('comment', moment.id, action.comment_text, commenterId, null, momentType);
                         }
@@ -2883,12 +3043,14 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
                 } catch (error) { console.error("Moment comment AI trigger error:", error); }
             };
 
-            const triggerAiMomentReply = async (moment, commentToReply, replierId, momentType) => {
+                        const triggerAiMomentReply = async (moment, commentToReply, replierId, momentType) => {
                 const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
                 const apiKey = elements.apiKeyInput.value.trim();
                 const model = elements.modelSelect.value;
                 const replierChar = characterSets.find(c => c.id === replierId);
-                if (!apiBaseUrl || !apiKey || !model || !replierChar) return;
+                const isGemini = apiBaseUrl.includes('google');
+
+                if (!apiBaseUrl || (!apiKey && !isGemini) || !model || !replierChar) return;
                 
                 const originalPosterChar = characterSets.find(c => c.id === moment.senderId);
                 const originalPosterName = moment.senderId === 'user' ? (userMomentsProfile.name || '我') : (originalPosterChar?.config.characterName || '一位朋友');
@@ -2902,13 +3064,39 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
 [输出格式]: 你的回复必须是JSON数组，里面只包含一个对象，像这样:
 [{"type": "moment_reply", "momentId": "${moment.id}", "commentId": "${commentToReply.id}", "reply_text": "你的回复内容"}]
 绝对不要在JSON数组前后添加任何多余的文字。`;
+                
                 const payload = getApiPayload(model, [], prompt);
+                
                 try {
-                    const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify(payload) });
+                    const fetchUrl = isGemini
+                        ? `${apiBaseUrl}/v1beta/models/${model}:generateContent?key=${apiKey}`
+                        : `${apiBaseUrl}/v1/chat/completions`;
+                    const headers = isGemini
+                        ? { 'Content-Type': 'application/json' }
+                        : { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` };
+
+                    const response = await fetch(fetchUrl, {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify(payload)
+                    });
+
                     if (!response.ok) { console.error("AI回复评论失败: ", await response.text()); return; }
                     const responseData = await response.json();
-                     if (responseData?.choices?.[0]?.message?.content) {
-                        processAiResponse(responseData.choices[0].message.content);
+                     
+                    if (responseData.error) throw new Error(responseData.error.message);
+                    
+                    let rawContent = '';
+                    if (isGemini) {
+                        if (!responseData.candidates || responseData.candidates.length === 0) return;
+                        rawContent = responseData.candidates[0]?.content?.parts?.[0]?.text;
+                    } else {
+                        rawContent = responseData.choices?.[0]?.message?.content;
+                    }
+
+                    if (rawContent) {
+                        // 由于回复也是通过主聊天流程处理的，我们直接调用processAiResponse
+                        processAiResponse(rawContent);
                     }
                 } catch (error) { console.error("AI触发回复时出错:", error); }
             };
@@ -3077,30 +3265,38 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
             </div>`;
     };
         
-            const renderComments = (comments, post, isReply = false) => {
-        if (!comments || comments.length === 0) return '';
-        const containerClass = isReply ? 'replies' : '';
-        return `<div class="${containerClass}">
-            ${comments.map(comment => {
-                // TASK 11: Correctly find character for comment
-                const commenterChar = comment.sender !== 'user' ? characterSets.find(char => char.id === comment.sender) : null;
-                const commenterName = comment.sender === 'user' ? userMomentsProfile.name : commenterChar?.config.characterName || '一位朋友';
-                
-                const repliedToChar = comment.replyTo ? characterSets.find(c => c.id === comment.replyTo) : null;
-                const repliedToUser = comment.replyTo ? (comment.replyTo === 'user' ? userMomentsProfile.name : repliedToChar?.config.characterName || '一位朋友') : null;
+                    const renderComments = (comments, post, isReply = false) => {
+            if (!comments || comments.length === 0) return '';
+            const containerClass = isReply ? 'replies' : '';
+            return `<div class="${containerClass}">
+                ${comments.map(comment => {
+                    // 查找发表评论的角色信息
+                    const commenterChar = characterSets.find(char => char.id === comment.sender);
+                    const commenterName = comment.sender === 'user' 
+                        ? (userMomentsProfile.name || '我') 
+                        : (commenterChar?.config.characterName || '一位朋友');
 
-                return `
-                    <div class="comment" data-comment-id="${comment.id}" data-sender-id="${comment.sender}">
-                        <span class="comment-user">${commenterName}</span>
-                        ${repliedToUser ? ` <span style="color: #555;">回复</span> <span class="comment-user">${repliedToUser}</span>` : ''}:
-                        <span class="comment-text">${comment.text}</span>
-                        <button class="delete-comment-btn" title="删除评论" style="background:none; border:none; color:#aaa; cursor:pointer; font-size:1.2em; padding: 0 5px;">×</button>
-                        ${renderComments(comment.replies, post, true)}
-                    </div>
-                `;
-            }).join('')}
-        </div>`;
-    };
+                    // 查找被回复的角色信息
+                    let repliedToName = null;
+                    if (comment.replyTo) {
+                        const repliedToChar = characterSets.find(char => char.id === comment.replyTo);
+                        repliedToName = comment.replyTo === 'user' 
+                            ? (userMomentsProfile.name || '我') 
+                            : (repliedToChar?.config.characterName || '一位朋友');
+                    }
+
+                    return `
+                        <div class="comment" data-comment-id="${comment.id}" data-sender-id="${comment.sender}">
+                            <span class="comment-user">${commenterName}</span>
+                            ${repliedToName ? ` <span style="color: #555;">回复</span> <span class="comment-user">${repliedToName}</span>` : ''}:
+                            <span class="comment-text">${comment.text}</span>
+                            <button class="delete-comment-btn" title="删除评论" style="background:none; border:none; color:#aaa; cursor:pointer; font-size:1.2em; padding: 0 5px;">×</button>
+                            ${renderComments(comment.replies, post, true)}
+                        </div>
+                    `;
+                }).join('')}
+            </div>`;
+        };
 
         const addCommentOrReplyByAI = (type, momentId, text, senderId, targetCommentId, momentType) => {
     let momentSource;
@@ -3272,15 +3468,18 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
 
         // --- Diary Logic ---
         const openDiaryModal = async () => { if (currentChat.type !== 'direct') return; const character = getCurrentCharacter(); if (!character) return; elements.diaryHeader.textContent = `${character.config.characterName}的日记本`; renderDiary(character); elements.diaryModal.classList.add('show'); };
-        const triggerAiDiaryEntry = async (character, date) => {
+                const triggerAiDiaryEntry = async (character, date) => {
             try {
                  const { config, chatHistory } = character;
                 const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
                 const apiKey = elements.apiKeyInput.value.trim();
                 const model = elements.modelSelect.value;
-                if (!apiBaseUrl || !apiKey || !model) {
-                    elements.diaryEntries.innerHTML = '<p>请先在设置中填写API信息。</p>';
-                    return;
+                const isGemini = apiBaseUrl.includes('google');
+
+                if (!apiBaseUrl || (!apiKey && !isGemini) || !model) {
+                    // 不在界面上显示错误，只在控制台记录
+                    console.error("无法触发AI写日记：API信息不完整。");
+                    return; 
                 }
 
                 const prompt = `[Role]: You are ${config.characterName}.
@@ -3290,13 +3489,36 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
 ABSOLUTELY NO other text, markdown, or explanations outside the JSON array.`;
                 
                 const payload = getApiPayload(model, chatHistory.slice(-config.memorySize), prompt);
-                const response = await fetch(`${apiBaseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify(payload) });
+                
+                const fetchUrl = isGemini
+                    ? `${apiBaseUrl}/v1beta/models/${model}:generateContent?key=${apiKey}`
+                    : `${apiBaseUrl}/v1/chat/completions`;
+                const headers = isGemini
+                    ? { 'Content-Type': 'application/json' }
+                    : { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` };
+
+                const response = await fetch(fetchUrl, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(payload)
+                });
+
                 if (!response.ok) throw new Error(`服务器返回错误: ${await response.text()}`);
                 const responseData = await response.json();
+                
+                if (responseData.error) {
+                    throw new Error(`API返回错误: ${responseData.error.message || JSON.stringify(responseData.error)}`);
+                }
+
                 let rawContent = '';
-                const isGemini = apiBaseUrl.includes('google');
-                if (isGemini) { rawContent = responseData?.candidates?.[0]?.content?.parts?.[0]?.text; } 
-                else { rawContent = responseData?.choices?.[0]?.message?.content; }
+                if (isGemini) {
+                    if (!responseData.candidates || responseData.candidates.length === 0) {
+                        throw new Error(`Gemini由于安全原因阻止了回复。`);
+                    }
+                    rawContent = responseData.candidates[0]?.content?.parts?.[0]?.text;
+                } else {
+                    rawContent = responseData.choices?.[0]?.message?.content;
+                }
                 
                 if (rawContent) {
                     let diaryText = null;
@@ -3307,14 +3529,25 @@ ABSOLUTELY NO other text, markdown, or explanations outside the JSON array.`;
                         if (action && action.type === 'diary_entry' && action.content) {
                             diaryText = action.content;
                         }
-                    } catch (e) { diaryText = rawContent.replace(/^```json\s*/, '').replace(/```$/, '').trim(); }
-                    if (diaryText) addDiaryEntry(character.id, diaryText, date);
-                    else throw new Error('API返回了有效但空的响应。');
-                } else if (responseData.error) {
-                    throw new Error(`API返回错误: ${responseData.error.message}`);
+                    } catch (e) { 
+                        // 如果解析失败，尝试直接从内容中提取
+                        diaryText = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
+                        // 这是一个备用方案，可能不总是完美
+                    }
+
+                    if (diaryText) {
+                         addDiaryEntry(character.id, diaryText, date);
+                    } else {
+                        throw new Error('API返回了有效但空的响应或无法解析的格式。');
+                    }
+                } else {
+                    throw new Error('API没有返回任何内容。');
                 }
             } catch (e) {
                 console.error("写日记时出错:", e);
+                // 可以在这里添加一个用户可见的错误提示，如果需要的话
+                const entryEl = elements.diaryEntries.querySelector(`.diary-entry[data-date="${date}"] .diary-content`);
+                if(entryEl) entryEl.textContent = `重写失败: ${e.message}`;
             }
         };
         const addDiaryEntry = (characterId, content, date) => {
@@ -3330,7 +3563,7 @@ ABSOLUTELY NO other text, markdown, or explanations outside the JSON array.`;
             saveAllData();
             if (elements.diaryModal.classList.contains('show')) renderDiary(character);
         };
-        const renderDiary = (character) => {
+                const renderDiary = (character) => {
             const entries = (character.diary || []).sort((a,b) => new Date(b.date) - new Date(a.date));
             if (entries.length === 0) {
                  elements.diaryEntries.innerHTML = '<p style="text-align:center; color:#999;">日记本还是空的。</p>';
@@ -3339,6 +3572,7 @@ ABSOLUTELY NO other text, markdown, or explanations outside the JSON array.`;
                     <div class="diary-entry" data-date="${entry.date}">
                         <div class="diary-date">${entry.date}</div>
                         <div class="diary-content">${entry.content.replace(/\n/g, '<br>')}</div>
+                        <button class="diary-regenerate-btn" title="为这一天重写日记">✏️</button>
                         <button class="diary-delete-btn" title="删除这篇日记">×</button>
                     </div>
                 `).join('');
@@ -3358,7 +3592,17 @@ ABSOLUTELY NO other text, markdown, or explanations outside the JSON array.`;
             }
             await triggerAiDiaryEntry(character, date);
         };
-
+        const handleRegenerateDiaryEntry = async (date) => {
+            if (!confirm(`您确定要让AI为 ${date} 重写一篇日记吗？原来的内容将会被覆盖。`)) return;
+            const character = getCurrentCharacter();
+            if (!character) return;
+            const entryEl = elements.diaryEntries.querySelector(`.diary-entry[data-date="${date}"]`);
+            if (entryEl) {
+                const contentEl = entryEl.querySelector('.diary-content');
+                if(contentEl) contentEl.innerHTML = '正在重写中...';
+            }
+            await triggerAiDiaryEntry(character, date);
+        };
 
         // --- Data Import/Export ---
         const exportData = async () => { await saveCurrentSettings(); await saveAllData(); const data = localStorage.getItem('aiBoyfriendBackup_v7_meta'); const blob = new Blob([data], {type: 'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `ai_boyfriend_backup_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); alert('全部数据已导出！'); };
@@ -3477,11 +3721,16 @@ const migrateDataToV7 = (oldData) => {
                   elements.diaryModalCloseBtn.onclick = () => closeModal(elements.diaryModal);
                   
                   // TASK 2: Add event listener for diary deletion
+                                      // --- 升级后的日记事件监听器 ---
                    elements.diaryEntries.addEventListener('click', (e) => {
-                       const deleteBtn = e.target.closest('.diary-delete-btn');
-                       if (deleteBtn) {
-                           const entryEl = deleteBtn.closest('.diary-entry');
-                           if (entryEl) handleDeleteDiaryEntry(entryEl.dataset.date);
+                       const entryEl = e.target.closest('.diary-entry');
+                       if (!entryEl) return;
+                       
+                       const date = entryEl.dataset.date;
+                       if (e.target.closest('.diary-delete-btn')) {
+                           handleDeleteDiaryEntry(date);
+                       } else if (e.target.closest('.diary-regenerate-btn')) {
+                           handleRegenerateDiaryEntry(date);
                        }
                    });
 
@@ -3496,7 +3745,47 @@ const migrateDataToV7 = (oldData) => {
                   elements.actionSendSticker.onclick = () => { handleStickerSend(); toggleActionPanel(true); };
                   elements.actionVideoCall.onclick = () => { startVideoCall(); toggleActionPanel(true); };
                   elements.actionCreatePoll.onclick = () => { openCreatePollModal(); toggleActionPanel(true); };
-                  elements.fetchModelsBtn.onclick = async () => { const baseUrl = elements.apiBaseUrlInput.value.trim(); const apiKey = elements.apiKeyInput.value.trim(); if (!baseUrl || !apiKey) { alert('请输入API端点和API密钥'); return; } elements.fetchModelsBtn.textContent = '获取中...'; elements.fetchModelsBtn.disabled = true; try { const response = await fetch(`${baseUrl}/v1/models`, { headers: { 'Authorization': `Bearer ${apiKey}` } }); if (!response.ok) throw new Error(`获取模型列表失败, Status: ${response.status} ${await response.text()}`); const data = await response.json(); elements.modelSelect.innerHTML = ''; const models = data.data || data.models || data; if (!Array.isArray(models)) throw new Error('API返回的模型列表格式不正确'); models.sort((a, b) => (a.id || a.name).localeCompare(b.id || b.name)).forEach(model => { const modelId = model.id || model.name; if (modelId) elements.modelSelect.add(new Option(modelId, modelId)); }); const currentModel = elements.modelSelect.value; if(currentModel) elements.modelSelect.value = currentModel; } catch (error) { alert(`获取模型失败: ${error.message}`); } finally { elements.fetchModelsBtn.textContent = '获取模型列表'; elements.fetchModelsBtn.disabled = false; } };
+                                    elements.fetchModelsBtn.onclick = async () => {
+                      const baseUrl = elements.apiBaseUrlInput.value.trim();
+                      const apiKey = elements.apiKeyInput.value.trim();
+                      if (!baseUrl || !apiKey) { alert('请输入API端点和API密钥'); return; }
+                      elements.fetchModelsBtn.textContent = '获取中...';
+                      elements.fetchModelsBtn.disabled = true;
+                      try {
+                          const isGemini = baseUrl.includes('google');
+                          const fetchUrl = isGemini ? `${baseUrl}/v1beta/models?key=${apiKey}` : `${baseUrl}/v1/models`;
+                          const headers = isGemini ? {} : { 'Authorization': `Bearer ${apiKey}` };
+                          
+                          const response = await fetch(fetchUrl, { headers });
+                          if (!response.ok) throw new Error(`获取模型列表失败, Status: ${response.status} ${await response.text()}`);
+                          
+                          const data = await response.json();
+                          elements.modelSelect.innerHTML = '';
+                          
+                          const models = data.models || data.data || data; // 兼容Gemini和OpenAI
+                          if (!Array.isArray(models)) throw new Error('API返回的模型列表格式不正确');
+                          
+                          models.forEach(model => {
+                              const modelId = model.name ? model.name.replace('models/', '') : model.id; // 兼容Gemini和OpenAI
+                              if (modelId) {
+                                  // 对Gemini做特殊过滤，只显示gemini开头的可生成模型
+                                  if(isGemini && model.supportedGenerationMethods?.includes('generateContent') && modelId.startsWith('gemini')) {
+                                      elements.modelSelect.add(new Option(modelId, modelId));
+                                  } else if (!isGemini) {
+                                      elements.modelSelect.add(new Option(modelId, modelId));
+                                  }
+                              }
+                          });
+                          const currentModel = elements.modelSelect.value;
+                          if(currentModel) elements.modelSelect.value = currentModel;
+
+                      } catch (error) {
+                          alert(`获取模型失败: ${error.message}`);
+                      } finally {
+                          elements.fetchModelsBtn.textContent = '获取模型列表';
+                          elements.fetchModelsBtn.disabled = false;
+                      }
+                  };
                   elements.themeSelector.onclick = (e) => { const t = e.target.closest('.theme-option'); if (t) applyTheme(t.dataset.theme, getCurrentChatData()); };
                   elements.fontSelect.addEventListener('change', () => applyFont(elements.fontSelect.value));   
                   const avatarCompression = { compress: true, quality: 0.7, maxWidth: 300, maxHeight: 300 };
