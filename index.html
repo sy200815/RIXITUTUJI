@@ -2467,20 +2467,18 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
             }
         };
         
-                const processAiResponse = (rawText) => {
+                        const processAiResponse = (rawText) => {
             let responseArray = [];
             try {
-                // 尝试清理并解析AI返回的文本为JSON数组
                 const cleanedText = rawText.trim().replace(/^```json\s*/, '').replace(/\s*```$/, '');
                 if (cleanedText.startsWith('[') && cleanedText.endsWith(']')) {
                     responseArray = JSON.parse(cleanedText);
                 } else if (cleanedText.startsWith('{') && cleanedText.endsWith('}')) {
-                    responseArray = [JSON.parse(cleanedText)]; // 如果是单个对象，也包装成数组
+                    responseArray = [JSON.parse(cleanedText)];
                 } else {
                     throw new Error("Response is not a valid JSON array or object.");
                 }
             } catch (e) {
-                 // 如果所有解析都失败，则作为纯文本处理
                  console.error("AI响应解析彻底失败。收到的原始文本:", rawText);
                  addMessage({ sender: 'system', text: `AI响应格式错误，将作为纯文本处理。`, type: 'system' });
                  const senderId = (currentChat.type === 'direct') ? currentChat.id : null;
@@ -2490,17 +2488,14 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
                  return;
             }
 
-            if (!Array.isArray(responseArray) || responseArray.length === 0) {
-                console.error("解析后的responseArray不是一个有效的数组或为空。");
-                return;
-            }
+            if (!Array.isArray(responseArray) || responseArray.length === 0) { return; }
 
             let dataChanged = false;
             let aiMemoryInjections = {}; 
 
             responseArray.forEach(msgObj => {
-                if (!msgObj.type) {
-                    // 兼容旧格式的字段
+                // ... (兼容旧格式的代码保持不变) ...
+                 if (!msgObj.type) {
                     if (msgObj.packetId || msgObj.redPacketId) msgObj.type = 'grab_red_packet';
                     else if (msgObj.pollId && msgObj.option) msgObj.type = 'vote';
                     else if (msgObj.will_like === true) msgObj.type = 'moment_like';
@@ -2508,10 +2503,12 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
                     else if (msgObj.momentId && msgObj.reply_text) msgObj.type = 'moment_reply';
                     else if (msgObj.transferId && msgObj.decision) msgObj.type = 'acknowledge_transfer';
                 }
+
+                // --- 【决定性修复 2：优先使用AI自己的签名】 ---
+                // 只有在AI真的、真的忘了签名的情况下，我们才使用备用方案
                 const senderId = msgObj.senderId || currentChat.id;
                 const momentType = currentChat.type === 'group' ? 'group' : 'direct';
                 
-                // --- 数据处理部分 ---
                 switch(msgObj.type) {
                     case 'vote': if (senderId) { handleAiVote_dataOnly(msgObj); dataChanged = true; } break;
                     case 'grab_red_packet':
@@ -2538,7 +2535,7 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
                 if (elements.momentsOverlay.classList.contains('show')) renderMoments();
             }
 
-            // --- 界面显示部分 ---
+            // --- 界面显示部分 (这部分没有逻辑错误，保持原样) ---
             responseArray.forEach((msgObj, index) => {
                 const isAction = ['vote', 'grab_red_packet', 'moment_like', 'moment_comment', 'moment_reply', 'acknowledge_transfer'].includes(msgObj.type);
                 if (isAction) return;
@@ -2563,21 +2560,16 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
                         case 'transfer': addMessage({ ...messageData, type: 'transfer', transferAmount: msgObj.amount, transferMemo: msgObj.memo, transferCoverUrl: `https://files.catbox.moe/qwu221.jpg`, transferStatus: 'pending' }); break;
                         case 'video-call-request': if (currentChat.type === 'direct') handleIncomingVideoCall(msgObj.content); break;
                         case 'post_moment': if (character) { const momentType = currentChat.type === 'group' ? 'group' : 'direct'; addMomentByAI(character.id, { content: msgObj.content, image_query: msgObj.image_query }, momentType); } break;
-                        
-                        // --- 【决定性修复】 ---
                         case 'diary_entry':
                             if (character && msgObj.content) {
-                                // 在这里，我们自己动手计算出“今天”的日期
                                 const today = new Date();
                                 const year = today.getFullYear();
                                 const month = String(today.getMonth() + 1).padStart(2, '0');
                                 const day = String(today.getDate()).padStart(2, '0');
                                 const todayString = `${year}-${month}-${day}`;
-                                // 把“今天”的日期一起交给厨师！
                                 addDiaryEntry(character.id, msgObj.content, todayString);
                             }
                             break;
-                        // --- 修复结束 ---
                     }
                 }, index * 1200 + (dataChanged ? 200 : 0));
             });
@@ -3074,26 +3066,27 @@ Do NOT leave the comment_text empty. Do NOT add any text, markdown, or explanati
                     console.error("【重大错误】Moment comment AI trigger error:", error); 
                 }
             };
-                                                                                                                                    const triggerAiMomentReply = async (moment, commentToReply, replierId, momentType) => {
+                                                                                                                                                const triggerAiMomentReply = async (moment, commentToReply, replierId, momentType) => {
                 try {
                     const replierChar = characterSets.find(c => c.id === replierId);
                     if (!replierChar) return;
-                    
+
                     const originalPosterName = characterSets.find(c => c.id === moment.senderId)?.config.characterName || (userMomentsProfile.name || '我');
                     const personBeingRepliedToName = characterSets.find(c => c.id === commentToReply.sender)?.config.characterName || (userMomentsProfile.name || '我');
                     const chatData = getCurrentChatData();
                     const recentHistory = chatData ? chatData.chatHistory.slice(-5) : [];
                     const historyContext = recentHistory.map(msg => `${msg.sender === 'user' ? 'User' : 'AI'}: ${msg.text || '(非文本消息)'}`).join('\n');
                     
-                    const finalPrompt = `[Role]: You are ${replierChar.config.characterName}. Your persona is: ${replierChar.config.characterPrompt}
+                    // --- 【决定性修复 1：强制AI签名】 ---
+                    const finalPrompt = `[Role]: You are ${replierChar.config.characterName} (ID: ${replierId}). Your persona is: ${replierChar.config.characterPrompt}
 [Recent Conversation Context]:
 ${historyContext}
 [Current Situation]: On ${originalPosterName}'s social media post, ${personBeingRepliedToName} left a comment saying: "${commentToReply.text}".
 [Task]: Now, write a short, natural, first-person reply in Simplified Chinese to ${personBeingRepliedToName}'s comment.
-[CRITICAL OUTPUT FORMAT]: Your entire response MUST be a valid JSON array containing a single object, like this example:
-[{"type": "moment_reply", "momentId": "${moment.id}", "commentId": "${commentToReply.id}", "reply_text": "Your actual reply text here."}]
+[CRITICAL OUTPUT FORMAT]: Your entire response MUST be a valid JSON array containing a single object. It MUST include your own senderId. Example:
+[{"senderId": "${replierId}", "type": "moment_reply", "momentId": "${moment.id}", "commentId": "${commentToReply.id}", "reply_text": "Your actual reply text here."}]
 Do NOT leave the reply_text empty. Do NOT add any text, markdown, or explanations outside the JSON array.`;
-
+                    
                     const payload = getApiPayload(elements.modelSelect.value, [], finalPrompt);
                     const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
                     const apiKey = elements.apiKeyInput.value.trim();
@@ -3104,12 +3097,12 @@ Do NOT leave the reply_text empty. Do NOT add any text, markdown, or explanation
                     
                     const response = await fetch(fetchUrl, { method: 'POST', headers: headers, body: JSON.stringify(payload) });
                     const rawText = await response.text();
-                    if (!response.ok) throw new Error(`API请求失败，官方报告 Status Code: ${response.status}`);
+                    if (!response.ok) throw new Error(`API请求失败: ${rawText}`);
 
                     const responseData = JSON.parse(rawText);
                     let aiResponseText = '';
                     if (isGemini) {
-                        if (!responseData.candidates || responseData.candidates.length === 0) { throw new Error("Gemini的candidates列表为空。"); }
+                        if (!responseData.candidates) { throw new Error("Gemini的candidates列表为空。"); }
                         aiResponseText = responseData.candidates[0].content.parts.map(part => part.text || '').join('');
                     } else {
                         aiResponseText = responseData.choices?.[0]?.message?.content;
@@ -3117,17 +3110,11 @@ Do NOT leave the reply_text empty. Do NOT add any text, markdown, or explanation
 
                     if (!aiResponseText) { throw new Error("AI的响应中没有有效的文本内容。"); }
                     
-                    // --- 【决定性修复】 ---
                     const cleanedJsonString = aiResponseText.trim().replace(/^```json\s*/, '').replace(/\s*```$/, '');
-                    // --- 修复结束 ---
                     
-                    const jsonAction = JSON.parse(cleanedJsonString);
+                    // 直接将带有正确senderId的JSON交给总管处理
+                    processAiResponse(cleanedJsonString);
                     
-                    if (jsonAction && Array.isArray(jsonAction) && jsonAction[0] && jsonAction[0].type === 'moment_reply' && jsonAction[0].reply_text && jsonAction[0].reply_text.trim() !== "") {
-                        processAiResponse(JSON.stringify(jsonAction));
-                    } else {
-                        console.error("最终解析出的JSON无效或内容为空。", jsonAction);
-                    }
                 } catch (error) { 
                     console.error("【重大错误】AI trigger reply error:", error); 
                 }
