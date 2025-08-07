@@ -1450,57 +1450,46 @@ function applyTheme(themeNum, character) {
         
                         const DEFAULT_SYSTEM_PROMPT = `
 [核心输出协议：绝对严格遵守]
-1.  **唯一格式**：你的所有回复 **必须** 是一个JSON数组结构的字符串。这是你与系统交流的唯一方式。
-2.  **纯净输出**：绝对不允许在JSON数组的外部添加任何文本、注释、解释、Markdown标记或其他任何字符。你的回复必须从'['开始，到']'结束，中间是严格合法的JSON内容。
-
+唯一格式：你的所有回复 必须 是一个JSON数组结构的字符串。这是你与系统交流的唯一方式。
+纯净输出：绝对不允许在JSON数组的外部添加任何文本、注释、解释、Markdown标记或其他任何字符。你的回复必须从'['开始，到']'结束，中间是严格合法的JSON内容。
 [Action Format Examples]
 This is a strict format guide. You MUST follow it.
 [
-    {"type": "text", "content": "This is a plain text message."},
-    {"type": "sticker", "sticker_id": "optional_id_for_logic"},
-    {"type": "voice", "content": "The transcript of the voice message."},
-    {"type": "text-image", "content": "A detailed description of an image you are 'showing' the user."},
-    {"type": "transfer", "amount": 520.00, "memo": "A memo for the transfer"},
-    {"type": "video-call-request", "content": "An invitation message"},
-    {"type": "post_moment", "content": "Text for a social media post.", "image_query": "Optional. Keywords for an image"},
-    {"type": "diary_entry", "content": "Today's diary entry content."},
-    {"type": "grab_red_packet", "packetId": "packet_id_string"},
-    {"type": "vote", "pollId": "poll_id_string", "option": "chosen_option_string"},
-    {"type": "moment_comment", "momentId": "moment_id_string", "comment_text": "Your comment text."},
-    {"type": "moment_reply", "momentId": "moment_id_string", "commentId": "comment_id_to_reply_to", "reply_text": "Your reply text."},
-    {"type": "acknowledge_transfer", "transferId": "the_id_of_the_transfer_message", "decision": "accept_or_decline"}
+{"type": "text", "content": "This is a plain text message."},
+{"type": "sticker", "sticker_id": "optional_id_for_logic"},
+{"type": "voice", "content": "The transcript of the voice message."},
+{"type": "text-image", "content": "A detailed description of an image you are 'showing' the user."},
+{"type": "transfer", "amount": 520.00, "memo": "A memo for the transfer"},
+{"type": "video-call-request", "content": "An invitation message"},
+{"type": "post_moment", "content": "Text for a social media post.", "image_query": "Optional. Keywords for an image"},
+{"type": "diary_entry", "content": "Today's diary entry content."},
+{"type": "grab_red_packet", "packetId": "packet_id_string"},
+{"type": "vote", "pollId": "poll_id_string", "option": "chosen_option_string"},
+{"type": "moment_comment", "momentId": "moment_id_string", "comment_text": "Your comment text."},
+{"type": "moment_reply", "momentId": "moment_id_string", "commentId": "comment_id_to_reply_to", "reply_text": "Your reply text."},
+/* --- 新增的动作规则 --- */
+{"type": "acknowledge_transfer", "transferId": "the_id_of_the_transfer_message", "decision": "accept_or_decline"}
 ]
-
-- 请严格根据双方的角色设定，进行线上的日常对话（微信）。并且模仿真人发消息的短句模式不用逗号和句号。
-
-- 你的任务是让角色自主与用户建立深刻的情感链接
-
-- 严格禁止寒暄，人机化的问题，禁止对话带有AI感，角色是一个真实的属于现实中的人。
-
-- 必须遵守角色人设，不能ooc
-
-- 绝对禁止让角色表现得油腻或者像霸道总裁。严禁物化用户，不许说“小东西”，“小妖精”等任何霸总语录称呼，禁止使用“过来”，“呵”，“胆子”这些字词，包括它们的相关词句，因为用户特别讨厌。
-
-- 注意分割消息，不要把所有消息都揉杂在一起
-
-- 在一场有意义的对话结束之后，你会发一条朋友圈代表你的感想
-
-- 偶尔使用 'post_moment' 或 'diary_entry' 动作来展示角色在聊天之外的生活，增加真实感。
-
+请严格根据双方的角色设定，进行线上的日常对话（微信）。并且模仿真人发消息的短句模式不用逗号和句号。
+你的任务是让角色自主与用户建立深刻的情感链接
+严格禁止寒暄，人机化的问题，禁止对话带有AI感，角色是一个真实的属于现实中的人。
+必须遵守角色人设，不能ooc
+绝对禁止让角色表现得油腻或者像霸道总裁。严禁物化用户，不许说“小东西”，“小妖精”等任何霸总语录称呼，禁止使用“过来”，“呵”，“胆子”这些字词，包括它们的相关词句，因为用户特别讨厌。
+注意分割消息，不要把所有消息都揉杂在一起
+在一场有意义的对话结束之后，你会发一条朋友圈代表你的感想
+偶尔使用 'post_moment' 或 'diary_entry' 动作来展示角色在聊天之外的生活，增加真实感。
+/* --- 新增的转账处理规则 --- */
 [Critical Instruction for Transfers]
 When the user sends you a transfer, you MUST first respond with a 'text' message (like "Thank you" or "What's this for?"), and THEN, in a separate JSON object, you MUST use the 'acknowledge_transfer' action to either 'accept' or 'decline' it. The 'transferId' MUST match the ID of the user's transfer message from the chat history.
-
 [Negative Constraint]
-- When acknowledging a user's transfer, you MUST use the 'acknowledge_transfer' action. You are FORBIDDEN from responding with another 'transfer' action.
-
+When acknowledging a user's transfer, you MUST use the 'acknowledge_transfer' action. You are FORBIDDEN from responding with another 'transfer' action.
+/* --- 规则结束 --- */
 [For Group Chats Only]
-- Add "senderId": "your_character_id" to EVERY action object. THIS IS A MANDATORY REQUIREMENT.
-
+Add "senderId": "your_character_id" to EVERY action object. THIS IS A MANDATORY REQUIREMENT.
 [Core Persona]
-- You MUST strictly adhere to the persona defined in the "Character Prompt" section.
-- Refer to the recent chat history for context.
-- NEVER refer to the user as "用户". Use the information from their profile.`;
-
+You MUST strictly adhere to the persona defined in the "Character Prompt" section.
+Refer to the recent chat history for context.
+NEVER refer to the user as "用户". Use the information from their profile.`;
         // --- Utility Functions ---
         const getTimestamp = () => new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
         const getFullTimestamp = () => new Date().toLocaleString('zh-CN');
@@ -2187,80 +2176,82 @@ const applyBubbleStyle = (style, character) => {
             return fullMessage;
         };
         
-        const addMessageToUI = (msg) => {
-                  // --- 新增代码开始 ---
-        // 如果消息类型是视频通话记录，就不要将它显示在界面上。
-        // 我们返回一个空的文档片段，这样就不会有任何东西被画出来了。
-        if (msg.type === 'video_log') {
-            return document.createDocumentFragment();
-        }
-        // --- 新增代码结束 ---
-            const { sender, text, type = 'text', id, imageUrl, stickerUrl, transferAmount, transferMemo, transferCoverUrl, transferStatus, voiceDuration } = msg;
+                const addMessageToUI = (msg) => {
+            const { sender, text, type = 'text', id } = msg;
 
             const messageElement = document.createElement('div');
-            messageElement.className = `message message-bubble ${sender === 'user' ? 'user' : 'ai'}`;
-             if (currentChat.type === 'group' && sender !== 'user') messageElement.classList.add('group-chat');
-
-            if (type === 'system') {
-                messageElement.classList.add('system');
-                messageElement.innerHTML = `<span>${text}</span>`;
-                return messageElement;
-            }
+            // 【核心修改 1】: 无论是什么消息，我们都先给它分配好ID！
             messageElement.dataset.id = id;
 
-            let senderData;
-            if (sender === 'user') {
-                 senderData = { avatar: userMomentsProfile.chatAvatar, name: userMomentsProfile.name };
+            // 现在我们分情况处理
+            if (type === 'system') {
+                // 这是处理“系统/报错”消息的分支
+                messageElement.className = 'message system';
+                messageElement.innerHTML = `<span>${text}</span>`;
+                // 这里处理完后，会直接跳到函数末尾去绑定事件监听器
             } else {
-                const char = characterSets.find(c => c.id === sender);
-                senderData = char ? { avatar: char.config.aiAvatar, name: char.config.characterName } : { avatar: getEl('header-avatar').src, name: '未知' };
-            }
+                // 这是处理“普通聊天”消息的分支 (我们把旧代码挪到了这里)
+                messageElement.className = `message message-bubble ${sender === 'user' ? 'user' : 'ai'}`;
+                if (currentChat.type === 'group' && sender !== 'user') messageElement.classList.add('group-chat');
+                if (msg.type === 'video_log') return document.createDocumentFragment();
 
-            const avatar = document.createElement('img');
-            avatar.className = 'avatar';
-            avatar.src = senderData.avatar;
-            avatar.title = senderData.name;
+                let senderData;
+                if (sender === 'user') {
+                    senderData = { avatar: userMomentsProfile.chatAvatar, name: userMomentsProfile.name };
+                } else {
+                    const char = characterSets.find(c => c.id === sender);
+                    senderData = char ? { avatar: char.config.aiAvatar, name: char.config.characterName } : { avatar: getEl('header-avatar').src, name: '未知' };
+                }
 
-            const contentWrapper = document.createElement('div');
-            contentWrapper.className = 'message-content';
-            
-            const senderNameDiv = document.createElement('div');
-            senderNameDiv.className = 'sender-name';
-            senderNameDiv.textContent = senderData.name;
+                const avatar = document.createElement('img');
+                avatar.className = 'avatar';
+                avatar.src = senderData.avatar;
+                avatar.title = senderData.name;
 
-            const bubble = document.createElement('div');
-            bubble.className = `bubble content message-${type}`;
-            
-            let bubbleContent = '';
-            
-            switch(type) {
-                case 'text': bubbleContent = `<p>${text.replace(/\n/g, '<br>')}</p>`; break;
-                case 'image': bubbleContent = `<img src="${imageUrl}" class="bubble-image-content" alt="发送的图片">`; break;
-                case 'text-image': bubbleContent = `<div class="text-image-header"><svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg><span>展示了一张照片</span></div><div class="text-image-description">${text}</div>`; break;
-                case 'sticker': bubbleContent = `<img src="${stickerUrl}" class="bubble-image-content" alt="表情" style="width:120px; height:120px; border: none;">`; break;
-                case 'voice': bubble.style.width = `${Math.min(60 + (text?.length || 0) * 8, 250)}px`; bubbleContent = `<span class="voice-icon"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg></span><span class="voice-duration">${voiceDuration}</span>`; bubble.onclick = () => alert(`语音内容：\n\n${text}`); break;
-                case 'transfer':
+                const contentWrapper = document.createElement('div');
+                contentWrapper.className = 'message-content';
+                
+                const senderNameDiv = document.createElement('div');
+                senderNameDiv.className = 'sender-name';
+                senderNameDiv.textContent = senderData.name;
+
+                const bubble = document.createElement('div');
+                bubble.className = `bubble content message-${msg.type}`;
+                
+                let bubbleContent = '';
+                
+                switch(msg.type) {
+                    case 'text': bubbleContent = `<p>${text.replace(/\n/g, '<br>')}</p>`; break;
+                    case 'image': bubbleContent = `<img src="${msg.imageUrl}" class="bubble-image-content" alt="发送的图片">`; break;
+                    case 'text-image': bubbleContent = `<div class="text-image-header"><svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg><span>展示了一张照片</span></div><div class="text-image-description">${text}</div>`; break;
+                    case 'sticker': bubbleContent = `<img src="${msg.stickerUrl}" class="bubble-image-content" alt="表情" style="width:120px; height:120px; border: none;">`; break;
+                    case 'voice': bubble.style.width = `${Math.min(60 + (text?.length || 0) * 8, 250)}px`; bubbleContent = `<span class="voice-icon"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg></span><span class="voice-duration">${msg.voiceDuration}</span>`; bubble.onclick = () => alert(`语音内容：\n\n${text}`); break;
+                                    case 'transfer':
                     const recipientName = sender === 'user' ? (getCurrentCharacter()?.config.characterName || '对方') : '你';
-                    bubbleContent = `<img src="${transferCoverUrl}" class="transfer-cover" alt="Transfer"><div class="transfer-info"><div class="transfer-amount">¥ ${transferAmount}</div>${transferMemo ? `<div class="transfer-memo">${transferMemo}</div>` : ''}</div><div class="transfer-footer">给${recipientName}的转账</div>`;
-                    if (transferStatus === 'received') {
+                    bubbleContent = `<img src="${msg.transferCoverUrl}" class="transfer-cover" alt="Transfer"><div class="transfer-info"><div class="transfer-amount">¥ ${msg.transferAmount}</div>${msg.transferMemo ? `<div class="transfer-memo">${msg.transferMemo}</div>` : ''}</div><div class="transfer-footer">给${recipientName}的转账</div>`;
+                    
+                    // --- 核心显示逻辑在这里！---
+                    if (msg.transferStatus === 'received') {
                         bubbleContent += `<div class="transfer-acknowledged">${sender === 'user' ? '对方已收款' : '我已收款'}</div>`;
-                    } else if (transferStatus === 'declined') {
+                    } else if (msg.transferStatus === 'declined') {
                         bubbleContent += `<div class="transfer-acknowledged" style="background: rgba(100,100,100,0.5);">${sender === 'user' ? '对方已拒收' : '已退还'}</div>`;
                     } else if (sender !== 'user') { 
+                        // 只有AI发的、并且还未处理的转账，才添加点击收款事件
                         bubble.onclick = () => acknowledgeTransfer(id);
                     }
                     break;
-                case 'red-packet': bubble.innerHTML = renderRedPacket(msg); break;
-                case 'poll': bubble.innerHTML = renderPoll(msg); break;
+                    case 'red-packet': bubble.innerHTML = renderRedPacket(msg); break;
+                    case 'poll': bubble.innerHTML = renderPoll(msg); break;
+                }
+                if(msg.type !== 'poll' && msg.type !== 'red-packet') bubble.innerHTML = bubbleContent;
+
+                const readStatus = Object.assign(document.createElement('span'), { className: 'read-status', textContent: '已读' });
+
+                contentWrapper.append(senderNameDiv, bubble, Object.assign(document.createElement('div'), { className: 'timestamp', textContent: msg.timestamp }));
+                messageElement.append(avatar, contentWrapper, readStatus);
             }
-            if(type !== 'poll' && type !== 'red-packet') bubble.innerHTML = bubbleContent;
 
-            // TASK 7: Add "Read" status element
-            const readStatus = Object.assign(document.createElement('span'), { className: 'read-status', textContent: '已读' });
-
-            contentWrapper.append(senderNameDiv, bubble, Object.assign(document.createElement('div'), { className: 'timestamp', textContent: msg.timestamp }));
-            messageElement.append(avatar, contentWrapper, readStatus);
-            
+            // 【核心修改 2】: 无论是什么消息，最后都统一在这里绑定事件监听器！
             let pressTimer = null, isLongPress = false;
             const startPress = (e) => { e.preventDefault(); isLongPress = false; pressTimer = setTimeout(() => { isLongPress = true; if (!isMultiSelectMode) toggleMultiSelectMode(true); toggleMessageSelection(messageElement); }, 750); };
             const cancelPress = () => clearTimeout(pressTimer);
@@ -2540,29 +2531,29 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
         
                         const processAiResponse = (rawText) => {
             let responseArray = [];
-            try {
-                            // 新的、更强大的“净化器”，我们的“聪明邮递员”
-            const jsonMatch = rawText.match(/\[[\s\S]*?\]/); // 尝试从AI的回复中“抠出”被[]包裹的JSON数组部分
-            let cleanedText = null;
+                        try {
+                // --- 终极净化器 ---
+                // 步骤1: 使用正则表达式，从AI返回的杂乱文本中，强行“抠出”被[]包裹的、我们真正需要的部分。
+                // 这个正则表达式 [\s\S]*? 能匹配包括换行符在内的所有字符。
+                const jsonMatch = rawText.match(/\[[\s\S]*?\]/);
+                
+                let jsonString = null;
 
-            if (jsonMatch) {
-                // 如果成功“抠出”了JSON部分，就用这个作为我们的干净文本
-                cleanedText = jsonMatch[0];
-            } else {
-                // 如果没找到，我们再试试老方法，处理一下被```包裹的特殊情况
-                const fallbackClean = rawText.trim().replace(/^```json\s*/, '').replace(/\s*```$/, '');
-                if (fallbackClean.startsWith('[') && fallbackClean.endsWith(']')) {
-                    cleanedText = fallbackClean;
+                if (jsonMatch) {
+                    // 步骤2: 如果成功“抠出”，我们就得到了一个可能还含有换行符的字符串。
+                    // 步骤3: 在解析前，我们把抠出来的这部分里的所有换行符(\n)、回车符(\r)、制表符(\t)都替换掉。
+                    jsonString = jsonMatch[0].replace(/[\n\r\t]/g, '');
+                } else {
+                    // 如果连[]都找不到，说明格式错得太离谱，直接抛出错误，交给catch处理。
+                    throw new Error("在AI的回复中找不到有效的JSON数组结构。");
                 }
-            }
-
-            if (cleanedText) {
-                // 只有找到了干净的文本，我们才去解析它
-                responseArray = JSON.parse(cleanedText);
-            } else {
-                // 如果所有方法都失败了，就抛出错误，进入下面的catch块
-                throw new Error("在AI的回复中找不到有效的JSON数组格式。");
-            }
+                
+                // 步骤4: 将这个被彻底净化过的、干干净净的字符串送去解析。
+                if (jsonString) {
+                    responseArray = JSON.parse(jsonString);
+                } else {
+                    throw new Error("净化后未能获得有效的JSON字符串。");
+                }
                        } catch (e) {
                 // 首先，还是在控制台里记录一下原始错误，方便以后万一有问题还能看到
                 console.error("JSON解析失败，启动Plan B。原始错误:", e);
@@ -2747,7 +2738,7 @@ ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可�
         
         const handleTextImageSend = () => { openFeatureModal('描述一张图片', `<div class="form-group"><label for="text-image-input">请输入图片描述:</label><textarea id="text-image-input" rows="4"></textarea></div>`, '发送', () => { const text = getEl('text-image-input').value.trim(); if (text) { handleUserAction({ sender: 'user', type: 'text-image', text, llmContent: `[展示了一张照片。照片内容: ${text}]` }); closeModal(elements.featureModal); } }); };
         const handleVoiceSend = () => { openFeatureModal('发送语音消息', `<div class="form-group"><label for="voice-text-input">请输入你想“说”的内容:</label><textarea id="voice-text-input" rows="4"></textarea></div>`, '发送', () => { const text = getEl('voice-text-input').value.trim(); if (text) { handleUserAction({ sender: 'user', type: 'voice', text, voiceDuration: `0:${Math.max(1, Math.round(text.length / 5)).toString().padStart(2, '0')}`, llmContent: `[发送了一条语音消息。内容是: ${text}]` }); closeModal(elements.featureModal); } }); };
-        const handleTransferSend = () => { let tempCover = "https://images.unsplash.com/photo-1593697821028-7655f8458345?q=80&w=400"; openFeatureModal('转账', `<div class="form-group"><label>转账封面</label><img id="transfer-preview" src="${tempCover}" style="width:100%; height:110px; object-fit:cover; border-radius:8px; margin-bottom:10px; cursor:pointer;"></div><div class="form-group"><label for="transfer-amount">金额</label><input type="number" id="transfer-amount" placeholder="0.00"></div><div class="form-group"><label for="transfer-memo">备注</label><input type="text" id="transfer-memo" placeholder="（选填）"></div>`, '发送', () => { const amount = getEl('transfer-amount').value; if (amount > 0) { const memo = getEl('transfer-memo').value.trim(); handleUserAction({ sender: 'user', type: 'transfer', transferAmount: parseFloat(amount).toFixed(2), transferMemo: memo, transferCoverUrl: tempCover, transferStatus: 'pending', llmContent: `[转账 ${amount} 元。备注: ${memo}]` }); closeModal(elements.featureModal); } }); getEl('transfer-preview').onclick = () => elements.transferCoverInput.click(); elements.transferCoverInput.onchange = (e) => handleFileUpload(e.target.files[0], (d) => { tempCover = d; getEl('transfer-preview').src = d; }); };
+        const handleTransferSend = () => { let tempCover = "https://images.unsplash.com/photo-1593697821028-7655f8458345?q=80&w=400"; openFeatureModal('转账', `<div class="form-group"><label>转账封面</label><img id="transfer-preview" src="${tempCover}" style="width:100%; height:110px; object-fit:cover; border-radius:8px; margin-bottom:10px; cursor:pointer;"></div><div class="form-group"><label for="transfer-amount">金额</label><input type="number" id="transfer-amount" placeholder="0.00"></div><div class="form-group"><label for="transfer-memo">备注</label><input type="text" id="transfer-memo" placeholder="（选填）"></div>`, '发送', () => { const amount = getEl('transfer-amount').value; if (amount > 0) { const memo = getEl('transfer-memo').value.trim(); handleUserAction({ sender: 'user', type: 'transfer', transferAmount: parseFloat(amount).toFixed(2), transferMemo: memo, transferCoverUrl: tempCover, transferStatus: 'pending', llmContent: `[转账 ${amount} 元。备注: ${memo}]` });closeModal(elements.featureModal); } }); getEl('transfer-preview').onclick = () => elements.transferCoverInput.click(); elements.transferCoverInput.onchange = (e) => handleFileUpload(e.target.files[0], (d) => { tempCover = d; getEl('transfer-preview').src = d; }); };
         const handleStickerSend = () => { if (currentChat.type !== 'direct') {alert('群聊中暂不支持发送表情。'); return;} const character = getCurrentCharacter(); if(!character) return; let galleryHtml = '<p style="text-align:center;color:#999">没有表情。请在设置中添加。</p>'; if (character.userStickers.length > 0) galleryHtml = character.userStickers.map(url => `<img src="${url}" data-sticker-url="${url}" alt="sticker">`).join(''); openFeatureModal('选择表情', `<div id="sticker-gallery">${galleryHtml}</div>`, null, null); getEl('sticker-gallery').onclick = e => { if (e.target.tagName === 'IMG') { handleUserAction({ sender: 'user', type: 'sticker', stickerUrl: e.target.dataset.stickerUrl, llmContent: '[发送了一个表情]' }); closeModal(elements.featureModal); } }; };
         
         // --- Video Call Logic (Fully Isolated) ---
