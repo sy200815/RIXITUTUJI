@@ -3348,32 +3348,6 @@ Do NOT leave the reply_text empty. Do NOT add any text, markdown, or explanation
         const handleUserVote = (pollId, option) => { const group = getCurrentGroup(); if (!group) return; const poll = (group.polls || []).find(p => p.pollId === pollId); if (!poll || poll.status === 'closed') return; Object.keys(poll.votes).forEach(key => { poll.votes[key] = (poll.votes[key] || []).filter(v => v !== 'user'); }); if (!poll.votes[option]) poll.votes[option] = []; poll.votes[option].push('user'); saveAllData(); renderAllMessages(); handleUserAction({ sender: 'user', type: 'text', text: `[我投了: 「${option}」]`, llmContent: `[用户投票了。选项: "${option}"]` }); };
         const handleAiVote_dataOnly = (voteAction) => { const group = getCurrentGroup(); if (!group) return; const poll = (group.polls || []).find(p => p.pollId === voteAction.pollId); const voterId = voteAction.senderId; const option = voteAction.option; if (!poll || !voterId || !option || poll.status === 'closed' || !poll.options.includes(option)) return; Object.keys(poll.votes).forEach(key => { poll.votes[key] = (poll.votes[key] || []).filter(v => v !== voterId); }); if (!poll.votes[option]) poll.votes[option] = []; poll.votes[option].push(voterId); saveAllData(); };
         
-        const renderMoments = () => {
-    const chatData = getCurrentChatData(); if(!chatData) { elements.momentsFeed.innerHTML = ''; return; }
-    let allPosts = [];
-    // 统一显示发动态按钮
-    elements.postNewMomentBtn.style.display = 'block';
-
-    if (currentChat.type === 'direct') {
-        const character = chatData;
-        allPosts = [...(character.moments || []).map(m => ({ ...m, senderType: 'ai' })), ...(userMomentsProfile.posts || []).map(p => ({ ...p, senderType: 'user' }))];
-        elements.momentsUserAvatar.src = userMomentsProfile.momentsAvatar;
-        elements.momentsUserName.textContent = userMomentsProfile.name;
-        elements.momentsCoverArea.style.backgroundImage = `url(${userMomentsProfile.cover})`;
-    } else { // Group Chat
-        const group = chatData;
-        // 在群聊动态中，同时显示群成员的动态和用户发的动态
-        allPosts = [...(group.groupMoments || [])];
-        elements.momentsUserAvatar.src = group.avatar;
-        elements.momentsUserName.textContent = group.name;
-        elements.momentsCoverArea.style.backgroundImage = `url(${group.avatar})`;
-    }
-    allPosts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-    elements.momentsFeed.innerHTML = allPosts.length === 0 
-        ? `<p style="text-align:center; padding: 40px; color: #999;">这里还没有任何动态。</p>`
-        : allPosts.map(post => renderSingleMoment(post)).join('');
-};
-        
             
 
                       // ===================================================================
@@ -3462,6 +3436,32 @@ const renderSingleMoment = (post) => {
             </div>
         </div>`;
 };
+
+// 总管函数：负责组合所有朋友圈动态
+const renderMoments = () => {
+    const chatData = getCurrentChatData(); if(!chatData) { elements.momentsFeed.innerHTML = ''; return; }
+    let allPosts = [];
+    elements.postNewMomentBtn.style.display = 'block';
+
+    if (currentChat.type === 'direct') {
+        const character = chatData;
+        allPosts = [...(character.moments || []).map(m => ({ ...m, senderType: 'ai' })), ...(userMomentsProfile.posts || []).map(p => ({ ...p, senderType: 'user' }))];
+        elements.momentsUserAvatar.src = userMomentsProfile.momentsAvatar;
+        elements.momentsUserName.textContent = userMomentsProfile.name || '我';
+        elements.momentsCoverArea.style.backgroundImage = `url(${userMomentsProfile.cover})`;
+    } else { 
+        const group = chatData;
+        allPosts = [...(group.groupMoments || [])];
+        elements.momentsUserAvatar.src = group.avatar;
+        elements.momentsUserName.textContent = group.name;
+        elements.momentsCoverArea.style.backgroundImage = `url(${group.avatar})`;
+    }
+    allPosts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    elements.momentsFeed.innerHTML = allPosts.length === 0 
+        ? `<p style="text-align:center; padding: 40px; color: #999;">这里还没有任何动态。</p>`
+        : allPosts.map(post => renderSingleMoment(post)).join('');
+};
+      
                        const handleMomentsInteraction = (e) => {
     const postEl = e.target.closest('.moment-post'); if (!postEl) return;
     const momentId = postEl.dataset.momentId;
