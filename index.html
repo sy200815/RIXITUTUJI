@@ -3374,154 +3374,94 @@ Do NOT leave the reply_text empty. Do NOT add any text, markdown, or explanation
         : allPosts.map(post => renderSingleMoment(post)).join('');
 };
         
-            const renderSingleMoment = (post) => {
-        const senderIsUser = post.senderId === 'user';
-        // TASK 11: Correctly find character for post
-        const postChar = !senderIsUser ? characterSets.find(c => c.id === post.senderId) : null;
-        const senderName = senderIsUser ? userMomentsProfile.name : postChar?.config.characterName || '一位朋友';
-        const senderAvatar = senderIsUser ? userMomentsProfile.momentsAvatar : postChar?.config.aiAvatar || '';
-        const momentType = currentChat.type === 'direct' ? 'direct' : 'group';
+            
+
+                      // ===================================================================
+// ============= 全新的、修复后的朋友圈“渲染引擎” =============
+// ===================================================================
+
+// “配菜”菜谱 1：评论扁平化工具
+const flattenComments = (comments) => {
+    const flatList = [];
+    const traverse = (commentNodes) => {
+        if (!commentNodes || commentNodes.length === 0) return;
+        for (const comment of commentNodes) {
+            flatList.push(comment);
+            traverse(comment.replies); 
+        }
+    };
+    traverse(comments);
+    return flatList;
+};
+
+// “配菜”菜谱 2：渲染评论区
+const renderComments = (comments, post) => {
+    const flatCommentList = flattenComments(comments);
+    if (flatCommentList.length === 0) return '';
+    
+    return flatCommentList.map(comment => {
+        const commenterChar = characterSets.find(char => char.id === comment.sender);
+        const commenterName = comment.sender === 'user' 
+            ? (userMomentsProfile.name || '我') 
+            : (commenterChar?.config.characterName || '一位朋友');
+
+        let repliedToName = null;
+        if (comment.replyTo) {
+            const repliedToChar = characterSets.find(char => char.id === comment.replyTo);
+            repliedToName = comment.replyTo === 'user' 
+                ? (userMomentsProfile.name || '我') 
+                : (repliedToChar?.config.characterName || '一位朋友');
+        }
 
         return `
-            <div class="moment-post" data-moment-id="${post.id}" data-sender-id="${post.senderId}" data-moment-type="${momentType}">
-                <img src="${senderAvatar}" alt="avatar" class="moment-avatar">
-                <div class="moment-body">
-                    <div class="moment-username">${senderName}</div>
-                    <div class="moment-content">${post.content.replace(/\n/g, '<br>')}</div>
-                    ${post.imageUrl ? `<img src="${post.imageUrl}" alt="moment image" class="moment-image">` : ''}
-                    <div class="moment-footer">
-                        <span class="moment-timestamp">${post.timestamp}</span>
-                        <div class="moment-actions">
-                            <button class="like-btn ${post.likes.includes('user') ? 'liked' : ''}">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                                <span class="like-count">${post.likes.length > 0 ? post.likes.length : ''}</span>
-                            </button>
-                            <button class="comment-btn">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
-                            </button>
-                            <button class="delete-moment-btn" title="删除动态">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" height="18px" width="18px"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="moment-comments">${renderComments(post.comments, post)}</div>
-                    <form class="comment-input-form" style="display: none;" data-reply-to="">
-                        <input type="text" class="comment-input" placeholder="添加评论...">
-                        <button type="submit">发送</button>
-                    </form>
-                </div>
-            </div>`;
-    };
-
-                      // --- 全新的“评论扁平化”工具函数 ---
-        const flattenComments = (comments) => {
-            const flatList = [];
-            const traverse = (commentNodes) => {
-                if (!commentNodes || commentNodes.length === 0) return;
-                for (const comment of commentNodes) {
-                    flatList.push(comment);
-                    traverse(comment.replies); // 继续深入下一层
-                }
-            };
-            traverse(comments);
-            return flatList;
-        };            
-                                 
-                          (comments, post) => {
-            // 首先，使用我们的小工具把所有评论“拍平”
-            const flatCommentList = flattenComments(comments);
-
-            if (flatCommentList.length === 0) return '';
-            
-            // 然后，遍历这个“拍平”后的列表来生成HTML
-            return flatCommentList.map(comment => {
-                // --- 查找“评论者”的名字 ---
-                const commenterChar = characterSets.find(char => char.id === comment.sender);
-                const commenterName = comment.sender === 'user' 
-                    ? (userMomentsProfile.name || '我') 
-                    : (commenterChar?.config.characterName || '一位朋友');
-
-                // --- 查找“被回复者”的名字 ---
-                let repliedToName = null;
-                if (comment.replyTo) {
-                    const repliedToChar = characterSets.find(char => char.id === comment.replyTo);
-                    repliedToName = comment.replyTo === 'user' 
-                        ? (userMomentsProfile.name || '我') 
-                        : (repliedToChar?.config.characterName || '一位朋友');
-                }
-
-                return `
-                    <div class="comment" data-comment-id="${comment.id}" data-sender-id="${comment.sender}">
-                        <span class="comment-user">${commenterName}</span>
-                        ${repliedToName ? ` <span style="color: #555; font-weight: normal;">回复</span> <span class="comment-user">${repliedToName}</span>` : ''}:
-                        <span class="comment-text">${comment.text}</span>
-                        <button class="delete-comment-btn" title="删除评论" style="background:none; border:none; color:#aaa; cursor:pointer; font-size:1.2em; padding: 0 5px;">×</button>
-                    </div>
-                `;
-            }).join('');
-        };
-        const addCommentOrReplyByAI = (type, momentId, text, senderId, targetCommentId, momentType) => {
-    let momentSource;
-    if (momentType === 'direct') {
-        momentSource = [...userMomentsProfile.posts, ...characterSets.flatMap(c => c.moments || [])];
-    } else {
-        momentSource = (getCurrentGroup() || {}).groupMoments || [];
-    }
-    const moment = momentSource.find(m => m.id === momentId);
-    if (!moment) return;
-    
-    const newComment = { id: generateId('cmt'), sender: senderId, text, replies: [] };
-    
-    let parentComment = null;
-    if (type === 'comment') {
-        if (!moment.comments) moment.comments = [];
-        moment.comments.push(newComment);
-        parentComment = newComment; 
-    } else if (type === 'reply' && targetCommentId) {
-        const findAndPushReply = (comments) => {
-            for (const c of comments) {
-                if (c.id === targetCommentId) {
-                    newComment.replyTo = c.sender;
-                    if (!c.replies) c.replies = [];
-                    c.replies.push(newComment);
-                    parentComment = c;
-                    return true;
-                }
-                if (c.replies && findAndPushReply(c.replies)) return true;
-            }
-            return false;
-        };
-        findAndPushReply(moment.comments);
-    }
-    
-    saveAllData();
-    if (elements.momentsOverlay.classList.contains('show')) renderMoments();
-    
-    // **核心新增：触发其他AI回复这条新评论**
-    if (momentType === 'group' && senderId !== 'user') {
-        const group = getCurrentGroup();
-        const commentToReplyTo = parentComment;
-        if(group && commentToReplyTo) {
-            // 其他所有群成员都有可能加入讨论
-            const otherMembers = group.memberIds.filter(id => id !== senderId && id !== commentToReplyTo?.sender);
-            otherMembers.forEach((memberId, index) => {
-                // 较小的几率加入对话，避免刷屏
-                if (Math.random() > 0.75) { 
-                    setTimeout(() => {
-                        triggerAiMomentReply(moment, newComment, memberId, 'group');
-                    }, (index + 1) * 6000 + Math.random() * 3000); 
-                }
-            });
-        }
-    }
+            <div class="comment" data-comment-id="${comment.id}" data-sender-id="${comment.sender}">
+                <span class="comment-user">${commenterName}</span>
+                ${repliedToName ? ` <span style="color: #555; font-weight: normal;">回复</span> <span class="comment-user">${repliedToName}</span>` : ''}:
+                <span class="comment-text">${comment.text}</span>
+                <button class="delete-comment-btn" title="删除评论" style="background:none; border:none; color:#aaa; cursor:pointer; font-size:1.2em; padding: 0 5px;">×</button>
+            </div>
+        `;
+    }).join('');
 };
-    const deleteCommentById = (commentsArray, idToDelete) => {
-        for (let i = 0; i < commentsArray.length; i++) {
-            if (commentsArray[i].id === idToDelete) { commentsArray.splice(i, 1); return true; }
-            if (commentsArray[i].replies && commentsArray[i].replies.length > 0) { if (deleteCommentById(commentsArray[i].replies, idToDelete)) return true; }
-        }
-        return false;
-    };
+
+// “主菜”菜谱：渲染单条朋友圈动态
+const renderSingleMoment = (post) => {
+    const senderIsUser = post.senderId === 'user';
+    const postChar = !senderIsUser ? characterSets.find(c => c.id === post.senderId) : null;
+    const senderName = senderIsUser ? (userMomentsProfile.name || '我') : postChar?.config.characterName || '一位朋友';
+    const senderAvatar = senderIsUser ? userMomentsProfile.momentsAvatar : postChar?.config.aiAvatar || '';
+    const momentType = currentChat.type === 'direct' ? 'direct' : 'group';
+
+    return `
+        <div class="moment-post" data-moment-id="${post.id}" data-sender-id="${post.senderId}" data-moment-type="${momentType}">
+            <img src="${senderAvatar}" alt="avatar" class="moment-avatar">
+            <div class="moment-body">
+                <div class="moment-username">${senderName}</div>
+                <div class="moment-content">${post.content.replace(/\n/g, '<br>')}</div>
+                ${post.imageUrl ? `<img src="${post.imageUrl}" alt="moment image" class="moment-image">` : ''}
+                <div class="moment-footer">
+                    <span class="moment-timestamp">${post.timestamp}</span>
+                    <div class="moment-actions">
+                        <button class="like-btn ${post.likes.includes('user') ? 'liked' : ''}">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                            <span class="like-count">${post.likes.length > 0 ? post.likes.length : ''}</span>
+                        </button>
+                        <button class="comment-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+                        </button>
+                        <button class="delete-moment-btn" title="删除动态">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" height="18px" width="18px"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="moment-comments">${renderComments(post.comments, post)}</div>
+                <form class="comment-input-form" style="display: none;" data-reply-to="">
+                    <input type="text" class="comment-input" placeholder="添加评论...">
+                    <button type="submit">发送</button>
+                </form>
+            </div>
+        </div>`;
+};
                        const handleMomentsInteraction = (e) => {
     const postEl = e.target.closest('.moment-post'); if (!postEl) return;
     const momentId = postEl.dataset.momentId;
