@@ -3243,17 +3243,15 @@ I can't believe she actually said that.
                     const historyContext = recentHistory.map(msg => `${msg.sender === 'user' ? 'User' : 'AI'}: ${msg.text || '(非文本消息)'}`).join('\n');
                     
                     // 这是修改后的代码
-const finalPrompt = `[Role]: You are ${replierChar.config.characterName} (ID: ${replierId}). Your persona is: ${replierChar.config.characterPrompt}
-
-${CORE_BEHAVIOR_PROMPT}
-
+// 这是改回去之后的、正确的代码
+const finalPrompt = `[Role]: You are ${commenterChar.config.characterName}. Your persona is: ${commenterChar.config.characterPrompt}
 [Recent Conversation Context]:
 ${historyContext}
-[Current Situation]: On ${originalPosterName}'s social media post, ${personBeingRepliedToName} left a comment saying: "${commentToReply.text}".
-[Task]: Now, write a short, natural, first-person reply in Simplified Chinese to ${personBeingRepliedToName}'s comment.
-[CRITICAL OUTPUT FORMAT]: Your entire response MUST be a valid JSON array containing a single object. It MUST include your own senderId. Example:
-[{"senderId": "${replierId}", "type": "moment_reply", "momentId": "${moment.id}", "commentId": "${commentToReply.id}", "reply_text": "Your actual reply text here."}]
-Do NOT leave the reply_text empty. Do NOT add any text, markdown, or explanations outside the JSON array.`;
+[Current Situation]: You see a social media post from ${postedBy}. The post says: "${moment.content}".
+[Task]: Based on ALL the information above (your persona and the recent conversation), write a short, natural, first-person comment in Simplified Chinese in response to this post.
+[CRITICAL OUTPUT FORMAT]: Your entire response MUST be a valid JSON array containing a single object, like this example:
+[{"type": "moment_comment", "momentId": "${moment.id}", "comment_text": "Your actual comment text here."}]
+Do NOT leave the comment_text empty. Do NOT add any text, markdown, or explanations outside the JSON array.`;
 
                     const payload = getApiPayload(elements.modelSelect.value, [], finalPrompt);
                     
@@ -3305,7 +3303,8 @@ Do NOT leave the reply_text empty. Do NOT add any text, markdown, or explanation
                     const recentHistory = chatData ? chatData.chatHistory.slice(-5) : [];
                     const historyContext = recentHistory.map(msg => `${msg.sender === 'user' ? 'User' : 'AI'}: ${msg.text || '(非文本消息)'}`).join('\n');
                     
-                    const finalPrompt = `[Role]: You are ${replierChar.config.characterName} (ID: ${replierId}). Your persona is: ${replierChar.config.characterPrompt}
+                    // 这是改回去之后的、正确的代码
+const finalPrompt = `[Role]: You are ${replierChar.config.characterName} (ID: ${replierId}). Your persona is: ${replierChar.config.characterPrompt}
 [Recent Conversation Context]:
 ${historyContext}
 [Current Situation]: On ${originalPosterName}'s social media post, ${personBeingRepliedToName} left a comment saying: "${commentToReply.text}".
