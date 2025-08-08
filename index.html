@@ -3994,7 +3994,7 @@ const triggerAiQuestion = async () => {
     setQnaLoading(true);
     const character = getCurrentCharacter();
     const questionPrompt = `
-[Task]: You are playing a Q&A game with the user. You won this round, so you get to ask the user a question.
+[Task]: You are playing a Q&A game with the user. You won this round, so you get to ask the user a question.Your entire response MUST be in Simplified Chinese.
 [Persona]: ${character.config.characterPrompt}
 [Question Rules]:
 1.  Your question MUST be a single, complete sentence.
@@ -4036,7 +4036,7 @@ const handleUserAnswer = async (answer) => {
     getEl('qna-result-area').innerHTML = '他正在看你的回答...';
     const character = getCurrentCharacter();
     const reactionPrompt = `
-[Task]: The user has just answered your question. Now, give a single-sentence reaction based on your personality and their answer.
+[Task]: The user has just answered your question. Now, give a single-sentence reaction based on your personality and their answer.Your entire response MUST be in Simplified Chinese.
 [Persona]: ${character.config.characterPrompt}
 [The Question You Asked]: ${qnaGameSessionLog[qnaGameSessionLog.length - 2].split(': ')[1]}
 [The User's Answer]: ${answer}
@@ -4070,7 +4070,7 @@ const triggerAiAnswer = async (question) => {
     getEl('qna-result-area').innerHTML = '他正在思考如何回答...';
     const character = getCurrentCharacter();
     const answerPrompt = `
-[Task]: You are playing a Q&A game. The user won and is asking you a question. Answer it in a single sentence, staying true to your personality.
+[Task]: You are playing a Q&A game. The user won and is asking you a question. Answer it in a single sentence, staying true to your personality.Your entire response MUST be in Simplified Chinese.
 [Persona]: ${character.config.characterPrompt}
 [The User's Question]: ${question}
 [Answer Rules]: Your answer MUST be a single, short, in-character sentence.
