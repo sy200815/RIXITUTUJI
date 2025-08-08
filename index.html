@@ -3135,7 +3135,7 @@ I can't believe she actually said that.
         }, (i + 1) * 4000 + Math.random() * 2000); 
     }
 };
-                                                                                                                                                const triggerAiMomentComment = async (moment, commenterId, momentType) => {
+                                                                                                                                                            const triggerAiMomentComment = async (moment, commenterId, momentType) => {
                 try {
                     const commenterChar = characterSets.find(c => c.id === commenterId);
                     if (!commenterChar) return;
@@ -3157,10 +3157,14 @@ ${historyContext}
 Do NOT leave the comment_text empty. Do NOT add any text, markdown, or explanations outside the JSON array.`;
 
                     const payload = getApiPayload(elements.modelSelect.value, [], finalPrompt);
+                    
+                    // ---【核心修复】--- 在函数内部获取API配置 ---
                     const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
                     const apiKey = elements.apiKeyInput.value.trim();
                     const model = elements.modelSelect.value;
                     const isGemini = apiBaseUrl.includes('google');
+                    // --- 修复结束 ---
+                    
                     const fetchUrl = isGemini ? `${apiBaseUrl}/v1beta/models/${model}:generateContent?key=${apiKey}` : `${apiBaseUrl}/v1/chat/completions`;
                     const headers = isGemini ? { 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` };
 
@@ -3179,11 +3183,7 @@ Do NOT leave the comment_text empty. Do NOT add any text, markdown, or explanati
 
                     if (!aiResponseText) { throw new Error("AI的响应中没有有效的文本内容。"); }
 
-                    // --- 【决定性修复】 ---
-                    // 在解析前，清理所有前后看不见的空格和换行符
                     const cleanedJsonString = aiResponseText.trim().replace(/^```json\s*/, '').replace(/\s*```$/, '');
-                    // --- 修复结束 ---
-
                     const jsonAction = JSON.parse(cleanedJsonString);
 
                     if (jsonAction && Array.isArray(jsonAction) && jsonAction[0] && jsonAction[0].type === 'moment_comment' && jsonAction[0].comment_text && jsonAction[0].comment_text.trim() !== "") {
@@ -3195,7 +3195,7 @@ Do NOT leave the comment_text empty. Do NOT add any text, markdown, or explanati
                     console.error("【重大错误】Moment comment AI trigger error:", error); 
                 }
             };
-                                                                                                                                                const triggerAiMomentReply = async (moment, commentToReply, replierId, momentType) => {
+                                                                                                                                                            const triggerAiMomentReply = async (moment, commentToReply, replierId, momentType) => {
                 try {
                     const replierChar = characterSets.find(c => c.id === replierId);
                     if (!replierChar) return;
@@ -3206,7 +3206,6 @@ Do NOT leave the comment_text empty. Do NOT add any text, markdown, or explanati
                     const recentHistory = chatData ? chatData.chatHistory.slice(-5) : [];
                     const historyContext = recentHistory.map(msg => `${msg.sender === 'user' ? 'User' : 'AI'}: ${msg.text || '(非文本消息)'}`).join('\n');
                     
-                    // --- 【决定性修复 1：强制AI签名】 ---
                     const finalPrompt = `[Role]: You are ${replierChar.config.characterName} (ID: ${replierId}). Your persona is: ${replierChar.config.characterPrompt}
 [Recent Conversation Context]:
 ${historyContext}
@@ -3217,10 +3216,14 @@ ${historyContext}
 Do NOT leave the reply_text empty. Do NOT add any text, markdown, or explanations outside the JSON array.`;
                     
                     const payload = getApiPayload(elements.modelSelect.value, [], finalPrompt);
+
+                    // ---【核心修复】--- 在函数内部获取API配置 ---
                     const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
                     const apiKey = elements.apiKeyInput.value.trim();
                     const model = elements.modelSelect.value;
                     const isGemini = apiBaseUrl.includes('google');
+                    // --- 修复结束 ---
+                    
                     const fetchUrl = isGemini ? `${apiBaseUrl}/v1beta/models/${model}:generateContent?key=${apiKey}` : `${apiBaseUrl}/v1/chat/completions`;
                     const headers = isGemini ? { 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` };
                     
@@ -3240,8 +3243,6 @@ Do NOT leave the reply_text empty. Do NOT add any text, markdown, or explanation
                     if (!aiResponseText) { throw new Error("AI的响应中没有有效的文本内容。"); }
                     
                     const cleanedJsonString = aiResponseText.trim().replace(/^```json\s*/, '').replace(/\s*```$/, '');
-                    
-                    // 直接将带有正确senderId的JSON交给总管处理
                     processAiResponse(cleanedJsonString);
                     
                 } catch (error) { 
@@ -3461,7 +3462,21 @@ const renderMoments = () => {
         ? `<p style="text-align:center; padding: 40px; color: #999;">这里还没有任何动态。</p>`
         : allPosts.map(post => renderSingleMoment(post)).join('');
 };
-      
+              // --- 全新的、用于删除评论的函数 ---
+        const deleteCommentById = (commentArray, idToDelete) => {
+            // 过滤掉当前层级中匹配ID的评论
+            const filteredArray = commentArray.filter(comment => comment.id !== idToDelete);
+
+            // 遍历过滤后的数组，对每一个评论的子回复进行递归操作
+            filteredArray.forEach(comment => {
+                if (comment.replies && comment.replies.length > 0) {
+                    // 递归调用自身，处理子回复
+                    comment.replies = deleteCommentById(comment.replies, idToDelete);
+                }
+            });
+
+            return filteredArray;
+        };
                        const handleMomentsInteraction = (e) => {
     const postEl = e.target.closest('.moment-post'); if (!postEl) return;
     const momentId = postEl.dataset.momentId;
@@ -3506,7 +3521,7 @@ const renderMoments = () => {
         }
         return;
     }
-    if (deleteCommentBtn) { const commentEl = e.target.closest('.comment'); const commentIdToDelete = commentEl.dataset.commentId; if (confirm('您确定要删除这条评论吗？')) { deleteCommentById(moment.comments, commentIdToDelete); saveAllData(); renderMoments(); } return; }
+    if (deleteCommentBtn) { const commentEl = e.target.closest('.comment'); const commentIdToDelete = commentEl.dataset.commentId; if (confirm('您确定要删除这条评论吗？')) { moment.comments = deleteCommentById(moment.comments, commentIdToDelete);; saveAllData(); renderMoments(); } return; }
     if (likeBtn) { const likeIndex = moment.likes.indexOf('user'); if (likeIndex > -1) { moment.likes.splice(likeIndex, 1); } else { moment.likes.push('user'); } saveAllData(); renderMoments(); }
     if (commentBtn || commentText) {
         const form = postEl.querySelector('.comment-input-form');
