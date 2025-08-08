@@ -3477,6 +3477,54 @@ const renderMoments = () => {
 
             return filteredArray;
         };
+              // --- 全新的、修复AI评论和回复功能的核心函数 ---
+        const addCommentOrReplyByAI = (type, momentId, text, senderId, replyToCommentId, momentType) => {
+            let allPosts = [];
+            if (momentType === 'direct') {
+                const character = getCurrentCharacter();
+                allPosts = [...(character?.moments || []), ...(userMomentsProfile.posts || [])];
+            } else {
+                const group = getCurrentGroup();
+                allPosts = group ? [...(group.groupMoments || [])] : [];
+            }
+            const moment = allPosts.find(p => p.id === momentId);
+            if (!moment) {
+                console.error(`AI试图评论一个不存在的动态 (ID: ${momentId})`);
+                return;
+            }
+
+            const newCommentByAI = { id: generateId('cmt'), sender: senderId, text, replies: [] };
+            
+            if (type === 'reply' && replyToCommentId) {
+                newCommentByAI.replyTo = replyToCommentId; // 记录它回复的是谁的ID
+                
+                const findParentCommentAndPush = (comments, parentId, newReply) => {
+                    for (const comment of comments) {
+                        if (comment.id === parentId) {
+                            if (!comment.replies) comment.replies = [];
+                            comment.replies.push(newReply);
+                            // 在给AI的回复中，记录它具体回复的是哪个用户的ID
+                            newReply.replyTo = comment.sender;
+                            return true;
+                        }
+                        if (comment.replies && findParentCommentAndPush(comment.replies, parentId, newReply)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                };
+                findParentCommentAndPush(moment.comments || [], replyToCommentId, newCommentByAI);
+
+            } else { // 'comment' type
+                if (!moment.comments) moment.comments = [];
+                moment.comments.push(newCommentByAI);
+            }
+            
+            saveAllData();
+            if (elements.momentsOverlay.classList.contains('show')) {
+                renderMoments();
+            }
+        };
                        const handleMomentsInteraction = (e) => {
     const postEl = e.target.closest('.moment-post'); if (!postEl) return;
     const momentId = postEl.dataset.momentId;
