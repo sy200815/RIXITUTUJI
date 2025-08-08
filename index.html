@@ -1537,79 +1537,89 @@ NEVER refer to the user as "用户". Use the information from their profile.`;
         const autoResizeTextarea = () => { elements.messageInput.style.height = 'auto'; elements.messageInput.style.height = (elements.messageInput.scrollHeight) + 'px'; };
         const generateId = (prefix) => `${prefix}_${Date.now()}${Math.random().toString(36).substring(2, 9)}`;
 
-        // --- API payload function ---
-                const getApiPayload = (model, history, systemPrompt) => {
-            const apiBaseUrl = elements.apiBaseUrlInput.value.trim().toLowerCase();
-            const isGemini = apiBaseUrl.includes('google');
+        // 这是修复后的、更智能的 getApiPayload 函数
+const getApiPayload = (model, history, systemPrompt) => {
+    const apiBaseUrl = elements.apiBaseUrlInput.value.trim().toLowerCase();
+    const isGemini = apiBaseUrl.includes('google');
 
-            let finalSystemPrompt = systemPrompt;
-            if (elements.realTimeAwarenessToggle.checked) {
-                const currentTime = `[System Knowledge: The current real-world date and time is ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}]`;
-                finalSystemPrompt = `${currentTime}\n\n${systemPrompt}`;
+    let finalSystemPrompt = systemPrompt;
+    if (elements.realTimeAwarenessToggle.checked) {
+        const currentTime = `[System Knowledge: The current real-world date and time is ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}]`;
+        finalSystemPrompt = `${currentTime}\n\n${systemPrompt}`;
+    }
+
+    if (isGemini) {
+        const formatForGemini = (msg) => {
+            if (!msg || typeof msg !== 'object' || msg.type === 'system' || typeof msg.sender !== 'string') return null;
+            const role = msg.sender === 'user' ? 'user' : 'model';
+            let parts = [];
+            
+            const textContent = msg.llmContent || msg.text || '';
+            if (textContent) {
+                parts.push({ text: textContent });
             }
 
-            if (isGemini) {
-                const formatForGemini = (msg) => {
-                    if (!msg || typeof msg !== 'object' || msg.type === 'system' || typeof msg.sender !== 'string') return null;
-                    const role = msg.sender === 'user' ? 'user' : 'model';
-                    let parts = [];
-                    
-                    const textContent = msg.llmContent || msg.text || '';
-                    if (textContent) {
-                        parts.push({ text: textContent });
-                    }
-
-                    if (msg.sender === 'user' && msg.type === 'image' && msg.imageUrl) {
-                        if (!textContent) { // 如果图片没有附带文字，给一个默认说明
-                           parts.push({ text: '用户发送了一张图片。' });
-                        }
-                        const mimeType = msg.imageUrl.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
-                        parts.push({ inline_data: { mime_type: mimeType, data: msg.imageUrl.split(',')[1] } });
-                    }
-
-                    if (parts.length === 0) return null;
-                    return { role, parts };
-                };
-                
-                const contents = [
-                    // Gemini没有system角，我们用user/model对话来模拟
-                    { role: 'user', parts: [{ text: finalSystemPrompt }] },
-                    { role: 'model', parts: [{ text: '好的，我会严格遵守以上所有指令。' }] },
-                    ...history.map(formatForGemini).filter(Boolean)
-                ];
-
-                return { 
-                    contents, 
-                    "generationConfig": { 
-                        "temperature": parseFloat(elements.temperatureSlider.value), 
-                        "topP": parseFloat(elements.topPSlider.value) 
-                    } 
-                };
-
-            } else { // OpenAI 的逻辑
-                const formatForOpenAI = (msg) => {
-                    if (!msg || typeof msg !== 'object' || msg.type === 'system' || typeof msg.sender !== 'string') return null;
-                    const role = msg.sender === 'user' ? 'user' : 'assistant';
-                    
-                    if (msg.sender === 'user' && msg.type === 'image' && msg.imageUrl) {
-                        const content = [
-                            { type: 'text', text: msg.llmContent || msg.text || '用户发送了一张图片。' },
-                            { type: 'image_url', image_url: { url: msg.imageUrl } }
-                        ];
-                        return { role, content };
-                    }
-
-                    const content = msg.llmContent || msg.text || '';
-                    if (!content.trim()) return null;
-                    return { role, content };
-                };
-                const messages = [
-                    { role: 'system', content: finalSystemPrompt },
-                    ...history.map(formatForOpenAI).filter(Boolean)
-                ];
-                return { model, messages, stream: false, temperature: parseFloat(elements.temperatureSlider.value), top_p: parseFloat(elements.topPSlider.value) };
+            if (msg.sender === 'user' && msg.type === 'image' && msg.imageUrl) {
+                if (!textContent) {
+                   parts.push({ text: '用户发送了一张图片。' });
+                }
+                const mimeType = msg.imageUrl.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+                parts.push({ inline_data: { mime_type: mimeType, data: msg.imageUrl.split(',')[1] } });
             }
+
+            if (parts.length === 0) return null;
+            return { role, parts };
         };
+        
+        // --- 核心修复在这里 ---
+        // 1. 我们先准备好最核心的任务指令
+        const contents = [
+            { role: 'user', parts: [{ text: finalSystemPrompt }] }
+        ];
+
+        // 2. 我们做一个判断：只有在进行真正的、有历史记录的“主线聊天”时，
+        //    才需要假装AI回复“好的”，来固化它的记忆。
+        //    对于像快乐问答这种历史记录为空的“一次性任务”，就直接跳过这一步！
+        if (history && history.length > 0) {
+            contents.push({ role: 'model', parts: [{ text: '好的，我会严格遵守以上所有指令。' }] });
+        }
+        
+        // 3. 最后再把真正的聊天记录（如果有的话）加进去
+        contents.push(...history.map(formatForGemini).filter(Boolean));
+        // --- 修复结束 ---
+
+        return { 
+            contents, 
+            "generationConfig": { 
+                "temperature": parseFloat(elements.temperatureSlider.value), 
+                "topP": parseFloat(elements.topPSlider.value) 
+            } 
+        };
+
+    } else { // OpenAI 的逻辑保持不变，它本来就是对的
+        const formatForOpenAI = (msg) => {
+            if (!msg || typeof msg !== 'object' || msg.type === 'system' || typeof msg.sender !== 'string') return null;
+            const role = msg.sender === 'user' ? 'user' : 'assistant';
+            
+            if (msg.sender === 'user' && msg.type === 'image' && msg.imageUrl) {
+                const content = [
+                    { type: 'text', text: msg.llmContent || msg.text || '用户发送了一张图片。' },
+                    { type: 'image_url', image_url: { url: msg.imageUrl } }
+                ];
+                return { role, content };
+            }
+
+            const content = msg.llmContent || msg.text || '';
+            if (!content.trim()) return null;
+            return { role, content };
+        };
+        const messages = [
+            { role: 'system', content: finalSystemPrompt },
+            ...history.map(formatForOpenAI).filter(Boolean)
+        ];
+        return { model, messages, stream: false, temperature: parseFloat(elements.temperatureSlider.value), top_p: parseFloat(elements.topPSlider.value) };
+    }
+};
 
               // --- IndexedDB (相册) 帮助函数 ---
         const DB_NAME = 'AI_Boyfriend_ImageStore';
