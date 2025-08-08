@@ -2924,7 +2924,10 @@ ${CORE_BEHAVIOR_PROMPT}
             if (currentChat.type !== 'direct') return;
             const character = getCurrentCharacter();
             if (!character) return;
-            const { config, chatHistory } = character;
+            // 这是修复后的代码
+const { config } = character;
+const activeSession = character.sessions.find(s => s.id === character.activeSessionId);
+const chatHistory = activeSession ? activeSession.history : [];
             const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
             const apiKey = elements.apiKeyInput.value.trim();
             const model = elements.modelSelect.value;
@@ -3238,8 +3241,10 @@ I can't believe she actually said that.
                     const postedByChar = characterSets.find(c => c.id === moment.senderId);
                     const postedBy = moment.senderId === 'user' ? (userMomentsProfile.name || '我') : (postedByChar?.config.characterName || '一位朋友');
                     
-                    const chatData = getCurrentChatData();
-                    const recentHistory = chatData ? chatData.chatHistory.slice(-5) : [];
+                    // 这是修复后的代码
+const chatData = getCurrentChatData();
+const activeSession = chatData ? chatData.sessions?.find(s => s.id === chatData.activeSessionId) : null;
+const recentHistory = activeSession ? activeSession.history.slice(-5) : [];
                     const historyContext = recentHistory.map(msg => `${msg.sender === 'user' ? 'User' : 'AI'}: ${msg.text || '(非文本消息)'}`).join('\n');
                     
                     // 这是修改后的代码
@@ -3299,8 +3304,10 @@ Do NOT leave the comment_text empty. Do NOT add any text, markdown, or explanati
 
                     const originalPosterName = characterSets.find(c => c.id === moment.senderId)?.config.characterName || (userMomentsProfile.name || '我');
                     const personBeingRepliedToName = characterSets.find(c => c.id === commentToReply.sender)?.config.characterName || (userMomentsProfile.name || '我');
-                    const chatData = getCurrentChatData();
-                    const recentHistory = chatData ? chatData.chatHistory.slice(-5) : [];
+                    // 这是修复后的代码
+const chatData = getCurrentChatData();
+const activeSession = chatData ? chatData.sessions?.find(s => s.id === chatData.activeSessionId) : null;
+const recentHistory = activeSession ? activeSession.history.slice(-5) : [];
                     const historyContext = recentHistory.map(msg => `${msg.sender === 'user' ? 'User' : 'AI'}: ${msg.text || '(非文本消息)'}`).join('\n');
                     
                     // 这是改回去之后的、正确的代码
@@ -3857,7 +3864,10 @@ const handleRenameSession = (sessionId, newName) => {
 };
                                                                 const triggerAiDiaryEntry = async (character, date) => {
             try {
-                const { config, chatHistory } = character;
+                // 这是修复后的代码
+const { config } = character;
+const activeSession = character.sessions.find(s => s.id === character.activeSessionId);
+const chatHistory = activeSession ? activeSession.history : [];
                 
                  const recentHistory = chatHistory.slice(-10);
                  const historyContext = recentHistory.map(msg => `${msg.sender === 'user' ? 'User' : 'AI'}: ${msg.text || '(非文本消息)'}`).join('\n');
