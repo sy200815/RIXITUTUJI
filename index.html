@@ -3933,11 +3933,15 @@ const openQnAGameModal = () => {
     const userInputArea = getEl('qna-user-input-area');
     const endGameBtn = getEl('qna-end-game-btn');
 
-    rpsButtons.onclick = (e) => {
-        if (e.target.classList.contains('qna-btn')) {
-            playQnARound();
-        }
-    };
+    // 这是修复后的代码
+rpsButtons.onclick = (e) => {
+    if (e.target.classList.contains('qna-btn')) {
+        // 从你点击的按钮上，获取你的选择 (比如 "scissors")
+        const userChoice = e.target.dataset.choice; 
+        // 把你的选择，作为命令传给游戏！
+        playQnARound(userChoice); 
+    }
+};
 
     getEl('qna-submit-question-btn').onclick = () => {
         const question = getEl('qna-user-question').value.trim();
@@ -3956,11 +3960,14 @@ const updateQnaDialogue = (speaker, text) => {
     dialogueArea.scrollTop = dialogueArea.scrollHeight;
 };
 
-const playQnARound = () => {
+// 这是修复后的代码
+const playQnARound = (userChoice) => { // 1. 这里现在会接收你传进来的命令了
     const choices = ['rock', 'paper', 'scissors'];
     const choiceMap = { rock: '✊ 石头', paper: '✋ 布', scissors: '✌️ 剪刀' };
-    const userChoice = choices[Math.floor(Math.random() * 3)];
-    const charChoice = choices[Math.floor(Math.random() * 3)];
+    
+    // 2. 我们把那句愚蠢的随机代码删掉了！现在你的选择就是你的选择！
+    
+    const charChoice = choices[Math.floor(Math.random() * 3)]; // 他的选择依然是随机的
 
     const resultArea = getEl('qna-result-area');
     let resultText = `你出了 ${choiceMap[userChoice]}，他出了 ${choiceMap[charChoice]}。<br>`;
@@ -3983,7 +3990,6 @@ const playQnARound = () => {
     }
     getEl('qna-end-game-btn').style.display = 'block';
 };
-
 const setQnaLoading = (isLoading) => {
     getEl('qna-rps-buttons').style.display = isLoading ? 'none' : 'flex';
     getEl('qna-user-input-area').style.display = 'none';
