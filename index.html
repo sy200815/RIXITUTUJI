@@ -926,6 +926,16 @@ input[type=range]::-webkit-slider-thumb {
     </div>
     <span>切换剧情</span>
 </div>
+            <!-- 这是需要新增的“快乐问答”HTML按钮 -->
+<div class="action-item" id="action-qna-game">
+    <div class="action-item-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px">
+            <path d="M0 0h24v24H0V0z" fill="none"/>
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
+        </svg>
+    </div>
+    <span>快乐问答</span>
+</div>  
             </div>
             <!-- TASK 5: Modify input area to include receive button -->
             <div id="input-area">
@@ -3862,6 +3872,261 @@ const handleRenameSession = (sessionId, newName) => {
         getEl('feature-modal-title').textContent = `管理与「${character.config.characterName}」的剧情线`;
     }
 };
+      // ==========================================================
+// ============ 快乐问答 (Q&A Game) 核心功能 (新增) ============
+// ==========================================================
+let qnaGameSessionLog = []; // 用来临时记录一局游戏的对话
+
+const openQnAGameModal = () => {
+    const character = getCurrentCharacter();
+    if (!character || currentChat.type !== 'direct') {
+        alert("此功能仅在与单人角色聊天时可用。");
+        return;
+    }
+    qnaGameSessionLog = []; // 每次开始新游戏都清空记录
+
+    const bodyHtml = `
+        <div id="qna-game-board" style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+            
+            <div id="qna-avatars" style="display: flex; justify-content: space-around; width: 100%; align-items: center;">
+                <div style="text-align: center;">
+                    <img id="qna-user-avatar" src="${userMomentsProfile.chatAvatar}" class="avatar-preview">
+                    <p style="margin: 5px 0 0;">你</p>
+                </div>
+                <span style="font-size: 2em; color: var(--accent-dark-color);">VS</span>
+                <div style="text-align: center;">
+                    <img id="qna-char-avatar" src="${character.config.aiAvatar}" class="avatar-preview">
+                    <p style="margin: 5px 0 0;">${character.config.characterName}</p>
+                </div>
+            </div>
+
+            <div id="qna-result-area" style="min-height: 50px; text-align: center; font-weight: bold;">
+                点击下方的按钮，一决胜负！
+            </div>
+
+            <div id="qna-dialogue-area" style="width: 100%; max-height: 25vh; overflow-y: auto; background: #f9f9f9; border-radius: 8px; padding: 10px; border: 1px solid #eee;">
+                <!-- 游戏对话会显示在这里 -->
+            </div>
+
+            <div id="qna-controls">
+                <div id="qna-rps-buttons" style="display: flex; gap: 10px;">
+                    <button class="qna-btn" data-choice="rock">✊ 石头</button>
+                    <button class="qna-btn" data-choice="paper">✋ 布</button>
+                    <button class="qna-btn" data-choice="scissors">✌️ 剪刀</button>
+                </div>
+                <div id="qna-user-input-area" style="display: none; width: 100%;">
+                    <textarea id="qna-user-question" placeholder="你赢了！请向他提问..." rows="2" style="width: 100%; box-sizing: border-box;"></textarea>
+                    <button id="qna-submit-question-btn" class="add-new-btn" style="width: 100%; margin-top: 5px;">发送问题</button>
+                </div>
+            </div>
+
+            <button id="qna-end-game-btn" class="danger-zone" style="background: var(--delete-color); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; margin-top: 10px; display: none;">结束游戏</button>
+        </div>
+        <style> .qna-btn { padding: 10px 15px; border-radius: 8px; border: 1px solid var(--accent-color); background: white; cursor: pointer; } </style>
+    `;
+
+    openFeatureModal(`快乐问答`, bodyHtml, null, null);
+
+    const resultArea = getEl('qna-result-area');
+    const dialogueArea = getEl('qna-dialogue-area');
+    const rpsButtons = getEl('qna-rps-buttons');
+    const userInputArea = getEl('qna-user-input-area');
+    const endGameBtn = getEl('qna-end-game-btn');
+
+    rpsButtons.onclick = (e) => {
+        if (e.target.classList.contains('qna-btn')) {
+            playQnARound();
+        }
+    };
+
+    getEl('qna-submit-question-btn').onclick = () => {
+        const question = getEl('qna-user-question').value.trim();
+        if (question) {
+            handleUserQuestion(question);
+        }
+    };
+
+    endGameBtn.onclick = endQnAGame;
+};
+
+const updateQnaDialogue = (speaker, text) => {
+    const dialogueArea = getEl('qna-dialogue-area');
+    dialogueArea.innerHTML += `<p><strong>${speaker}:</strong> ${text}</p>`;
+    qnaGameSessionLog.push(`${speaker}: ${text}`);
+    dialogueArea.scrollTop = dialogueArea.scrollHeight;
+};
+
+const playQnARound = () => {
+    const choices = ['rock', 'paper', 'scissors'];
+    const choiceMap = { rock: '✊ 石头', paper: '✋ 布', scissors: '✌️ 剪刀' };
+    const userChoice = choices[Math.floor(Math.random() * 3)];
+    const charChoice = choices[Math.floor(Math.random() * 3)];
+
+    const resultArea = getEl('qna-result-area');
+    let resultText = `你出了 ${choiceMap[userChoice]}，他出了 ${choiceMap[charChoice]}。<br>`;
+
+    if (userChoice === charChoice) {
+        resultText += "平局！再来一次！";
+        resultArea.innerHTML = resultText;
+    } else if (
+        (userChoice === 'rock' && charChoice === 'scissors') ||
+        (userChoice === 'scissors' && charChoice === 'paper') ||
+        (userChoice === 'paper' && charChoice === 'rock')
+    ) {
+        resultText += "🎉 你赢了！轮到你提问了！";
+        resultArea.innerHTML = resultText;
+        promptUserQuestion();
+    } else {
+        resultText += "💔 你输了！他要开始提问咯！";
+        resultArea.innerHTML = resultText;
+        triggerAiQuestion();
+    }
+    getEl('qna-end-game-btn').style.display = 'block';
+};
+
+const setQnaLoading = (isLoading) => {
+    getEl('qna-rps-buttons').style.display = isLoading ? 'none' : 'flex';
+    getEl('qna-user-input-area').style.display = 'none';
+    getEl('qna-result-area').innerHTML = isLoading ? '他正在绞尽脑汁想问题...' : getEl('qna-result-area').innerHTML;
+};
+
+const triggerAiQuestion = async () => {
+    setQnaLoading(true);
+    const character = getCurrentCharacter();
+    const questionPrompt = `
+[Task]: You are playing a Q&A game with the user. You won this round, so you get to ask the user a question.
+[Persona]: ${character.config.characterPrompt}
+[Question Rules]:
+1.  Your question MUST be a single, complete sentence.
+2.  Your question MUST be creative, interesting, and reflect your specific personality.
+3.  ABSOLUTELY FORBIDDEN questions: Do not ask boring questions like "What did you eat today?", "Do you like me?", or any other robotic small talk.
+4.  GOOD question examples: "What color is your underwear today?", "If you were given ten handsome guys, would you still choose me?", "If I were a cat instead of a person, would you still want me?", "Describe our daily interactions using only five emojis."
+[Output Format]: Your entire response MUST be just the question text. NO JSON, NO MARKDOWN.
+`;
+    const payload = getApiPayload(elements.modelSelect.value, [], questionPrompt);
+    // ... (API call logic is the same as other triggers)
+    try {
+        const responseText = await makeApiCall(payload);
+        updateQnaDialogue(character.config.characterName, responseText);
+        getEl('qna-result-area').innerHTML = '他问了，快回答！';
+        promptUserAnswer(); // A new function to get user's answer
+    } catch (e) {
+        getEl('qna-result-area').textContent = `出错了: ${e.message}`;
+        setQnaLoading(false);
+    }
+};
+
+const promptUserAnswer = () => {
+    const userInputArea = getEl('qna-user-input-area');
+    userInputArea.style.display = 'block';
+    getEl('qna-rps-buttons').style.display = 'none';
+    const textarea = userInputArea.querySelector('#qna-user-question');
+    const button = userInputArea.querySelector('#qna-submit-question-btn');
+    textarea.placeholder = "请回答他的问题...";
+    button.textContent = "回答他";
+    button.onclick = () => {
+        const answer = textarea.value.trim();
+        if (answer) handleUserAnswer(answer);
+    };
+};
+
+const handleUserAnswer = async (answer) => {
+    updateQnaDialogue("你", answer);
+    setQnaLoading(true);
+    getEl('qna-result-area').innerHTML = '他正在看你的回答...';
+    const character = getCurrentCharacter();
+    const reactionPrompt = `
+[Task]: The user has just answered your question. Now, give a single-sentence reaction based on your personality and their answer.
+[Persona]: ${character.config.characterPrompt}
+[The Question You Asked]: ${qnaGameSessionLog[qnaGameSessionLog.length - 2].split(': ')[1]}
+[The User's Answer]: ${answer}
+[Reaction Rules]: Your reaction MUST be a single, short, in-character sentence.
+[Output Format]: Your entire response MUST be just the reaction text. NO JSON, NO MARKDOWN.
+`;
+    const payload = getApiPayload(elements.modelSelect.value, [], reactionPrompt);
+    try {
+        const responseText = await makeApiCall(payload);
+        updateQnaDialogue(character.config.characterName, responseText);
+        getEl('qna-result-area').innerHTML = '一轮结束！可以继续，或结束游戏。';
+    } catch (e) {
+        updateQnaDialogue("系统", `出错了: ${e.message}`);
+    } finally {
+        setQnaLoading(false);
+    }
+};
+
+const promptUserQuestion = () => {
+    getEl('qna-rps-buttons').style.display = 'none';
+    getEl('qna-user-input-area').style.display = 'block';
+};
+
+const handleUserQuestion = (question) => {
+    updateQnaDialogue("你", question);
+    triggerAiAnswer(question);
+};
+
+const triggerAiAnswer = async (question) => {
+    setQnaLoading(true);
+    getEl('qna-result-area').innerHTML = '他正在思考如何回答...';
+    const character = getCurrentCharacter();
+    const answerPrompt = `
+[Task]: You are playing a Q&A game. The user won and is asking you a question. Answer it in a single sentence, staying true to your personality.
+[Persona]: ${character.config.characterPrompt}
+[The User's Question]: ${question}
+[Answer Rules]: Your answer MUST be a single, short, in-character sentence.
+[Output Format]: Your entire response MUST be just the answer text. NO JSON, NO MARKDOWN.
+`;
+    const payload = getApiPayload(elements.modelSelect.value, [], answerPrompt);
+    try {
+        const responseText = await makeApiCall(payload);
+        updateQnaDialogue(character.config.characterName, responseText);
+        getEl('qna-result-area').innerHTML = '一轮结束！可以继续，或结束游戏。';
+    } catch (e) {
+        updateQnaDialogue("系统", `出错了: ${e.message}`);
+    } finally {
+        setQnaLoading(false);
+    }
+};
+
+// A new helper function for making API calls to avoid repetition
+const makeApiCall = async (payload) => {
+    const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
+    const apiKey = elements.apiKeyInput.value.trim();
+    const model = elements.modelSelect.value;
+    const isGemini = apiBaseUrl.includes('google');
+    
+    const fetchUrl = isGemini ? `${apiBaseUrl}/v1beta/models/${model}:generateContent?key=${apiKey}` : `${apiBaseUrl}/v1/chat/completions`;
+    const headers = isGemini ? { 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` };
+    
+    const response = await fetch(fetchUrl, { method: 'POST', headers: headers, body: JSON.stringify(payload) });
+    if (!response.ok) throw new Error(`API 请求失败: ${response.status}`);
+    
+    const responseData = await response.json();
+    if (responseData.error) throw new Error(`API 错误: ${responseData.error.message}`);
+    
+    let content = '';
+    if (isGemini) {
+        content = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
+    } else {
+        content = responseData.choices?.[0]?.message?.content;
+    }
+    
+    if (!content) throw new Error("API 未返回有效内容。");
+    return content.trim();
+};
+
+const endQnAGame = () => {
+    if (qnaGameSessionLog.length > 0) {
+        const summary = `[我们刚刚玩了一场快乐问答，这是游戏记录摘要：\n${qnaGameSessionLog.join('\n')}\n]`;
+        addMessage({
+            sender: 'system',
+            type: 'video_log', // Using this type to hide it from UI but keep in memory
+            llmContent: summary
+        });
+        alert("游戏结束！这段有趣的记忆已经被他记住啦。");
+    }
+    closeModal(elements.featureModal);
+};
                                                                 const triggerAiDiaryEntry = async (character, date) => {
             try {
                 // 这是修复后的代码
@@ -4175,6 +4440,9 @@ elements.messageInput.onkeydown = (e) => {
                   // 这是需要新增的事件绑定
 elements.actionManageSessions = getEl('action-manage-sessions'); // 先获取按钮
 elements.actionManageSessions.onclick = () => { openSessionManager(); toggleActionPanel(true); };
+                  // 这是需要新增的事件绑定
+elements.actionQnaGame = getEl('action-qna-game');
+elements.actionQnaGame.onclick = () => { openQnAGameModal(); toggleActionPanel(true); };
                   elements.actionSendTextImage.onclick = () => { handleTextImageSend(); toggleActionPanel(true); };
                   elements.actionSendRealImage.onclick = () => { elements.realImageUploadInput.click(); toggleActionPanel(true); };
                   elements.actionSendVoice.onclick = () => { handleVoiceSend(); toggleActionPanel(true); };
