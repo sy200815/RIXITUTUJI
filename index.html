@@ -1083,6 +1083,7 @@ input[type=range]::-webkit-slider-thumb {
                 <div id="my-profile-settings-section">
                     <div class="settings-section">
                         <h3>我的个人资料设置</h3>
+                      <div class="form-group"><label for="user-name-input">我的名字 (用于角色称呼)</label><input type="text" id="user-name-input" placeholder="输入你的昵称"></div>
                          <div class="form-group"><label for="user-avatar-upload-input">我的头像 (用于聊天)</label><div class="avatar-upload-group"><img id="user-avatar-preview" src="" class="avatar-preview"><label class="file-input-label" for="user-avatar-upload-input">选择图片</label></div></div>
                         <div class="form-group"><label for="user-moments-avatar-upload-input">朋友圈头像</label><div class="avatar-upload-group"><img id="user-moments-avatar-preview" src="" class="avatar-preview"><label class="file-input-label" for="user-moments-avatar-upload-input">选择图片</label></div></div>
                         <div class="form-group"><label for="user-moments-cover-upload-input">朋友圈封面</label><div class="avatar-upload-group"><img id="user-moments-cover-preview" src="" class="avatar-preview"><label class="file-input-label" for="user-moments-cover-upload-input">选择图片</label></div></div>
@@ -1515,6 +1516,7 @@ function applyTheme(themeNum, character) {
             bubbleSizeSlider: getEl('bubble-size-slider'),
             bubbleSizeValue: getEl('bubble-size-value'),
             realTimeAwarenessToggle: getEl('real-time-awareness-toggle'),
+          userNameInput: getEl('user-name-input'),
           apiFormatSelect: getEl('api-format-select'), // <-- 新增的API格式钥匙
         };
 
@@ -2088,6 +2090,7 @@ const createNewCharacterObject = () => {
     renderPresets(); // Presets有自己的渲染逻辑
 
     elements.myProfileSettingsSection.style.display = 'block';
+     elements.userNameInput.value = userMomentsProfile.name || '';                     
     elements.userAvatarPreview.src = userMomentsProfile.chatAvatar;
     elements.userMomentsAvatarPreview.src = userMomentsProfile.momentsAvatar; 
     elements.userMomentsCoverPreview.src = userMomentsProfile.cover;
@@ -3531,8 +3534,7 @@ const renderComments = (comments, post) => {
     
     return flatCommentList.map(comment => {
         const commenterChar = characterSets.find(char => char.id === comment.sender);
-        const commenterName = comment.sender === 'user' 
-            ? (userMomentsProfile.name || '我') 
+        const commenterName = comment.sender === 'user' ? (userMomentsProfile.name || '你')
             : (commenterChar?.config.characterName || '一位朋友');
 
         let repliedToName = null;
@@ -3558,7 +3560,7 @@ const renderComments = (comments, post) => {
 const renderSingleMoment = (post) => {
     const senderIsUser = post.senderId === 'user';
     const postChar = !senderIsUser ? characterSets.find(c => c.id === post.senderId) : null;
-    const senderName = senderIsUser ? (userMomentsProfile.name || '我') : postChar?.config.characterName || '一位朋友';
+    const senderName = senderIsUser ? (userMomentsProfile.name || '你') : postChar?.config.characterName || '一位朋友';
     const senderAvatar = senderIsUser ? userMomentsProfile.momentsAvatar : postChar?.config.aiAvatar || '';
     const momentType = currentChat.type === 'direct' ? 'direct' : 'group';
 
@@ -3603,7 +3605,7 @@ const renderMoments = () => {
         const character = chatData;
         allPosts = [...(character.moments || []).map(m => ({ ...m, senderType: 'ai' })), ...(userMomentsProfile.posts || []).map(p => ({ ...p, senderType: 'user' }))];
         elements.momentsUserAvatar.src = userMomentsProfile.momentsAvatar;
-        elements.momentsUserName.textContent = userMomentsProfile.name || '我';
+        elements.momentsUserName.textContent = userMomentsProfile.name || '你';
         elements.momentsCoverArea.style.backgroundImage = `url(${userMomentsProfile.cover})`;
     } else { 
         const group = chatData;
@@ -3862,7 +3864,7 @@ const triggerAiForumGeneration = async (count = 4, replace = false) => {
     if (!chatData) return;
 
     const charName = currentChat.type === 'direct' ? chatData.config.characterName : chatData.name;
-    const userName = userMomentsProfile.name || '我';
+    const userName = userMomentsProfile.name || 'TA';
     const activeSession = chatData.sessions?.find(s => s.id === chatData.activeSessionId);
     const history = (activeSession ? activeSession.history : (chatData.chatHistory || [])).slice(-10);
     const historyContext = history.map(msg => `${msg.sender === 'user' ? userName : charName}: ${msg.text || '(非文本消息)'}`).join('\n');
@@ -3936,8 +3938,7 @@ const handleUserForumComment = async (postId, text, isAnonymous) => {
 const triggerAiForumReplies = async (post, userComment) => {
     const chatData = getCurrentChatData();
     const charName = currentChat.type === 'direct' ? chatData.config.characterName : chatData.name;
-    const userName = userMomentsProfile.name || '我';
-
+    const userName = userMomentsProfile.name || 'TA';
     const prompt = `
     [TASK] 你是一个论坛网友模拟器。在一个关于名人情侶 (${charName} 和 ${userName}) 的帖子里，一个用户刚刚发表了评论。请你生成3-4条其他网友的回复。
     [POST CONTEXT]
