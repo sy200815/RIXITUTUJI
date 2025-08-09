@@ -3920,9 +3920,13 @@ const handleUserForumComment = async (postId, text, isAnonymous) => {
     const post = chatData.forum.posts.find(p => p.id === postId);
     if (!post) return;
 
+    // 【核心修复】在这里进行判断
+    // 如果是匿名，作者字段就为空；如果不是，才使用用户的名字。
+    const commentAuthor = isAnonymous ? null : (userMomentsProfile.name || '你');
+
     const newComment = {
         id: generateId('forum_cmt'),
-        author: userMomentsProfile.name || '我',
+        author: commentAuthor, // <-- 使用我们刚刚判断好的作者名
         text: text,
         isAnonymous: isAnonymous
     };
