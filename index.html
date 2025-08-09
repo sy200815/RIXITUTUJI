@@ -4352,58 +4352,38 @@ ${CORE_BEHAVIOR_PROMPT}
 };
 
 // A new helper function for making API calls to avoid repetition
-const makeApiCall = async (payload, retries = 2) => {
+const makeApiCall = async (payload) => {
     const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
     const apiKey = elements.apiKeyInput.value.trim();
     const model = elements.modelSelect.value;
-    const apiFormat = getApiFormat();
+    const apiFormat = getApiFormat(); // 使用新的检测器
 
     let fetchUrl, headers;
+    
+    // 【核心改造】根据API格式，决定URL和请求头
     if (apiFormat === 'gemini_native') {
         fetchUrl = `${apiBaseUrl}/v1beta/models/${model}:generateContent?key=${apiKey}`;
         headers = { 'Content-Type': 'application/json' };
-    } else {
+    } else { // 'openai' and 'gemini_openai'
         fetchUrl = `${apiBaseUrl}/v1/chat/completions`;
         headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` };
     }
-
-    // --- 第二层防御：自动重试机制 ---
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(fetchUrl, { method: 'POST', headers: headers, body: JSON.stringify(payload) });
-            if (!response.ok) throw new Error(`API 请求失败: ${response.status}`);
-            
-            const responseData = await response.json();
-            if (responseData.error) throw new Error(`API 错误: ${responseData.error.message}`);
-            
-            let content = '';
-            if (apiFormat === 'gemini_native') {
-                content = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
-            } else {
-                content = responseData.choices?.[0]?.message?.content;
-            }
-            
-            if (!content) throw new Error("API 未返回有效内容。");
-
-            // --- 第一层防御：超级净化器 ---
-            // 它会从AI可能返回的一大堆废话中，精准提取出被 {} 或 [] 包裹的核心JSON部分
-            const jsonMatch = content.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
-            if (jsonMatch) {
-                return jsonMatch[0]; // 成功找到并返回纯净的JSON字符串
-            }
-            return content.trim(); // 如果没找到JSON，就返回原始文本（用于问答等功能）
-
-        } catch (error) {
-            console.error(`API调用尝试 ${i + 1}/${retries} 失败:`, error);
-            if (i === retries - 1) {
-                // --- 第三层防御：智能回退 ---
-                // 重试全部失败后，抛出一个用户友好的错误
-                throw new Error("与AI的连接超时或发生错误，请稍后再试。");
-            }
-            // 等待1秒再重试
-            await new Promise(res => setTimeout(res, 1000));
-        }
+    
+    const response = await fetch(fetchUrl, { method: 'POST', headers: headers, body: JSON.stringify(payload) });
+    if (!response.ok) throw new Error(`API 请求失败: ${response.status}`);
+    
+    const responseData = await response.json();
+    if (responseData.error) throw new Error(`API 错误: ${responseData.error.message}`);
+    
+    let content = '';
+    if (apiFormat === 'gemini_native') {
+        content = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
+    } else { // 'openai' and 'gemini_openai'
+        content = responseData.choices?.[0]?.message?.content;
     }
+    
+    if (!content) throw new Error("API 未返回有效内容。");
+    return content.trim();
 };
 
 const endQnAGame = () => {
