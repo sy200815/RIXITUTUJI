@@ -4326,6 +4326,8 @@ const promptUserQuestion = () => {
 const handleUserQuestion = (question) => {
     updateQnaDialogue("你", question);
     triggerAiAnswer(question);
+    // 【核心修复】发送问题后，清空输入框
+    getEl('qna-user-question').value = '';
 };
 
 const triggerAiAnswer = async (question) => {
