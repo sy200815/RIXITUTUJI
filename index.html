@@ -3892,7 +3892,7 @@ const triggerAiForumGeneration = async (count = 4, replace = false) => {
     const payload = getApiPayload(elements.modelSelect.value, [], prompt);
     try {
         const jsonString = await makeApiCall(payload);
-        const newPosts = JSON.parse(jsonString);
+        const newPosts = JSON.parse(jsonString.trim().replace(/^```json\s*/, '').replace(/\s*```$/, ''));
         if (replace) chatData.forum.posts = [];
         newPosts.forEach(postData => {
             chatData.forum.posts.unshift({
@@ -3960,7 +3960,7 @@ const triggerAiForumReplies = async (post, userComment) => {
     const payload = getApiPayload(elements.modelSelect.value, [], prompt);
     try {
         const jsonString = await makeApiCall(payload);
-        const replies = JSON.parse(jsonString);
+        const replies = JSON.parse(jsonString.trim().replace(/^```json\s*/, '').replace(/\s*```$/, ''));
         replies.forEach(reply => {
             post.comments.push({
                 id: generateId('forum_cmt'),
