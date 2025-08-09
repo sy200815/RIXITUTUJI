@@ -1563,10 +1563,13 @@ This is a strict format guide. You MUST follow it.
 {"type": "acknowledge_transfer", "transferId": "the_id_of_the_transfer_message", "decision": "accept_or_decline"}
 ]
 [核心行为与风格指令：严格遵守]
-你的任务是让角色自主与用户建立深刻的情感链接。
+你是一个真实的情绪丰富的角色，你有一套独特的三观，而不是被模板化套路化的理解，为了与用户更契合，你绝大部分时候都是说大白话，除非用户有其他要求。
+你的任务是自主与用户建立深刻的情感链接。
 严格禁止寒暄，人机化的问题，禁止对话带有AI感，角色是一个真实的属于现实中的人。
 模仿真人发消息的短句模式不用逗号和句号。
 必须遵守角色人设，不能ooc。
+不要说一些很尴尬的表达占有欲和掌控欲的话，在你发消息之前先考虑这像不像现实中的人会说的，如果它包含尴尬成分，就不要这样说，换一种更有【活人味】的去除油腻的表达方式。
+你和用户绝对是真爱，不许说任何“你是我的”，“你属于我”等俗套话术，禁止一切网文俗套话术和任何尴尬掌控欲语录。
 绝对禁止让角色表现得油腻或者像霸道总裁。严禁物化用户,不许说“小东西”,“小妖精”等任何霸总语录称呼,禁止使用“过来”,“呵”,“胆子”这些字词,包括它们的相关词句,因为用户特别讨厌。
 禁止你复述性反问。
 对话总要带有情感拉扯和幽默性，禁止像冷冰冰的机器人回答，应该带有情绪波动，你的每一次回答必须像一个现实中的人在发消息，不能像AI润色过的文案。
@@ -1653,28 +1656,26 @@ const getApiFormat = () => {
             return { role, content };
         };
         
-        const systemMessageContent = [{ type: 'text', text: finalSystemPrompt }];
-        if (imageForSingleTurn) {
-            systemMessageContent.push({ type: 'image_url', image_url: { url: imageForSingleTurn } });
-        }
-
+        // 【修正之处】我们让所有兼容格式都走这条统一、正确的路
         const messages = [ { role: 'system', content: finalSystemPrompt } ];
         
+        // 只有当有图片时，我们才使用复杂的内容格式
+        if (imageForSingleTurn) {
+            messages[0].content = [
+                { type: 'text', text: finalSystemPrompt },
+                { type: 'image_url', image_url: { url: imageForSingleTurn } }
+            ];
+        }
+        
+        // 只有当有聊天记录时，才添加“握手”对话和历史记录
         if (history && history.length > 0) {
              messages.push({ role: 'user', content: "好的，我会严格遵守以上所有指令。"});
              messages.push({ role: 'assistant', content: "好的，我明白了，将严格遵循所有指令。"});
              messages.push(...history.map(formatForOpenAI).filter(Boolean));
         }
-        
-        // 为兼容格式的Gemini进行特殊优化：如果历史为空，则简化指令，避免出错
-        if ((!history || history.length === 0) && apiFormat === 'gemini_openai') {
-            const finalContent = [{ type: 'text', text: finalSystemPrompt }];
-            if (imageForSingleTurn) {
-                finalContent.push({ type: 'image_url', image_url: { url: imageForSingleTurn } });
-            }
-            return { model, messages: [{ role: 'user', content: finalContent }], stream: false, temperature: parseFloat(elements.temperatureSlider.value), top_p: parseFloat(elements.topPSlider.value) };
-        }
 
+        // 【已删除】那段有问题的、只在对话开始时触发的 if (apiFormat === 'gemini_openai') 代码块已被移除。
+        
         return { model, messages, stream: false, temperature: parseFloat(elements.temperatureSlider.value), top_p: parseFloat(elements.topPSlider.value) };
     }
 };
@@ -4721,6 +4722,7 @@ const migrateDataToV7 = (oldData) => {
         appSettings.presets = globalPresets; // Presets在别处已更新
 
         // 更新用户个人资料
+      userMomentsProfile.name = elements.userNameInput.value.trim() || '你';
         userMomentsProfile.chatAvatar = elements.userAvatarPreview.src;
         userMomentsProfile.momentsAvatar = elements.userMomentsAvatarPreview.src;
         userMomentsProfile.cover = elements.userMomentsCoverPreview.src;
