@@ -1853,6 +1853,25 @@ const getApiFormat = () => {
 };
                 // --- Re-written loadAllData with migration logic ---
                 const loadAllData = async () => {
+    // --- 核心修复：在程序开始时，立刻检查“抽屉”里有没有菜单 ---
+    try {
+        const cachedModelsRaw = localStorage.getItem('ai_boyfriend_model_cache');
+        if (cachedModelsRaw) {
+            const cachedModels = JSON.parse(cachedModelsRaw);
+            if (Array.isArray(cachedModels) && cachedModels.length > 0) {
+                elements.modelSelect.innerHTML = ''; // 清空选择框
+                cachedModels.forEach(model => {
+                    elements.modelSelect.add(new Option(model.name, model.id));
+                });
+                console.log("已成功从缓存加载模型列表。");
+            }
+        }
+    } catch (e) {
+        console.error("从缓存加载模型列表失败:", e);
+        localStorage.removeItem('ai_boyfriend_model_cache'); // 如果缓存坏了，就清掉它
+    }
+    // --- 修复结束 ---
+
     const darkModeSaved = localStorage.getItem('ui_dark_mode_enabled') === 'true';
     applyDarkMode(darkModeSaved);
     const compactModeSaved = localStorage.getItem('ui_compact_mode_enabled') === 'true';
@@ -1866,7 +1885,9 @@ const getApiFormat = () => {
                 const value = obj[key];
                 if (isImageKey(value)) {
                     const imageData = await dbGet(value);
-                    if (imageData) { obj[key] = imageData; }
+                    if (imageData) {
+                        obj[key] = imageData;
+                    }
                 } else if (typeof value === 'object') {
                     await processObjectForLoading(value);
                 }
@@ -1880,8 +1901,16 @@ const getApiFormat = () => {
         console.log("未找到任何数据，正在进行全新安装...");
         const newChar = createNewCharacterObject();
         characterSets.push(newChar);
-        currentChat = { type: 'direct', id: newChar.id };
-        appSettings = { fontSize: 13, uiScale: 1.0, bubblePadding: 10, apiFormat: 'openai' }; // 默认设置
+        currentChat = {
+            type: 'direct',
+            id: newChar.id
+        };
+        appSettings = {
+            fontSize: 13,
+            uiScale: 1.0,
+            bubblePadding: 10,
+            apiFormat: 'openai'
+        }; // 默认设置
         applySizing(appSettings);
         loadChat(currentChat.type, currentChat.id);
         return;
@@ -1895,7 +1924,12 @@ const getApiFormat = () => {
             characterSets.forEach(c => {
                 if (c.chatHistory && !c.sessions) {
                     const defaultSessionId = generateId('session');
-                    c.sessions = [{ id: defaultSessionId, name: '默认继承的剧情', history: c.chatHistory, createdAt: new Date().toISOString() }];
+                    c.sessions = [{
+                        id: defaultSessionId,
+                        name: '默认继承的剧情',
+                        history: c.chatHistory,
+                        createdAt: new Date().toISOString()
+                    }];
                     c.activeSessionId = defaultSessionId;
                     delete c.chatHistory;
                 }
@@ -1906,7 +1940,12 @@ const getApiFormat = () => {
                     c.config.streak = c.config.streak || 1;
                     c.config.lastChatDate = c.config.lastChatDate || null;
                 }
-                 if (!c.forum) { c.forum = { posts: [], background: '' }; }
+                if (!c.forum) {
+                    c.forum = {
+                        posts: [],
+                        background: ''
+                    };
+                }
             });
         }
 
@@ -1914,7 +1953,12 @@ const getApiFormat = () => {
         if (groupChats) {
             groupChats.forEach(g => {
                 g.memorySize = g.memorySize || 80;
-                 if (!g.forum) { g.forum = { posts: [], background: '' }; }
+                if (!g.forum) {
+                    g.forum = {
+                        posts: [],
+                        background: ''
+                    };
+                }
             });
         }
 
@@ -1926,7 +1970,9 @@ const getApiFormat = () => {
         }
         if (!savedData.userMomentsProfile?.userStickers) {
             if (savedData.userMomentsProfile) savedData.userMomentsProfile.userStickers = [];
-            else savedData.userMomentsProfile = { userStickers: [] };
+            else savedData.userMomentsProfile = {
+                userStickers: []
+            };
         }
         userMomentsProfile = savedData.userMomentsProfile || {};
 
@@ -1939,26 +1985,32 @@ const getApiFormat = () => {
         if (appSettings.customFontName && appSettings.customFontUrl) {
             applyCustomFont(appSettings.customFontName, appSettings.customFontUrl);
         }
-        
+
         globalPresets = appSettings.presets || [];
-        
+
         if (characterSets.length > 0) {
-            const isValidSavedChat = savedData.currentChat && 
-                ( (savedData.currentChat.type === 'direct' && characterSets.some(c => c.id === savedData.currentChat.id)) || 
-                (savedData.currentChat.type === 'group' && groupChats.some(g => g.id === savedData.currentChat.id)) );
-            currentChat = isValidSavedChat ? savedData.currentChat : { type: 'direct', id: characterSets[0].id };
+            const isValidSavedChat = savedData.currentChat &&
+                ((savedData.currentChat.type === 'direct' && characterSets.some(c => c.id === savedData.currentChat.id)) ||
+                    (savedData.currentChat.type === 'group' && groupChats.some(g => g.id === savedData.currentChat.id)));
+            currentChat = isValidSavedChat ? savedData.currentChat : {
+                type: 'direct',
+                id: characterSets[0].id
+            };
         } else {
             const newChar = createNewCharacterObject();
             characterSets.push(newChar);
-            currentChat = { type: 'direct', id: newChar.id };
+            currentChat = {
+                type: 'direct',
+                id: newChar.id
+            };
         }
-        
+
         loadChat(currentChat.type, currentChat.id);
-    } catch(error) {
+    } catch (error) {
         console.error("加载数据失败:", error);
         if (confirm("加载数据失败，存档可能已损坏。是否清除损坏的数据并重新开始？\n警告：此操作不可逆！")) {
-             localStorage.removeItem('aiBoyfriendBackup_v7_meta');
-             location.reload();
+            localStorage.removeItem('aiBoyfriendBackup_v7_meta');
+            location.reload();
         }
     }
 };
@@ -4107,7 +4159,50 @@ const handleForumInteraction = (e) => {
     }
     // --- 修复结束 ---
 };
-        const openDiaryModal = async () => { if (currentChat.type !== 'direct') return; const character = getCurrentCharacter(); if (!character) return; elements.diaryHeader.textContent = `${character.config.characterName}的日记本`; renderDiary(character); elements.diaryModal.classList.add('show'); };
+        const openDiaryModal = async () => {
+    // 基础检查，确保是在和单人角色聊天
+    if (currentChat.type !== 'direct') return;
+    const character = getCurrentCharacter();
+    if (!character) return;
+
+    // --- 核心修复：采纳您的智能触发方案 ---
+
+    // 1. 获取今天的日期，并格式化为 "YYYY-MM-DD"
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const todayString = `${year}-${month}-${day}`;
+
+    // 2. 检查角色的日记本里，是否已经有了今天的日记
+    //    我们用 .some() 方法来检查，它只要找到一个符合条件的就会返回 true
+    if (!character.diary) character.diary = []; // 确保日记数组存在
+    const todayEntryExists = character.diary.some(entry => entry.date === todayString);
+
+    // 3. 【关键】如果今天的日记不存在，就命令AI去写！
+    if (!todayEntryExists) {
+        try {
+            // 调用AI写日记的函数，告诉它为今天(todayString)写
+            // 这个过程会在后台悄悄进行
+            triggerAiDiaryEntry(character, todayString);
+            
+            // 为了更好的体验，我们可以在界面上给一个提示
+            // （但这步是可选的，核心功能已经实现）
+            console.log(`检测到今天还没有日记，已触发${character.config.characterName}去写...`);
+            
+        } catch (error) {
+            // 万一触发失败，在控制台记录错误，避免程序崩溃
+            console.error("触发AI写日记时出错:", error);
+        }
+    }
+
+    // --- 修复结束 ---
+
+    // 后续的逻辑保持不变：设置日记本标题、渲染所有（可能刚刚更新的）日记、显示窗口
+    elements.diaryHeader.textContent = `${character.config.characterName}的日记本`;
+    renderDiary(character);
+    elements.diaryModal.classList.add('show');
+};
       // ==========================================================
 // ============ 剧情线 (Session) 管理核心功能 (新增) ============
 // ==========================================================
@@ -4931,7 +5026,10 @@ elements.actionQnaGame.onclick = () => { openQnAGameModal(); toggleActionPanel(t
                                                       elements.fetchModelsBtn.onclick = async () => {
     const baseUrl = elements.apiBaseUrlInput.value.trim();
     const apiKey = elements.apiKeyInput.value.trim();
-    if (!baseUrl) { alert('请输入API端点'); return; }
+    if (!baseUrl) {
+        alert('请输入API端点');
+        return;
+    }
     elements.fetchModelsBtn.textContent = '获取中...';
     elements.fetchModelsBtn.disabled = true;
 
@@ -4941,35 +5039,62 @@ elements.actionQnaGame.onclick = () => { openQnAGameModal(); toggleActionPanel(t
     try {
         // 【核心改造】根据API格式，决定从哪里获取模型
         if (apiFormat === 'gemini_native') {
-            if (!apiKey) { alert('使用原生Gemini格式时，API密钥不能为空'); throw new Error('Missing API Key');}
+            if (!apiKey) {
+                alert('使用原生Gemini格式时，API密钥不能为空');
+                throw new Error('Missing API Key');
+            }
             fetchUrl = `${baseUrl}/v1beta/models?key=${apiKey}`;
             headers = {};
         } else { // 'openai' and 'gemini_openai'
             fetchUrl = `${baseUrl}/v1/models`;
-            headers = { 'Authorization': `Bearer ${apiKey}` };
+            headers = {
+                'Authorization': `Bearer ${apiKey}`
+            };
         }
 
-        const response = await fetch(fetchUrl, { headers });
+        const response = await fetch(fetchUrl, {
+            headers
+        });
         if (!response.ok) throw new Error(`获取模型列表失败, Status: ${response.status} ${await response.text()}`);
-        
+
         const data = await response.json();
         elements.modelSelect.innerHTML = '';
-        
+
         const models = data.models || data.data || data;
         if (!Array.isArray(models)) throw new Error('API返回的模型列表格式不正确');
-        
+
+        // --- 核心修复：在这里“复印并珍藏”菜单 ---
+        const modelCache = []; // 准备一个空数组来存放菜单项
+        // --- 修复结束 ---
+
         models.forEach(model => {
             const modelId = model.name ? model.name.replace('models/', '') : model.id;
             if (modelId) {
-                if(apiFormat === 'gemini_native' && model.supportedGenerationMethods?.includes('generateContent') && modelId.includes('gemini')) {
-                    elements.modelSelect.add(new Option(modelId, modelId));
+                let isValidModel = false;
+                if (apiFormat === 'gemini_native' && model.supportedGenerationMethods?.includes('generateContent') && modelId.includes('gemini')) {
+                    isValidModel = true;
                 } else if (apiFormat !== 'gemini_native') {
+                    isValidModel = true;
+                }
+
+                if (isValidModel) {
                     elements.modelSelect.add(new Option(modelId, modelId));
+                    // --- 核心修复：把每个菜品（模型）记下来 ---
+                    modelCache.push({
+                        id: modelId,
+                        name: modelId
+                    });
+                    // --- 修复结束 ---
                 }
             }
         });
+
+        // --- 核心修复：将完整的菜单存入本地存储（那个“特殊抽屉”） ---
+        localStorage.setItem('ai_boyfriend_model_cache', JSON.stringify(modelCache));
+        // --- 修复结束 ---
+
         const currentModel = elements.modelSelect.value;
-        if(currentModel) elements.modelSelect.value = currentModel;
+        if (currentModel) elements.modelSelect.value = currentModel;
 
     } catch (error) {
         alert(`获取模型失败: ${error.message}`);
