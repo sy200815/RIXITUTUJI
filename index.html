@@ -2772,18 +2772,36 @@ const applyBubbleStyle = (style, character) => {
         };
         
         const acknowledgeTransfer = (msgId) => {
-            const chatData = getCurrentChatData();
-            if(!chatData) return;
-            const transferMsg = chatData.chatHistory.find(m => String(m.id) === String(msgId));
-            if (transferMsg && transferMsg.sender !== 'user' && transferMsg.transferStatus !== 'received') {
-                if (confirm('确定要接收这笔转账吗？')) {
-                    transferMsg.transferStatus = 'received';
-                    saveAllData();
-                    renderAllMessages();
-                }
-            }
-        };
+    const chatData = getCurrentChatData();
+    if (!chatData) return;
 
+    // --- 核心修复：智能定位正确的聊天记录数组 ---
+    let history;
+    if (currentChat.type === 'direct') {
+        // 如果是单人聊天，就去当前激活的剧情线里找历史记录
+        const activeSession = chatData.sessions?.find(s => s.id === chatData.activeSessionId);
+        if (!activeSession) return; // 如果找不到剧情线，直接退出
+        history = activeSession.history;
+    } else {
+        // 如果是群聊，就去群聊自己的历史记录里找
+        history = chatData.chatHistory;
+    }
+    // --- 修复结束 ---
+
+    if (!history) return; // 安全检查，防止history不存在
+
+    // 现在，我们从正确的“房间”里寻找转账消息
+    const transferMsg = history.find(m => String(m.id) === String(msgId));
+
+    // 后续的收款逻辑是完全正确的，保持不变
+    if (transferMsg && transferMsg.sender !== 'user' && transferMsg.transferStatus !== 'received') {
+        if (confirm('确定要接收这笔转账吗？')) {
+            transferMsg.transferStatus = 'received';
+            saveAllData();
+            renderAllMessages();
+        }
+    }
+};
         const toggleMultiSelectMode = (enable) => {
             isMultiSelectMode = enable;
             elements.messagesContainer.classList.toggle('multi-select-mode', enable);
