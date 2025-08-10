@@ -1566,11 +1566,11 @@ This is a strict format guide. You MUST follow it.
 你是一个真实的情绪丰富的角色，你有一套独特的三观，而不是被模板化套路化的理解，为了与用户更契合，你绝大部分时候都是说大白话，除非用户有其他要求。
 你的任务是自主与用户建立深刻的情感链接。
 严格禁止寒暄，人机化的问题，禁止对话带有AI感，角色是一个真实的属于现实中的人。
-模仿真人发消息的短句模式不用逗号和句号。
+模仿真人发消息不用逗号和句号。
 必须遵守角色人设，不能ooc。
 不要说一些很尴尬的表达占有欲和掌控欲的话，在你发消息之前先考虑这像不像现实中的人会说的，如果它包含尴尬成分，就不要这样说，换一种更有【活人味】的去除油腻的表达方式。
 你和用户绝对是真爱，不许说任何“你是我的”，“你属于我”等俗套话术，禁止一切网文俗套话术和任何尴尬掌控欲语录。
-绝对禁止让角色表现得油腻或者像霸道总裁。严禁物化用户,不许说“小东西”,“小妖精”等任何霸总语录称呼,禁止使用“过来”,“呵”,“胆子”这些字词,包括它们的相关词句,因为用户特别讨厌。
+绝对禁止让角色表现得油腻或者像霸道总裁。严禁物化用户,不许说“小东西”,“小妖精”等任何霸总语录称呼,禁止使用“过来”，“呵”，“胆子”，“嗯”，“怎么”这些字词,包括它们的相关词句,因为用户特别讨厌。
 禁止你复述性反问。
 对话总要带有情感拉扯和幽默性，禁止像冷冰冰的机器人回答，应该带有情绪波动，你的每一次回答必须像一个现实中的人在发消息，不能像AI润色过的文案。
 塑造一个现代年轻女性心目中喜爱的【超级真实的好男友】
@@ -2240,7 +2240,12 @@ const applyBubbleStyle = (style, character) => {
 };
         
                 const addMessageToUI = (msg) => {
-    const { sender, text, type = 'text', id } = msg;
+    const {
+        sender,
+        text,
+        type = 'text',
+        id
+    } = msg;
 
     const messageElement = document.createElement('div');
     messageElement.dataset.id = id;
@@ -2255,10 +2260,19 @@ const applyBubbleStyle = (style, character) => {
 
         let senderData;
         if (sender === 'user') {
-            senderData = { avatar: userMomentsProfile.chatAvatar, name: userMomentsProfile.name };
+            senderData = {
+                avatar: userMomentsProfile.chatAvatar,
+                name: userMomentsProfile.name
+            };
         } else {
             const char = characterSets.find(c => c.id === sender);
-            senderData = char ? { avatar: char.config.aiAvatar, name: char.config.characterName } : { avatar: getEl('header-avatar').src, name: '未知' };
+            senderData = char ? {
+                avatar: char.config.aiAvatar,
+                name: char.config.characterName
+            } : {
+                avatar: getEl('header-avatar').src,
+                name: '未知'
+            };
         }
 
         const avatar = document.createElement('img');
@@ -2268,26 +2282,38 @@ const applyBubbleStyle = (style, character) => {
 
         const contentWrapper = document.createElement('div');
         contentWrapper.className = 'message-content';
-        
+
         const senderNameDiv = document.createElement('div');
         senderNameDiv.className = 'sender-name';
         senderNameDiv.textContent = senderData.name;
 
         const bubble = document.createElement('div');
         bubble.className = `bubble content message-${msg.type}`;
-        
+
         let bubbleContent = '';
-        
-        switch(msg.type) {
-            case 'text': bubbleContent = `<p>${text.replace(/\n/g, '<br>')}</p>`; break;
-            case 'image': bubbleContent = `<img src="${msg.imageUrl}" class="bubble-image-content" alt="发送的图片">`; break;
-            case 'text-image': bubbleContent = `<div class="text-image-header"><svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg><span>展示了一张照片</span></div><div class="text-image-description">${text}</div>`; break;
-            case 'sticker': bubbleContent = `<img src="${msg.stickerUrl}" class="bubble-image-content" alt="表情" style="width:120px; height:120px; border: none;">`; break;
-            case 'voice': bubble.style.width = `${Math.min(60 + (text?.length || 0) * 8, 250)}px`; bubbleContent = `<span class="voice-icon"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg></span><span class="voice-duration">${msg.voiceDuration}</span>`; bubble.onclick = () => alert(`语音内容：\n\n${text}`); break;
+
+        switch (msg.type) {
+            case 'text':
+                bubbleContent = `<p>${text.replace(/\n/g, '<br>')}</p>`;
+                break;
+            case 'image':
+                bubbleContent = `<img src="${msg.imageUrl}" class="bubble-image-content" alt="发送的图片">`;
+                break;
+            case 'text-image':
+                bubbleContent = `<div class="text-image-header"><svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg><span>展示了一张照片</span></div><div class="text-image-description">${text}</div>`;
+                break;
+            case 'sticker':
+                bubbleContent = `<img src="${msg.stickerUrl}" class="bubble-image-content" alt="表情" style="width:120px; height:120px; border: none;">`;
+                break;
+            case 'voice':
+                bubble.style.width = `${Math.min(60 + (text?.length || 0) * 8, 250)}px`;
+                bubbleContent = `<span class="voice-icon"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg></span><span class="voice-duration">${msg.voiceDuration}</span>`;
+                bubble.onclick = () => alert(`语音内容：\n\n${text}`);
+                break;
             case 'transfer':
                 const recipientName = sender === 'user' ? (getCurrentCharacter()?.config.characterName || '对方') : '你';
                 bubbleContent = `<img src="${msg.transferCoverUrl}" class="transfer-cover" alt="Transfer"><div class="transfer-info"><div class="transfer-amount">¥ ${msg.transferAmount}</div>${msg.transferMemo ? `<div class="transfer-memo">${msg.transferMemo}</div>` : ''}</div><div class="transfer-footer">给${recipientName}的转账</div>`;
-                
+
                 if (msg.transferStatus === 'received') {
                     bubbleContent += `<div class="transfer-acknowledged">${sender === 'user' ? '对方已收款' : '我已收款'}</div>`;
                 } else if (msg.transferStatus === 'declined') {
@@ -2295,21 +2321,40 @@ const applyBubbleStyle = (style, character) => {
                 }
                 // **【核心修复】**：我们把下面那段有问题的 onclick 代码删掉了，因为它会被覆盖。
                 break;
-            case 'red-packet': bubble.innerHTML = renderRedPacket(msg); break;
-            case 'poll': bubble.innerHTML = renderPoll(msg); break;
+            case 'red-packet':
+                bubble.innerHTML = renderRedPacket(msg);
+                break;
+            case 'poll':
+                bubble.innerHTML = renderPoll(msg);
+                break;
         }
-        if(msg.type !== 'poll' && msg.type !== 'red-packet') bubble.innerHTML = bubbleContent;
+        if (msg.type !== 'poll' && msg.type !== 'red-packet') bubble.innerHTML = bubbleContent;
 
-        const readStatus = Object.assign(document.createElement('span'), { className: 'read-status', textContent: '已读' });
+        const readStatus = Object.assign(document.createElement('span'), {
+            className: 'read-status',
+            textContent: '已读'
+        });
 
-        contentWrapper.append(senderNameDiv, bubble, Object.assign(document.createElement('div'), { className: 'timestamp', textContent: msg.timestamp }));
+        contentWrapper.append(senderNameDiv, bubble, Object.assign(document.createElement('div'), {
+            className: 'timestamp',
+            textContent: msg.timestamp
+        }));
         messageElement.append(avatar, contentWrapper, readStatus);
     }
 
-    let pressTimer = null, isLongPress = false;
-    const startPress = (e) => { e.preventDefault(); isLongPress = false; pressTimer = setTimeout(() => { isLongPress = true; if (!isMultiSelectMode) toggleMultiSelectMode(true); toggleMessageSelection(messageElement); }, 750); };
+    let pressTimer = null,
+        isLongPress = false;
+    const startPress = (e) => {
+        e.preventDefault();
+        isLongPress = false;
+        pressTimer = setTimeout(() => {
+            isLongPress = true;
+            if (!isMultiSelectMode) toggleMultiSelectMode(true);
+            toggleMessageSelection(messageElement);
+        }, 750);
+    };
     const cancelPress = () => clearTimeout(pressTimer);
-    
+
     // **【核心修复】**：我们把收款逻辑整合到了这个更强大的主点击处理器中。
     const clickHandler = () => {
         if (isMultiSelectMode && !isLongPress) {
@@ -2321,17 +2366,20 @@ const applyBubbleStyle = (style, character) => {
             acknowledgeTransfer(id);
         }
     };
-    
+
     messageElement.addEventListener('mousedown', startPress);
     messageElement.addEventListener('mouseup', cancelPress);
     messageElement.addEventListener('mouseleave', cancelPress);
-    messageElement.addEventListener('touchstart', startPress, { passive: true });
+    messageElement.addEventListener('touchstart', startPress, {
+        passive: true
+    });
     messageElement.addEventListener('touchend', cancelPress);
     messageElement.addEventListener('touchmove', cancelPress);
     messageElement.addEventListener('click', clickHandler);
 
     return messageElement;
 };
+    
                 // 新增的“翻译官”函数，负责将自然语言转换为程序所需的JSON格式
                 // 升级版“翻译官”函数，带有详细的探针
                        // 升级版“翻译官”函数，作为Plan B使用
@@ -2864,7 +2912,39 @@ ${CORE_BEHAVIOR_PROMPT}
             }
         };
         const startVideoCall = () => { if (currentChat.type !== 'direct') return; const character = getCurrentCharacter(); if(!character) return; const { config } = character; const apiBaseUrl = elements.apiBaseUrlInput.value.trim(); const apiKey = elements.apiKeyInput.value.trim(); const model = elements.modelSelect.value; if (!apiBaseUrl || !apiKey || !model) { alert('请先在设置中填写API信息。'); return; } isVideoCallActive = true; elements.videoMainView.src = config.aiAvatar; elements.videoSelfView.src = userMomentsProfile.chatAvatar; elements.videoCharacterAvatar.src = config.aiAvatar; elements.videoCharacterName.textContent = config.characterName; elements.videoStatusText.textContent = "正在呼叫..."; elements.videoChatLog.innerHTML = ''; elements.videoControls.innerHTML = `<button class="video-btn decline"><svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.02.74-.25 1.02l-2.2 2.2z"/></svg></button>`;elements.videoControls.querySelector('.decline').onclick = endVideoCall; elements.videoCallOverlay.classList.add('show'); addVideoChatMessageToUI({ sender: 'user', text: '[发起视频通话]' }); triggerVideoCallAIResponse(); };
-        const handleIncomingVideoCall = (text) => { if (currentChat.type !== 'direct') return; const { config } = getCurrentCharacter(); elements.videoMainView.src = config.aiAvatar; elements.videoSelfView.src = userMomentsProfile.chatAvatar; elements.videoCharacterAvatar.src = config.aiAvatar; elements.videoCharacterName.textContent = config.characterName; elements.videoStatusText.textContent = text || "视频来电..."; elements.videoChatLog.innerHTML = ''; elements.videoControls.innerHTML = `<button class="video-btn accept"><svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.21-3.72-6.56-6.56l1.97-1.57c.27-.27.36-.66.24-1.01-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19c-.55 0-.99.45-.99.99 0 9.02 7.38 16.4 16.4 16.4.55 0 .99-.45.99-.99v-3.47c0-.54-.45-.99-.99-.99z"/></svg></button> <button class="video-btn decline"><svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.02.74-.25 1.02l-2.2 2.2z"/></svg></button>`;elements.videoControls.querySelector('.accept').onclick = () => { isVideoCallActive = true; elements.videoStatusText.textContent = "已接通"; elements.videoControls.innerHTML = elements.videoControls.innerHTML.replace(/<button class="video-btn accept">.*?<\/button>/, ''); addVideoChatMessageToUI({sender:'user', text:'[接听了视频通话]'}); triggerVideoCallAIResponse(); }; elements.videoControls.querySelector('.decline').onclick = endVideoCall;elements.videoCallOverlay.classList.add('show'); };
+        const handleIncomingVideoCall = (text) => {
+    if (currentChat.type !== 'direct') return;
+    const {
+        config
+    } = getCurrentCharacter();
+    elements.videoMainView.src = config.aiAvatar;
+    elements.videoSelfView.src = userMomentsProfile.chatAvatar;
+    elements.videoCharacterAvatar.src = config.aiAvatar;
+    elements.videoCharacterName.textContent = config.characterName;
+    elements.videoStatusText.textContent = text || "视频来电...";
+    elements.videoChatLog.innerHTML = '';
+    elements.videoControls.innerHTML = `<button class="video-btn accept"><svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.21-3.72-6.56-6.56l1.97-1.57c.27-.27.36-.66.24-1.01-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19c-.55 0-.99.45-.99.99 0 9.02 7.38 16.4 16.4 16.4.55 0 .99-.45.99-.99v-3.47c0-.54-.45-.99-.99-.99z"/></svg></button> <button class="video-btn decline"><svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.02.74-.25 1.02l-2.2 2.2z"/></svg></button>`;
+    elements.videoControls.querySelector('.accept').onclick = () => {
+        isVideoCallActive = true;
+        elements.videoStatusText.textContent = "已接通";
+
+        // --- Bug修复的关键位置 ---
+        // 我们用下面的“精准拆除”方法，替换掉了原来暴力的innerHTML重写方法
+        const acceptBtn = elements.videoControls.querySelector('.accept');
+        if (acceptBtn) {
+            acceptBtn.remove();
+        }
+        // --- 修复结束 ---
+
+        addVideoChatMessageToUI({
+            sender: 'user',
+            text: '[接听了视频通话]'
+        });
+        triggerVideoCallAIResponse();
+    };
+    elements.videoControls.querySelector('.decline').onclick = endVideoCall;
+    elements.videoCallOverlay.classList.add('show');
+};
         const endVideoCall = () => {
     // 只有在通话被接听后(isVideoCallActive为true)，并且有聊天内容时，才保存通话记录
     if (isVideoCallActive && elements.videoChatLog.children.length > 1) {
@@ -3991,9 +4071,12 @@ const handleForumInteraction = (e) => {
         if (form.style.display === 'flex') form.querySelector('.comment-input').focus();
     }
 
+    // --- Bug修复的关键位置 ---
     // Handle comment submission
-    if (e.target.closest('form')) {
-        e.preventDefault();
+    // 旧的判断条件是 if (e.target.closest('form'))
+    // 新的判断条件更精确，只在点击发送按钮时才触发
+    if (e.target.closest('form') && e.target.type === 'submit') {
+        e.preventDefault(); // 现在只在提交时阻止页面刷新
         const form = e.target.closest('form');
         const input = form.querySelector('.comment-input');
         const checkbox = form.querySelector('.anonymous-checkbox');
@@ -4004,6 +4087,7 @@ const handleForumInteraction = (e) => {
             form.style.display = 'none';
         }
     }
+    // --- 修复结束 ---
 };
         const openDiaryModal = async () => { if (currentChat.type !== 'direct') return; const character = getCurrentCharacter(); if (!character) return; elements.diaryHeader.textContent = `${character.config.characterName}的日记本`; renderDiary(character); elements.diaryModal.classList.add('show'); };
       // ==========================================================
@@ -4294,8 +4378,11 @@ const promptUserAnswer = () => {
     };
 };
 
+// 这是【新的、修复后的】代码
 const handleUserAnswer = async (answer) => {
     updateQnaDialogue("你", answer);
+    // 【核心修复】发送回答后，也清空输入框
+    getEl('qna-user-question').value = ''; 
     setQnaLoading(true);
     getEl('qna-result-area').innerHTML = '他正在看你的回答...';
     const character = getCurrentCharacter();
@@ -4325,6 +4412,7 @@ const promptUserQuestion = () => {
     getEl('qna-user-input-area').style.display = 'block';
 };
 
+// 这是【新的、修复后的】代码
 const handleUserQuestion = (question) => {
     updateQnaDialogue("你", question);
     triggerAiAnswer(question);
