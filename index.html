@@ -862,11 +862,282 @@ input[type=range]::-webkit-slider-thumb {
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15); /* 阴影加深一点 */
     transform: translateY(-1px); /* 微微上浮，增加互动感 */
 }
+      
+/* ============================================================== */
+/* =================== 白绒绒 主题专属样式 (V4 - 精准尺寸控制) ===== */
+/* ============================================================== */
+
+/* 当body元素拥有 .theme-white-fluff 这个类时，以下所有样式生效 */
+
+/* --- 1. 全局字体和变量覆盖 (这部分不变) --- */
+.theme-white-fluff {
+    --font-main: 'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-ui: 'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --accent-color: #555555;
+    --accent-dark-color: #000000;
+    --text-color: #333333;
+    --text-light-color: #999999;
+    --border-color: #eeeeee;
+    --header-bg-color: rgba(255, 255, 255, 0.7);
+    --chat-bg-color: #ffffff;
+    --bg-color: #f5f5f5;
+}
+
+/* --- 2. 主界面美化 (这部分不变) --- */
+.theme-white-fluff #chat-header { position: relative; border-bottom: 1px solid #f0f0f0; }
+.theme-white-fluff #chat-header::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('https://files.catbox.moe/kk44at.jpg'); background-size: cover; background-position: center; opacity: 0.7; z-index: -1; }
+.theme-white-fluff #chat-header::after { content: ''; position: absolute; top: 50%; right: 10px; transform: translateY(-50%); width: 30px; height: 30px;  background-size: contain; background-repeat: no-repeat; }
+.theme-white-fluff #message-input { background-color: rgba(248, 248, 248, 0.35); border: 1px solid #e0e0e0; color: #333; }
+.theme-white-fluff #message-input:focus { border-color: #333; box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); }
+.theme-white-fluff #action-btn svg { fill: #000000; }
+
+/* --- 【这里是您调节的地方 - 发送与接收按钮】 --- */
+.theme-white-fluff #send-btn,
+.theme-white-fluff #receive-btn {
+    background: none !important; border: none !important; border-radius: 0 !important;
+    box-shadow: none !important; transform: none !important; padding: 0 !important;
+    /* 在这里调节大小 */
+    width: 44px !important;
+    height: 44px !important;
+}
+
+/* --- 【这里是您调节的地方 - 头部按钮】 --- */
+/* 统一设置头部按钮的基础样式，防止被拉伸 */
+.theme-white-fluff #chat-header button {
+    padding: 0; /* 移除内边距，让图片完全填充 */
+    flex-shrink: 0; /* 【关键】禁止按钮在flex布局中被压缩 */
+    display: flex; /* 让内部图片居中 */
+    align-items: center;
+    justify-content: center;
+}
+
+/* 左上角按钮 */
+.theme-white-fluff #chat-manager-btn {
+    /* 在这里调节大小 */
+    width: 58px;
+    height: 58px;
+}
+
+/* --- 【核心修复】增大“进入设置”按钮的可点击区域 --- */
+.theme-white-fluff #settings-btn {
+    width: 54px;  /* 在这里调节按钮的点击区域大小 */
+    height: 54px;
+}
+.theme-white-fluff #settings-btn img {
+    width: 28px;  /* 在这里调节按钮的视觉大小 (图片大小) */
+    height: 28px;
+}
+
+/* --- 让图片自动填满我们设定好的按钮大小 --- */
+.theme-white-fluff #chat-manager-btn img,
+.theme-white-fluff #settings-btn img,
+.theme-white-fluff #send-btn img,
+.theme-white-fluff #receive-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+/* 【核心修复】设置界面里的关闭按钮 (叉叉) */
+.theme-white-fluff .settings-content .close-btn {
+    width: 32px;  /* 按钮本身大小，方便点击 */
+    height: 32px;
+    top: 15px; /* 把它从角落往里挪一点，更好看 */
+    right: 15px;
+    background-color: rgba(255, 255, 255, 0.5); /* 加个半透明底色，增加存在感 */
+    border-radius: 50%; /* 圆形更精致 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.theme-white-fluff .settings-content .close-btn svg {
+    width: 16px; /* SVG图标本身的大小，可以调小 */
+    height: 16px;
+    fill: #333;
+}
+/* --- 【核心修复】设置界面内所有按钮统一为半透明玻璃风格 --- */
+.theme-white-fluff .settings-section button,
+.theme-white-fluff #save-settings-btn {
+    background-color: rgba(255, 255, 255, 0.7) !important; /* 半透明白色背景 */
+    color: #333 !important; /* 深色文字保证可读性 */
+    border: 1px solid rgba(255, 255, 255, 0.8) !important;
+    border-radius: 8px;
+    backdrop-filter: blur(5px); /* 毛玻璃效果 */
+    transition: all 0.2s ease;
+}
+/* 鼠标悬停时，按钮变得更实，增加互动感 */
+.theme-white-fluff .settings-section button:hover,
+.theme-white-fluff #save-settings-btn:hover {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    border-color: rgba(255, 255, 255, 1) !important;
+    transform: translateY(-1px);
+}
+/* 特别处理删除按钮的文字颜色 */
+.theme-white-fluff .danger-zone button {
+    color: var(--delete-color) !important;
+}
+.theme-white-fluff .danger-zone button:hover {
+    color: #fff !important;
+    background-color: var(--delete-color) !important;
+}
+/* --- 3. 设置界面美化 (这部分不变) --- */
+.theme-white-fluff .settings-content { background-color: transparent; position: relative; overflow: hidden; }
+.theme-white-fluff .settings-content::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('https://files.catbox.moe/nuarnd.jpg'); background-size: cover; background-position: center; opacity: 0.9; z-index: -1; }
+.theme-white-fluff .settings-section h3 { color: #333; border-left-color: #333; }
+.theme-white-fluff .data-zone button, .theme-white-fluff .sticker-zone button, .theme-white-fluff .danger-zone button { background-color: #fff; color: #333; border-color: #ccc; }
+
+/* =================================================== */
+/* ============== 一起听歌 功能专属样式 =============== */
+/* =================================================== */
+
+#listen-together-content {
+    background: rgba(255, 255, 255, 0.5); /* 半透明背景 */
+    backdrop-filter: blur(15px); /* 毛玻璃效果 */
+    -webkit-backdrop-filter: blur(15px); /* 兼容Safari浏览器 */
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    padding: 30px 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    width: 90%;
+    max-width: 400px;
+    color: #333;
+    text-align: center;
+    font-family: var(--font-ui);
+}
+
+#listen-initial-screen h3 {
+    font-size: 2em;
+    font-family: var(--font-logo);
+    color: var(--accent-dark-color);
+    margin-bottom: 10px;
+}
+
+button.listen-btn {
+    padding: 12px 25px;
+    background: var(--accent-dark-color);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: var(--font-ui);
+    font-size: 1em;
+    transition: all 0.2s ease;
+}
+button.listen-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.listening-status {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin-bottom: 15px;
+}
+.listening-status .avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+.connecting-wave {
+    width: 80px;
+    animation: wave 2s infinite ease-in-out;
+}
+@keyframes wave {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(0.5); }
+}
+
+#listen-status-text {
+    font-size: 0.9em;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+.music-player {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    background: rgba(255, 255, 255, 0.5);
+    padding: 20px;
+    border-radius: 15px;
+}
+
+#song-cover-art {
+    width: 120px;
+    height: 120px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+
+.song-info {
+    text-align: center;
+}
+.song-info h4 { margin: 0; font-size: 1.2em; }
+.song-info p { margin: 5px 0 0; color: #666; font-size: 0.9em; }
+
+.audio-controls {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+.audio-controls button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #444;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+/* 设置SVG图标的样式 */
+.audio-controls button svg {
+    width: 28px;
+    height: 28px;
+    fill: #444;
+}
+#play-pause-btn svg {
+    width: 36px;
+    height: 36px;
+}
+
+.playlist-container {
+    margin-top: 25px;
+    width: 100%;
+}
+#playlist-ul {
+    list-style: none;
+    padding: 0;
+    max-height: 150px;
+    overflow-y: auto;
+    background: rgba(255,255,255,0.3);
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+#playlist-ul li {
+    padding: 10px 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.5);
+    cursor: pointer;
+    transition: background-color 0.2s;
+    text-align: left;
+    font-size: 0.95em;
+}
+#playlist-ul li:last-child { border-bottom: none; }
+#playlist-ul li:hover { background-color: rgba(255,255,255,0.5); }
+#playlist-ul li.active {
+    background-color: var(--accent-dark-color);
+    color: white;
+    font-weight: bold;
+}
 /* ============================================================== */
 /* ========================= CSS样式结束 ========================== */
 /* ============================================================== */
     </style>
   <style id="custom-bubble-style-tag"></style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
     <div id="chat-container">
@@ -960,6 +1231,14 @@ input[type=range]::-webkit-slider-thumb {
         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="currentColor"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M21 6h-2v9H6v2c0 .55.45 1 1 1h11l4 4V7c0-.55-.45-1-1-1zm-4 6V4c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v13l4-4h9c1.1 0 2-.9 2-2z"/></svg>
     </div>
     <span>吃瓜广场</span>
+</div>  
+            <!-- ==================== 一起听歌 功能按钮 ==================== -->
+<div class="action-item" id="action-listen-together">
+    <div class="action-item-icon">
+        <!-- 使用了新的音乐SVG图标 -->
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="currentColor"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M12 3v9.28c-.47-.17-.97-.28-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z"/></svg>
+    </div>
+    <span>一起听歌</span>
 </div>  
             </div>
             <!-- TASK 5: Modify input area to include receive button -->
@@ -1093,6 +1372,19 @@ input[type=range]::-webkit-slider-thumb {
 
                 <div class="settings-section">
                     <h3>设计与显示</h3>
+                  <!-- ============================================= -->
+<!-- ============== 全局主题选择 开始 ============== -->
+<!-- ============================================= -->
+<div class="form-group">
+    <label for="global-theme-select">全局界面主题</label>
+    <select id="global-theme-select">
+        <option value="default">默认主题</option>
+        <option value="white-fluff">白绒绒</option>
+    </select>
+</div>
+<!-- ============================================= -->
+<!-- ============== 全局主题选择 结束 ============== -->
+<!-- ============================================= -->
                     <!-- ============================================= -->
                     <!-- ============== 夜间模式开关 开始 ============== -->
                     <!-- ============================================= -->
@@ -1329,6 +1621,56 @@ input[type=range]::-webkit-slider-thumb {
         </div>
     </div>
 </div>
+  <!-- ======================================================= -->
+<!-- ==================== 一起听歌 弹窗 (V2) ================== -->
+<!-- ======================================================= -->
+<div id="listen-together-modal" class="modal-overlay">
+    <div id="listen-together-content">
+        <div id="listen-initial-screen"><h3>一起听歌</h3><p>准备好和TA分享你们的专属BGM了吗？</p><button id="start-listen-along-btn" class="listen-btn">开始一起听</button></div>
+        <div id="listen-main-screen" style="display: none;">
+            <div class="listening-status"><img id="listen-user-avatar" class="avatar"><svg class="connecting-wave" viewBox="0 0 100 40"><path d="M 0,20 C 20,0 30,40 50,20 S 80,0 100,20" stroke="#fff" fill="none" stroke-width="2"/></svg><img id="listen-char-avatar" class="avatar"></div>
+            <p id="listen-status-text"></p>
+            <div class="music-player"><img id="song-cover-art" src="https://files.catbox.moe/g0b1sx.png" alt="歌曲封面"><div class="song-info"><h4 id="song-title">暂无歌曲</h4><p id="song-artist">请从列表选择或导入</p></div><div class="audio-controls"><button id="prev-song-btn" title="上一首"></button><button id="play-pause-btn" title="播放/暂停"></button><button id="next-song-btn" title="下一首"></button></div></div>
+            <div class="playlist-container">
+                <h4>播放列表</h4>
+                <ul id="playlist-ul"></ul>
+                <!-- 新增的ZIP导入按钮和原按钮并排显示 -->
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button id="add-new-song-btn" class="listen-btn" style="flex-grow: 1;">导入单曲</button>
+                    <button id="import-zip-btn" class="listen-btn" style="flex-grow: 1; background-color: #67c23a;">导入ZIP包</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button id="close-listen-modal-btn" class="close-btn" style="position:absolute; top: 15px; right: 15px;">&times;</button>
+</div>
+
+<!-- ======================================================= -->
+<!-- ==================== 添加歌曲 弹窗 (V2) ================== -->
+<!-- ======================================================= -->
+<div id="add-song-modal" class="modal-overlay">
+    <div class="feature-modal-content">
+        <div class="feature-modal-header"><h3>添加新歌曲</h3><button class="feature-modal-close">&times;</button></div>
+        <div class="feature-modal-body">
+            <div class="form-group"><label>歌曲文件 (MP3, WAV等)</label><label for="music-file-input" class="file-input-label">选择文件</label><span id="music-file-name" style="margin-left: 10px; color: #888;"></span></div>
+            <div class="form-group"><label>歌曲封面 (可选)</label><label for="song-cover-input" class="file-input-label">选择图片</label><img id="new-song-cover-preview" src="" style="max-width: 80px; max-height: 80px; border-radius: 8px; margin-top: 10px; display: none;"></div>
+            <div class="form-group"><label for="new-song-title">歌名</label><input type="text" id="new-song-title" placeholder="请输入歌名"></div>
+            <div class="form-group"><label for="new-song-artist">歌手</label><input type="text" id="new-song-artist" placeholder="请输入歌手名"></div>
+            <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                    <label for="new-song-lyrics">歌词 (重要！)</label>
+                    <!-- 新增的LRC导入按钮 -->
+                    <button id="import-lrc-btn" class="file-input-label" style="padding: 4px 10px; font-size: 0.8em;">导入.lrc文件</button>
+                </div>
+                <textarea id="new-song-lyrics" rows="6" placeholder="请在此处粘贴完整歌词，或通过上方按钮导入LRC文件。"></textarea>
+            </div>
+        </div>
+        <div class="feature-modal-footer"><button id="save-new-song-btn" class="feature-modal-submit-btn">保存歌曲</button></div>
+    </div>
+</div>
+<!-- 隐藏的文件选择器 -->
+<input type="file" id="music-file-input" accept="audio/*" style="display:none;">
+<input type="file" id="song-cover-input" accept="image/*" style="display:none;">
 <input type="file" id="forum-background-input" accept="image/*" style="display:none;">
     <!-- Hidden file inputs -->
     <input type="file" id="real-image-upload-input" accept="image/*" style="display:none;">
@@ -1343,7 +1685,8 @@ input[type=range]::-webkit-slider-thumb {
     <input type="file" id="user-moments-cover-upload-input" accept="image/*" style="display:none;">
     <input type="file" id="import-data-input" accept=".json" style="display:none;">
     <input type="file" id="moment-post-image-input" accept="image/*" multiple style="display:none;">
-
+<input type="file" id="lrc-file-input" accept=".lrc" style="display:none;">
+<input type="file" id="zip-file-input" accept=".zip,application/zip" style="display:none;">
 
     <script>
       // 主题切换函数
@@ -1518,6 +1861,42 @@ function applyTheme(themeNum, character) {
             realTimeAwarenessToggle: getEl('real-time-awareness-toggle'),
           userNameInput: getEl('user-name-input'),
           apiFormatSelect: getEl('api-format-select'), // <-- 新增的API格式钥匙
+          globalThemeSelect: getEl('global-theme-select'), // <-- 全局主题选择
+
+          // --- 一起听歌 功能元素 ---
+actionListenTogether: getEl('action-listen-together'),
+listenTogetherModal: getEl('listen-together-modal'),
+closeListenModalBtn: getEl('close-listen-modal-btn'),
+listenInitialScreen: getEl('listen-initial-screen'),
+listenMainScreen: getEl('listen-main-screen'),
+startListenAlongBtn: getEl('start-listen-along-btn'),
+listenUserAvatar: getEl('listen-user-avatar'),
+listenCharAvatar: getEl('listen-char-avatar'),
+listenStatusText: getEl('listen-status-text'),
+songCoverArt: getEl('song-cover-art'),
+songTitle: getEl('song-title'),
+songArtist: getEl('song-artist'),
+prevSongBtn: getEl('prev-song-btn'),
+playPauseBtn: getEl('play-pause-btn'),
+nextSongBtn: getEl('next-song-btn'),
+playlistUl: getEl('playlist-ul'),
+addNewSongBtn: getEl('add-new-song-btn'),
+
+// 添加歌曲弹窗元素
+addSongModal: getEl('add-song-modal'),
+musicFileInput: getEl('music-file-input'),
+musicFileName: getEl('music-file-name'),
+songCoverInput: getEl('song-cover-input'),
+newSongCoverPreview: getEl('new-song-cover-preview'),
+newSongTitle: getEl('new-song-title'),
+newSongArtist: getEl('new-song-artist'),
+newSongLyrics: getEl('new-song-lyrics'),
+saveNewSongBtn: getEl('save-new-song-btn'),
+
+          importLrcBtn: getEl('import-lrc-btn'),
+    lrcFileInput: getEl('lrc-file-input'),
+    importZipBtn: getEl('import-zip-btn'),
+    zipFileInput: getEl('zip-file-input'),
         };
 
         // --- State Management ---
@@ -1528,6 +1907,9 @@ function applyTheme(themeNum, character) {
         let globalPresets = [];
         let isMultiSelectMode = false, selectedMessageIds = [];
         let isActionPanelOpen = false, isVideoCallActive = false;
+      let isListenAlongActive = false; // 是否正在一起听歌
+let currentSongIndex = -1;       // 当前歌曲在播放列表里的位置
+const audioPlayer = new Audio(); // 创建一个全局的音频播放器
       let appSettings = {}; // 全局应用设置对象
         let currentlyDisplayedMessageCount = 25;
         // ==========================================================
@@ -1594,6 +1976,57 @@ NEVER refer to the user as "用户". Use the information from their profile.`;
 const getApiFormat = () => {
     return getEl('api-format-select').value || 'openai';
 };
+      // --- 全局主题应用函数 (V8 - 最终修正版) ---
+const applyGlobalTheme = (themeName) => {
+    const body = document.body;
+    
+    // --- 在这里修改您的图标链接 ---
+    const iconUrl = 'https://s21.ax1x.com/2025/08/12/pVdTGlt.png';
+    const closeIconUrl = 'https://files.catbox.moe/0zpqr4.png'; // <--- 在这里粘贴您的新图片链接！
+
+    // Helper函数：用于更新按钮图标
+    const updateButtonIcons = (isFluffTheme) => {
+        const buttonsToUpdate = [
+            elements.settingsBtn,
+            elements.chatManagerBtn,
+            elements.sendBtn,
+            elements.receiveBtn,
+            elements.closeSettingsBtn,
+        ];
+
+        buttonsToUpdate.forEach(btn => {
+            if (!btn.dataset.defaultHtml) {
+                btn.dataset.defaultHtml = btn.innerHTML;
+            }
+            
+            if (isFluffTheme) {
+                // 【核心修正】我们现在检查按钮是否包含 'close-btn' 这个类名
+                if (btn.classList.contains('close-btn')) {
+                    // 如果是关闭按钮，就使用您指定的 closeIconUrl
+                    btn.innerHTML = `<img src="${closeIconUrl}" alt="close icon">`;
+                } else {
+                    // 其他按钮，继续使用通用的 iconUrl
+                    btn.innerHTML = `<img src="${iconUrl}" alt="icon">`;
+                }
+            } else {
+                btn.innerHTML = btn.dataset.defaultHtml;
+            }
+        });
+    };
+
+    if (themeName === 'white-fluff') {
+        body.classList.add('theme-white-fluff');
+        updateButtonIcons(true);
+    } else {
+        body.classList.remove('theme-white-fluff');
+        updateButtonIcons(false);
+    }
+    
+    if(elements.globalThemeSelect.value !== themeName) {
+        elements.globalThemeSelect.value = themeName;
+    }
+    localStorage.setItem('global_app_theme', themeName);
+};
         const getTimestamp = () => new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
         const getFullTimestamp = () => new Date().toLocaleString('zh-CN');
         const getCurrentDate = () => new Date().toISOString().slice(0, 10);
@@ -1605,14 +2038,24 @@ const getApiFormat = () => {
     const apiFormat = getApiFormat(); // 使用新的检测器
 
     let finalSystemPrompt = systemPrompt;
-    if (elements.realTimeAwarenessToggle.checked) {
-        const currentTime = `[System Knowledge: The current real-world date and time is ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}]`;
-        finalSystemPrompt = `${currentTime}\n\n${systemPrompt}`;
+
+    // 【一起听歌 - AI感知模块】
+    const character = getCurrentCharacter();
+    if (isListenAlongActive && currentSongIndex > -1 && character && character.playlist && character.playlist[currentSongIndex]) {
+        const song = character.playlist[currentSongIndex];
+        // 获取最近10行歌词
+        const lyricsLines = song.lyrics.split('\n');
+        const recentLyrics = lyricsLines.slice(-10).join('\\n'); // 用\\n让AI能识别换行
+        const musicContext = `\n[系统知识：我们正在一起听歌。歌名：'${song.title}'，歌手：'${song.artist}'。最近的歌词是：'${recentLyrics}']`;
+        finalSystemPrompt += musicContext;
     }
 
-    // 【核心改造】根据新的API格式，决定如何打包数据
+    if (elements.realTimeAwarenessToggle.checked) {
+        const currentTime = `[System Knowledge: The current real-world date and time is ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}]`;
+        finalSystemPrompt = `${currentTime}\n\n${finalSystemPrompt}`;
+    }
+
     if (apiFormat === 'gemini_native') {
-        // --- 这是原生Gemini的打包方式 ---
         const formatForGemini = (msg) => {
             if (!msg || typeof msg !== 'object' || msg.type === 'system' || typeof msg.sender !== 'string') return null;
             const role = msg.sender === 'user' ? 'user' : 'model';
@@ -1645,7 +2088,6 @@ const getApiFormat = () => {
             "generationConfig": { "temperature": parseFloat(elements.temperatureSlider.value), "topP": parseFloat(elements.topPSlider.value) } 
         };
     } else { 
-        // --- 这是所有兼容OpenAI格式（包括真OpenAI和Gemini中转）的打包方式 ---
         const formatForOpenAI = (msg) => {
             if (!msg || typeof msg !== 'object' || msg.type === 'system' || typeof msg.sender !== 'string') return null;
             const role = msg.sender === 'user' ? 'user' : 'assistant';
@@ -1657,10 +2099,8 @@ const getApiFormat = () => {
             return { role, content };
         };
         
-        // 【修正之处】我们让所有兼容格式都走这条统一、正确的路
         const messages = [ { role: 'system', content: finalSystemPrompt } ];
         
-        // 只有当有图片时，我们才使用复杂的内容格式
         if (imageForSingleTurn) {
             messages[0].content = [
                 { type: 'text', text: finalSystemPrompt },
@@ -1668,19 +2108,15 @@ const getApiFormat = () => {
             ];
         }
         
-        // 只有当有聊天记录时，才添加“握手”对话和历史记录
         if (history && history.length > 0) {
              messages.push({ role: 'user', content: "好的，我会严格遵守以上所有指令。"});
              messages.push({ role: 'assistant', content: "好的，我明白了，将严格遵循所有指令。"});
              messages.push(...history.map(formatForOpenAI).filter(Boolean));
         }
-
-        // 【已删除】那段有问题的、只在对话开始时触发的 if (apiFormat === 'gemini_openai') 代码块已被移除。
         
         return { model, messages, stream: false, temperature: parseFloat(elements.temperatureSlider.value), top_p: parseFloat(elements.topPSlider.value) };
     }
 };
-
               // --- IndexedDB (相册) 帮助函数 ---
         const DB_NAME = 'AI_Boyfriend_ImageStore';
         const STORE_NAME = 'images';
@@ -1763,7 +2199,126 @@ const getApiFormat = () => {
                 elements.topNotification.classList.remove('show');
             }, duration);
         };
+// ===================================================
+// ============ 一起听歌 核心功能函数 (V2) ============
+// ===================================================
+const playIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+const pauseIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+const nextIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>`;
+const prevIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>`;
+let tempSongData = {};
 
+// 新增：LRC歌词解析函数
+const parseLrcFile = (lrcContent) => {
+    const lines = lrcContent.split('\n');
+    const lyrics = lines
+        .map(line => {
+            // 移除时间戳，只保留歌词文本
+            const text = line.substring(line.indexOf(']') + 1);
+            return text.trim();
+        })
+        .filter(line => line) // 过滤掉空行
+        .join('\n');
+    return lyrics;
+};
+
+// 新增：处理ZIP文件导入的核心函数
+const handleZipImport = async (file) => {
+    if (!window.JSZip) {
+        alert("错误：ZIP处理库未加载！");
+        return;
+    }
+    const btn = elements.importZipBtn;
+    const originalText = btn.textContent;
+    btn.textContent = '解压中...';
+    btn.disabled = true;
+
+    try {
+        const zip = new JSZip();
+        const contents = await zip.loadAsync(file);
+        const songFiles = {};
+
+        // 1. 遍历ZIP包，按文件名（不含扩展名）分组
+        for (const filename in contents) {
+            if (contents[filename].dir) continue; // 跳过文件夹
+            const baseName = filename.substring(filename.lastIndexOf('/') + 1, filename.lastIndexOf('.'));
+            if (!songFiles[baseName]) songFiles[baseName] = {};
+
+            const fileExtension = filename.split('.').pop().toLowerCase();
+            if (['mp3', 'wav', 'ogg', 'm4a'].includes(fileExtension)) {
+                songFiles[baseName].audio = contents[filename];
+            } else if (fileExtension === 'lrc') {
+                songFiles[baseName].lyrics = contents[filename];
+            } else if (['jpg', 'jpeg', 'png', 'webp'].includes(fileExtension)) {
+                songFiles[baseName].cover = contents[filename];
+            }
+        }
+
+        let importedCount = 0;
+        let skippedCount = 0;
+        const character = getCurrentCharacter();
+
+        // 2. 遍历分组，匹配并创建歌曲对象
+        for (const baseName in songFiles) {
+            const group = songFiles[baseName];
+            if (group.audio && group.lyrics) {
+                const audioBlob = await group.audio.async('blob');
+                const lrcText = await group.lyrics.async('string');
+                let coverSrc = 'https://files.catbox.moe/g0b1sx.png';
+                if (group.cover) {
+                    const coverBlob = await group.cover.async('blob');
+                    coverSrc = URL.createObjectURL(coverBlob); // 直接使用blob URL，后面保存时会处理
+                }
+
+                const newSong = {
+                    id: generateId('song'),
+                    title: baseName, // 使用文件名作为歌名
+                    artist: '未知歌手',
+                    audioSrc: URL.createObjectURL(audioBlob),
+                    coverSrc: coverSrc,
+                    lyrics: parseLrcFile(lrcText) // 解析LRC文件
+                };
+                character.playlist.push(newSong);
+                importedCount++;
+            } else {
+                skippedCount++;
+            }
+        }
+
+        if (importedCount > 0) {
+            saveAllData();
+            renderPlaylist();
+        }
+        alert(`导入完成！\n成功导入 ${importedCount} 首歌曲。\n因缺少歌曲或歌词文件，跳过了 ${skippedCount} 个文件。`);
+
+    } catch (error) {
+        console.error("ZIP导入失败:", error);
+        alert("导入ZIP包失败，请检查文件是否损坏或格式不正确。");
+    } finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
+    }
+};
+
+// 已有的函数保持不变，但为了完整性全部提供
+const openListenTogetherModal = () => { const character = getCurrentCharacter(); if (!character) return; if (!character.playlist) character.playlist = []; elements.listenUserAvatar.src = userMomentsProfile.chatAvatar || ''; elements.listenCharAvatar.src = character.config.aiAvatar || ''; elements.listenStatusText.textContent = `${userMomentsProfile.name || '你'} 和 ${character.config.characterName} 正在一起听歌`; elements.playPauseBtn.innerHTML = playIconSvg; elements.nextSongBtn.innerHTML = nextIconSvg; elements.prevSongBtn.innerHTML = prevIconSvg; elements.listenInitialScreen.style.display = 'block'; elements.listenMainScreen.style.display = 'none'; elements.listenTogetherModal.classList.add('show'); renderPlaylist(); };
+const startListenAlong = () => { isListenAlongActive = true; elements.listenInitialScreen.style.display = 'none'; elements.listenMainScreen.style.display = 'block'; if (getCurrentCharacter().playlist.length > 0) { loadSong(0); } };
+const closeListenTogetherModal = () => { pauseMusic(); isListenAlongActive = false; closeModal(elements.listenTogetherModal); };
+const openAddSongModal = () => { tempSongData = {}; elements.musicFileName.textContent = ''; elements.newSongCoverPreview.style.display = 'none'; elements.newSongCoverPreview.src = ''; elements.newSongTitle.value = ''; elements.newSongArtist.value = ''; elements.newSongLyrics.value = ''; elements.addSongModal.classList.add('show'); };
+const handleMusicFileSelect = (e) => { const file = e.target.files[0]; if (!file) return; tempSongData.audioSrc = URL.createObjectURL(file); elements.musicFileName.textContent = file.name; elements.newSongTitle.value = file.name.replace(/\.[^/.]+$/, ""); };
+const handleCoverFileSelect = (e) => { const file = e.target.files[0]; if (!file) return; handleFileUpload(file, (dataUrl) => { tempSongData.coverSrc = dataUrl; elements.newSongCoverPreview.src = dataUrl; elements.newSongCoverPreview.style.display = 'block'; }, { compress: true, quality: 0.6, maxWidth: 200, maxHeight: 200 }); };
+const saveNewSong = () => { const title = elements.newSongTitle.value.trim(); const artist = elements.newSongArtist.value.trim(); const lyrics = elements.newSongLyrics.value.trim(); if (!title || !tempSongData.audioSrc || !lyrics) { alert('必须提供歌曲文件、歌名和歌词！'); return; } const newSong = { id: generateId('song'), title, artist: artist || '未知歌手', audioSrc: tempSongData.audioSrc, coverSrc: tempSongData.coverSrc || 'https://files.catbox.moe/g0b1sx.png', lyrics }; const character = getCurrentCharacter(); character.playlist.push(newSong); saveAllData(); renderPlaylist(); closeModal(elements.addSongModal); loadSong(character.playlist.length - 1); };
+const renderPlaylist = () => { const character = getCurrentCharacter(); if (!character || !character.playlist) return; elements.playlistUl.innerHTML = character.playlist.map((song, index) => `<li data-index="${index}" class="${index === currentSongIndex ? 'active' : ''}">${song.title} - ${song.artist}</li>`).join(''); };
+const loadSong = (index) => { const character = getCurrentCharacter(); if (!character || index < 0 || index >= character.playlist.length) return; currentSongIndex = index; const song = character.playlist[index]; audioPlayer.src = song.audioSrc; elements.songCoverArt.src = song.coverSrc; elements.songTitle.textContent = song.title; elements.songArtist.textContent = song.artist; renderPlaylist(); playMusic(); };
+const playMusic = () => { audioPlayer.play(); elements.playPauseBtn.innerHTML = pauseIconSvg; };
+const pauseMusic = () => { audioPlayer.pause(); elements.playPauseBtn.innerHTML = playIconSvg; };
+const togglePlayPause = () => { if (audioPlayer.paused) { playMusic(); } else { pauseMusic(); } };
+const nextSong = () => { const character = getCurrentCharacter(); if (!character || character.playlist.length === 0) return; let newIndex = currentSongIndex + 1; if (newIndex >= character.playlist.length) { newIndex = 0; } loadSong(newIndex); };
+const prevSong = () => { const character = getCurrentCharacter(); if (!character || character.playlist.length === 0) return; let newIndex = currentSongIndex - 1; if (newIndex < 0) { newIndex = character.playlist.length - 1; } loadSong(newIndex); };
+const playSongFromPlaylist = (e) => { if (e.target.tagName === 'LI') { const index = parseInt(e.target.dataset.index); loadSong(index); } };
+const savePlaylistToDB = async () => { const character = getCurrentCharacter(); if (!character || !character.playlist) return; for(let i=0; i < character.playlist.length; i++){ const song = character.playlist[i]; if(song.audioSrc && song.audioSrc.startsWith('blob:')){ const response = await fetch(song.audioSrc); const blob = await response.blob(); const audioKey = `audio_${song.id}`; await dbSet(audioKey, blob); song.audioSrc = audioKey; } } };
+const loadPlaylistFromDB = async () => { const character = getCurrentCharacter(); if (!character || !character.playlist) return; for(let i=0; i < character.playlist.length; i++){ const song = character.playlist[i]; if(song.audioSrc && song.audioSrc.startsWith('audio_')){ const blob = await dbGet(song.audioSrc); if(blob){ song.audioSrc = URL.createObjectURL(blob); } } } };
+      
         // --- Data & State Management ---
         const getCurrentCharacter = () => characterSets.find(c => c.id === currentChat.id);
         const getCurrentGroup = () => groupChats.find(g => g.id === currentChat.id);
@@ -1805,8 +2360,8 @@ const getApiFormat = () => {
             elements.bubbleSizeValue.textContent = `${elements.bubbleSizeSlider.value}px`;
         };
                 const saveAllData = async () => {
+    await savePlaylistToDB(); // 在保存前，处理播放列表
     const isImage = (value) => typeof value === 'string' && value.startsWith('data:image');
-    
     const processObjectForSaving = async (obj) => {
         if (!obj || typeof obj !== 'object') return obj;
         const newObj = Array.isArray(obj) ? [] : {};
@@ -1826,40 +2381,33 @@ const getApiFormat = () => {
         }
         return newObj;
     };
-
     try {
-        updatePresetsFromUI(); // 这个函数内部有自己的UI读取，没问题
-        
-        // 【核心升级】直接从内存中的变量构建备份数据，不再读取UI元素
+        updatePresetsFromUI();
         const backupData = {
             version: '1.1',
             characterSets,
             groupChats,
             currentChat,
             userMomentsProfile,
-            globalSettings: appSettings // 直接使用我们安全的中央设置对象
+            globalSettings: appSettings
         };
-        
         const processedData = await processObjectForSaving(backupData);
         localStorage.setItem('aiBoyfriendBackup_v7_meta', JSON.stringify(processedData));
-        
     } catch (error) {
         console.error("保存数据时发生严重错误:", error);
-        // 只在用户能看到的地方弹窗，比如设置界面
         if (getEl('settings-modal').classList.contains('show')) {
            alert("保存数据时出错: " + error.message);
         }
     }
 };
-                // --- Re-written loadAllData with migration logic ---
-                const loadAllData = async () => {
-    // --- 核心修复：在程序开始时，立刻检查“抽屉”里有没有菜单 ---
+
+const loadAllData = async () => {
     try {
         const cachedModelsRaw = localStorage.getItem('ai_boyfriend_model_cache');
         if (cachedModelsRaw) {
             const cachedModels = JSON.parse(cachedModelsRaw);
             if (Array.isArray(cachedModels) && cachedModels.length > 0) {
-                elements.modelSelect.innerHTML = ''; // 清空选择框
+                elements.modelSelect.innerHTML = '';
                 cachedModels.forEach(model => {
                     elements.modelSelect.add(new Option(model.name, model.id));
                 });
@@ -1868,14 +2416,14 @@ const getApiFormat = () => {
         }
     } catch (e) {
         console.error("从缓存加载模型列表失败:", e);
-        localStorage.removeItem('ai_boyfriend_model_cache'); // 如果缓存坏了，就清掉它
+        localStorage.removeItem('ai_boyfriend_model_cache');
     }
-    // --- 修复结束 ---
-
     const darkModeSaved = localStorage.getItem('ui_dark_mode_enabled') === 'true';
     applyDarkMode(darkModeSaved);
     const compactModeSaved = localStorage.getItem('ui_compact_mode_enabled') === 'true';
     applyCompactMode(compactModeSaved);
+    const savedTheme = localStorage.getItem('global_app_theme') || 'default';
+    applyGlobalTheme(savedTheme);
 
     const isImageKey = (value) => typeof value === 'string' && value.startsWith('img_');
     const processObjectForLoading = async (obj) => {
@@ -1901,16 +2449,8 @@ const getApiFormat = () => {
         console.log("未找到任何数据，正在进行全新安装...");
         const newChar = createNewCharacterObject();
         characterSets.push(newChar);
-        currentChat = {
-            type: 'direct',
-            id: newChar.id
-        };
-        appSettings = {
-            fontSize: 13,
-            uiScale: 1.0,
-            bubblePadding: 10,
-            apiFormat: 'openai'
-        }; // 默认设置
+        currentChat = { type: 'direct', id: newChar.id };
+        appSettings = { fontSize: 13, uiScale: 1.0, bubblePadding: 10, apiFormat: 'openai' };
         applySizing(appSettings);
         loadChat(currentChat.type, currentChat.id);
         return;
@@ -1918,93 +2458,42 @@ const getApiFormat = () => {
 
     try {
         let savedData = await processObjectForLoading(JSON.parse(savedMetaV7Raw));
-
         characterSets = savedData.characterSets || [];
+        await loadPlaylistFromDB(); // 在加载完角色数据后，处理播放列表
         if (characterSets) {
             characterSets.forEach(c => {
                 if (c.chatHistory && !c.sessions) {
                     const defaultSessionId = generateId('session');
-                    c.sessions = [{
-                        id: defaultSessionId,
-                        name: '默认继承的剧情',
-                        history: c.chatHistory,
-                        createdAt: new Date().toISOString()
-                    }];
+                    c.sessions = [{ id: defaultSessionId, name: '默认继承的剧情', history: c.chatHistory, createdAt: new Date().toISOString() }];
                     c.activeSessionId = defaultSessionId;
                     delete c.chatHistory;
                 }
-                if (!c.activeSessionId && c.sessions && c.sessions.length > 0) {
-                    c.activeSessionId = c.sessions[0].id;
-                }
-                if (c.config) {
-                    c.config.streak = c.config.streak || 1;
-                    c.config.lastChatDate = c.config.lastChatDate || null;
-                }
-                if (!c.forum) {
-                    c.forum = {
-                        posts: [],
-                        background: ''
-                    };
-                }
+                if (!c.activeSessionId && c.sessions && c.sessions.length > 0) { c.activeSessionId = c.sessions[0].id; }
+                if (c.config) { c.config.streak = c.config.streak || 1; c.config.lastChatDate = c.config.lastChatDate || null; }
+                if (!c.forum) { c.forum = { posts: [], background: '' }; }
             });
         }
-
         groupChats = savedData.groupChats || [];
-        if (groupChats) {
-            groupChats.forEach(g => {
-                g.memorySize = g.memorySize || 80;
-                if (!g.forum) {
-                    g.forum = {
-                        posts: [],
-                        background: ''
-                    };
-                }
-            });
-        }
-
+        if (groupChats) { groupChats.forEach(g => { g.memorySize = g.memorySize || 80; if (!g.forum) { g.forum = { posts: [], background: '' }; } }); }
         if (savedData.characterSets && savedData.characterSets.length > 0 && !savedData.userMomentsProfile.userStickers) {
             const firstChar = savedData.characterSets[0];
-            if (firstChar.userStickers && firstChar.userStickers.length > 0) {
-                savedData.userMomentsProfile.userStickers = firstChar.userStickers;
-            }
+            if (firstChar.userStickers && firstChar.userStickers.length > 0) { savedData.userMomentsProfile.userStickers = firstChar.userStickers; }
         }
-        if (!savedData.userMomentsProfile?.userStickers) {
-            if (savedData.userMomentsProfile) savedData.userMomentsProfile.userStickers = [];
-            else savedData.userMomentsProfile = {
-                userStickers: []
-            };
-        }
+        if (!savedData.userMomentsProfile?.userStickers) { if (savedData.userMomentsProfile) savedData.userMomentsProfile.userStickers = []; else savedData.userMomentsProfile = { userStickers: [] }; }
         userMomentsProfile = savedData.userMomentsProfile || {};
-
-        // 【核心升级】将设置加载到中央管理器
         appSettings = savedData.globalSettings || {};
-
-        // 应用加载的设置
         applySizing(appSettings);
         applyFont(appSettings.fontFamily || "'Cubic 11', 'Noto Sans JP', sans-serif");
-        if (appSettings.customFontName && appSettings.customFontUrl) {
-            applyCustomFont(appSettings.customFontName, appSettings.customFontUrl);
-        }
-
+        if (appSettings.customFontName && appSettings.customFontUrl) { applyCustomFont(appSettings.customFontName, appSettings.customFontUrl); }
         globalPresets = appSettings.presets || [];
-
         if (characterSets.length > 0) {
-            const isValidSavedChat = savedData.currentChat &&
-                ((savedData.currentChat.type === 'direct' && characterSets.some(c => c.id === savedData.currentChat.id)) ||
-                    (savedData.currentChat.type === 'group' && groupChats.some(g => g.id === savedData.currentChat.id)));
-            currentChat = isValidSavedChat ? savedData.currentChat : {
-                type: 'direct',
-                id: characterSets[0].id
-            };
+            const isValidSavedChat = savedData.currentChat && ((savedData.currentChat.type === 'direct' && characterSets.some(c => c.id === savedData.currentChat.id)) || (savedData.currentChat.type === 'group' && groupChats.some(g => g.id === savedData.currentChat.id)));
+            currentChat = isValidSavedChat ? savedData.currentChat : { type: 'direct', id: characterSets[0].id };
         } else {
             const newChar = createNewCharacterObject();
             characterSets.push(newChar);
-            currentChat = {
-                type: 'direct',
-                id: newChar.id
-            };
+            currentChat = { type: 'direct', id: newChar.id };
         }
-
         loadChat(currentChat.type, currentChat.id);
     } catch (error) {
         console.error("加载数据失败:", error);
@@ -2032,17 +2521,16 @@ const createNewCharacterObject = () => {
             lastChatDate: null
         },
         userPrompt: '',
-        // --- 核心改造开始 ---
-        activeSessionId: defaultSessionId, // 记录当前激活的剧情线ID
-        sessions: [ // 一个存放所有剧情线的数组
+        activeSessionId: defaultSessionId,
+        sessions: [
             { id: defaultSessionId, name: '主线剧情', history: [], createdAt: new Date().toISOString() }
         ],
-        // --- 核心改造结束 ---
         userStickers: [],
         aiStickers: [],
         moments: [],
         diary: [],
-      forum: { posts: [], background: '' },
+        playlist: [], // <-- 确保有这一行
+        forum: { posts: [], background: '' },
     };
 };
         
@@ -2629,10 +3117,17 @@ const applyBubbleStyle = (style, character) => {
         [最近的朋友圈动态 (用于对话参考)]
         ${momentsContext}
         [对话生成指南]
-        - **创造互动**: 角色不仅要回应用户，**更重要的是，要让他们彼此之间产生对话**。他们可以互相提问、反驳、开玩笑或延续对方的话题。
+        - **创造互动**: 角色不仅要回应用户，**更重要的是，要让他们彼此之间产生对话**。他们可以互相提问、反驳、开玩笑或延续对方的话题，角色们至少总共回复用户5条消息。
         - **保持人设**: 确保每个角色的发言都严格符合其人设，不能ooc。
         - **禁止出戏**: 绝不能透露你是AI，或提及任何关于“扮演”、“模型”、“生成”等词语。
         - **积极互动**: 在一场有意义的对话结束后，角色们必须积极发表朋友圈进行趣味性讨论。
+严格禁止寒暄，人机化的问题，禁止对话带有AI感，角色是一个真实的属于现实中的人。
+模仿真人发消息不用逗号和句号。
+不要说一些很尴尬的表达占有欲和掌控欲的话，在你发消息之前先考虑这像不像现实中的人会说的，如果它包含尴尬成分，就不要这样说，换一种更有【活人味】的去除油腻的表达方式。
+你和用户绝对是真爱，不许说任何“你是我的”，“你属于我”等俗套话术，禁止一切网文俗套话术和任何尴尬掌控欲语录。
+绝对禁止让角色表现得油腻或者像霸道总裁。严禁物化用户,不许说“小东西”,“小妖精”等任何霸总语录称呼,禁止使用“过来”，“呵”，“胆子”，“嗯”，“怎么”这些字词,包括它们的相关词句,因为用户特别讨厌。
+禁止你复述性反问。
+对话总要带有情感拉扯和幽默性，禁止像冷冰冰的机器人回答，应该带有情绪波动，你的每一次回答必须像一个现实中的人在发消息，不能像AI润色过的文案。
         [当前群内活动 (需要你让角色参与)]
         ${openPollsInfo ? `[重要任务]${openPollsInfo} 有一个投票正在进行！根据角色性格，安排他们用 "vote" 类型的动作去投票！` : ''}
         ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可以抢！安排角色们用 "grab_red_packet" 类型的动作去抢！` : ''}
@@ -2662,148 +3157,130 @@ const applyBubbleStyle = (style, character) => {
 };
         
                         const processAiResponse = (rawText) => {
-            let responseArray = [];
-                        try {
-                // --- 终极净化器 ---
-                // 步骤1: 使用正则表达式，从AI返回的杂乱文本中，强行“抠出”被[]包裹的、我们真正需要的部分。
-                // 这个正则表达式 [\s\S]*? 能匹配包括换行符在内的所有字符。
-                const jsonMatch = rawText.match(/\[[\s\S]*?\]/);
-                
-                let jsonString = null;
-
-                if (jsonMatch) {
-                    // 步骤2: 如果成功“抠出”，我们就得到了一个可能还含有换行符的字符串。
-                    // 步骤3: 在解析前，我们把抠出来的这部分里的所有换行符(\n)、回车符(\r)、制表符(\t)都替换掉。
-                    jsonString = jsonMatch[0].replace(/[\n\r\t]/g, '');
-                } else {
-                    // 如果连[]都找不到，说明格式错得太离谱，直接抛出错误，交给catch处理。
-                    throw new Error("在AI的回复中找不到有效的JSON数组结构。");
-                }
-                
-                // 步骤4: 将这个被彻底净化过的、干干净净的字符串送去解析。
-                if (jsonString) {
-                    responseArray = JSON.parse(jsonString);
-                } else {
-                    throw new Error("净化后未能获得有效的JSON字符串。");
-                }
-                       } catch (e) {
-                // 首先，还是在控制台里记录一下原始错误，方便以后万一有问题还能看到
-                console.error("JSON解析失败，启动Plan B。原始错误:", e);
-                console.error("收到的原始文本:", rawText);
-
-                // 给用户一个友好的提示，告诉他我们正在尝试补救
-                addMessage({ sender: 'system', text: `AI回复格式不标准，已尝试按文本内容解析。`, type: 'system' });
-
-                // 这是我们的“Plan B”核心：
-                // 1. 确定是谁在说话
-                const senderId = currentChat.type === 'direct' ? currentChat.id : null;
-                
-                // 只有在能确定发送者的情况下才继续（单聊模式）
-                if (senderId) {
-                    // 2. 把可能存在的JSON符号、标记都清理掉，只留下纯文本
-                    const plainText = rawText.replace(/```json|```|\[|\]|\{|\}/g, '').trim();
-
-                    // 3. 按换行符把文本分割成一行一行的数组
-                    const lines = plainText.split('\n');
-
-                    // 4. 遍历每一行，只要不是空行，就作为一条新消息发送出来
-                    lines.forEach(line => {
-                        if (line.trim()) { // 确保不是空的行
-                            addMessage({
-                                sender: senderId,
-                                type: 'text',
-                                text: line.trim() // 发送清理过的单行文本
-                            });
-                        }
-                    });
-                }
-            }
-            if (!Array.isArray(responseArray) || responseArray.length === 0) { return; }
-
-            let dataChanged = false;
-            let aiMemoryInjections = {}; 
-
-            responseArray.forEach(msgObj => {
-                // ... (兼容旧格式的代码保持不变) ...
-                 if (!msgObj.type) {
-                    if (msgObj.packetId || msgObj.redPacketId) msgObj.type = 'grab_red_packet';
-                    else if (msgObj.pollId && msgObj.option) msgObj.type = 'vote';
-                    else if (msgObj.will_like === true) msgObj.type = 'moment_like';
-                    else if (msgObj.momentId && msgObj.comment_text) msgObj.type = 'moment_comment';
-                    else if (msgObj.momentId && msgObj.reply_text) msgObj.type = 'moment_reply';
-                    else if (msgObj.transferId && msgObj.decision) msgObj.type = 'acknowledge_transfer';
-                }
-
-                // --- 【决定性修复 2：优先使用AI自己的签名】 ---
-                // 只有在AI真的、真的忘了签名的情况下，我们才使用备用方案
-                const senderId = msgObj.senderId || currentChat.id;
-                const momentType = currentChat.type === 'group' ? 'group' : 'direct';
-                
-                switch(msgObj.type) {
-                    case 'vote': if (senderId) { handleAiVote_dataOnly(msgObj); dataChanged = true; } break;
-                    case 'grab_red_packet':
-                        if (senderId) {
-                            const currentPacketId = msgObj.packetId || msgObj.redPacketId;
-                            if (currentPacketId) {
-                                const amount = handleAiGrabRedPacket(currentPacketId, senderId);
-                                if (typeof amount === 'number') {
-                                    aiMemoryInjections[senderId] = `[Internal Memo: You just grabbed a red packet and got ${amount.toFixed(2)} yuan.]`;
-                                }
-                                dataChanged = true;
-                            }
-                        }
-                        break;
-                    case 'acknowledge_transfer': if (msgObj.transferId && msgObj.decision) { if (handleAcknowledgeTransfer(msgObj.transferId, msgObj.decision)) { dataChanged = true; } } break;
-                    case 'moment_like': if (senderId && msgObj.momentId) { handleAiLike(msgObj.momentId, senderId, momentType); dataChanged = true; } break;
-                    case 'moment_comment': if (senderId && msgObj.momentId && msgObj.comment_text) { addCommentOrReplyByAI('comment', msgObj.momentId, msgObj.comment_text, senderId, null, momentType); dataChanged = true; } break;
-                    case 'moment_reply': if (senderId && msgObj.momentId && msgObj.reply_text) { addCommentOrReplyByAI('reply', msgObj.momentId, msgObj.reply_text, senderId, msgObj.commentId, momentType); dataChanged = true; } break;
+    let responseArray = [];
+    try {
+        const jsonMatch = rawText.match(/\[[\s\S]*?\]/);
+        let jsonString = null;
+        if (jsonMatch) {
+            jsonString = jsonMatch[0].replace(/[\n\r\t]/g, '');
+        } else {
+            throw new Error("在AI的回复中找不到有效的JSON数组结构。");
+        }
+        if (jsonString) {
+            responseArray = JSON.parse(jsonString);
+        } else {
+            throw new Error("净化后未能获得有效的JSON字符串。");
+        }
+    } catch (e) {
+        console.error("JSON解析失败，启动Plan B。原始错误:", e);
+        console.error("收到的原始文本:", rawText);
+        addMessage({ sender: 'system', text: `AI回复格式不标准，已尝试按文本内容解析。`, type: 'system' });
+        const senderId = currentChat.type === 'direct' ? currentChat.id : null;
+        if (senderId) {
+            const plainText = rawText.replace(/```json|```|\[|\]|\{|\}/g, '').trim();
+            const lines = plainText.split('\n');
+            lines.forEach(line => {
+                if (line.trim()) {
+                    addMessage({ sender: senderId, type: 'text', text: line.trim() });
                 }
             });
+        }
+    }
+    if (!Array.isArray(responseArray) || responseArray.length === 0) { return; }
 
-            if (dataChanged) {
-                renderAllMessages();
-                if (elements.momentsOverlay.classList.contains('show')) renderMoments();
-            }
+    let dataChanged = false;
+    let aiMemoryInjections = {}; 
 
-            // --- 界面显示部分 (这部分没有逻辑错误，保持原样) ---
-            responseArray.forEach((msgObj, index) => {
-                const isAction = ['vote', 'grab_red_packet', 'moment_like', 'moment_comment', 'moment_reply', 'acknowledge_transfer'].includes(msgObj.type);
-                if (isAction) return;
-                
-                if (!msgObj.type && (msgObj.content || msgObj.message)) { msgObj.type = 'text'; msgObj.content = msgObj.content || msgObj.message; }
-                
-                setTimeout(() => {
-                    const senderId = msgObj.senderId || currentChat.id;
-                    const character = characterSets.find(c => c.id === senderId);
-                    if (!character) return;
-                    
-                    let llmContentForHistory = (index === 0) ? rawText : null;
-                    if (aiMemoryInjections[senderId]) { llmContentForHistory = (llmContentForHistory || '') + '\n' + aiMemoryInjections[senderId]; delete aiMemoryInjections[senderId]; }
-                    
-                    let messageData = { sender: senderId, llmContent: llmContentForHistory };
+    responseArray.forEach(msgObj => {
+         if (!msgObj.type) {
+            if (msgObj.packetId || msgObj.redPacketId) msgObj.type = 'grab_red_packet';
+            else if (msgObj.pollId && msgObj.option) msgObj.type = 'vote';
+            else if (msgObj.will_like === true) msgObj.type = 'moment_like';
+            else if (msgObj.momentId && msgObj.comment_text) msgObj.type = 'moment_comment';
+            else if (msgObj.momentId && msgObj.reply_text) msgObj.type = 'moment_reply';
+            else if (msgObj.transferId && msgObj.decision) msgObj.type = 'acknowledge_transfer';
+        }
 
-                    switch (msgObj.type) {
-                        case 'text': addMessage({ ...messageData, text: msgObj.content, type: 'text' }); break;
-                        case 'voice': addMessage({ ...messageData, text: msgObj.content, type: 'voice', voiceDuration: `0:${Math.max(1, Math.round((msgObj.content || '').length / 5)).toString().padStart(2, '0')}` }); break;
-                        case 'text-image': addMessage({ ...messageData, text: msgObj.content, type: 'text-image' }); break;
-                        case 'sticker': if (character.aiStickers.length > 0) { addMessage({ ...messageData, type: 'sticker', stickerUrl: character.aiStickers[Math.floor(Math.random() * character.aiStickers.length)] }); } break;
-                        case 'transfer': addMessage({ ...messageData, type: 'transfer', transferAmount: msgObj.amount, transferMemo: msgObj.memo, transferCoverUrl: `https://files.catbox.moe/qwu221.jpg`, transferStatus: 'pending' }); break;
-                        case 'video-call-request': if (currentChat.type === 'direct') handleIncomingVideoCall(msgObj.content); break;
-                        case 'post_moment': if (character) { const momentType = currentChat.type === 'group' ? 'group' : 'direct'; addMomentByAI(character.id, { content: msgObj.content, image_query: msgObj.image_query }, momentType); } break;
-                        case 'diary_entry':
-                            if (character && msgObj.content) {
-                                const today = new Date();
-                                const year = today.getFullYear();
-                                const month = String(today.getMonth() + 1).padStart(2, '0');
-                                const day = String(today.getDate()).padStart(2, '0');
-                                const todayString = `${year}-${month}-${day}`;
-                                addDiaryEntry(character.id, msgObj.content, todayString);
-                            }
-                            break;
+        const senderId = msgObj.senderId || currentChat.id;
+        const momentType = currentChat.type === 'group' ? 'group' : 'direct';
+        
+        switch(msgObj.type) {
+            case 'change_song':
+                if (msgObj.song_name) {
+                    const character = getCurrentCharacter();
+                    const songToFind = msgObj.song_name.toLowerCase().trim();
+                    const songIndex = character.playlist.findIndex(s => s.title.toLowerCase().includes(songToFind));
+                    if (songIndex > -1) {
+                        loadSong(songIndex);
+                        addMessage({ sender: 'system', text: `他将歌曲切换到了《${character.playlist[songIndex].title}》`, type: 'system' });
+                    } else {
+                         addMessage({ sender: 'system', text: `他想切歌，但在播放列表里没找到《${msgObj.song_name}》`, type: 'system' });
                     }
-                }, index * 1200 + (dataChanged ? 200 : 0));
-            });
-        };
+                }
+                break;
+            case 'vote': if (senderId) { handleAiVote_dataOnly(msgObj); dataChanged = true; } break;
+            case 'grab_red_packet':
+                if (senderId) {
+                    const currentPacketId = msgObj.packetId || msgObj.redPacketId;
+                    if (currentPacketId) {
+                        const amount = handleAiGrabRedPacket(currentPacketId, senderId);
+                        if (typeof amount === 'number') {
+                            aiMemoryInjections[senderId] = `[Internal Memo: You just grabbed a red packet and got ${amount.toFixed(2)} yuan.]`;
+                        }
+                        dataChanged = true;
+                    }
+                }
+                break;
+            case 'acknowledge_transfer': if (msgObj.transferId && msgObj.decision) { if (handleAcknowledgeTransfer(msgObj.transferId, msgObj.decision)) { dataChanged = true; } } break;
+            case 'moment_like': if (senderId && msgObj.momentId) { handleAiLike(msgObj.momentId, senderId, momentType); dataChanged = true; } break;
+            case 'moment_comment': if (senderId && msgObj.momentId && msgObj.comment_text) { addCommentOrReplyByAI('comment', msgObj.momentId, msgObj.comment_text, senderId, null, momentType); dataChanged = true; } break;
+            case 'moment_reply': if (senderId && msgObj.momentId && msgObj.reply_text) { addCommentOrReplyByAI('reply', msgObj.momentId, msgObj.reply_text, senderId, msgObj.commentId, momentType); dataChanged = true; } break;
+        }
+    });
+
+    if (dataChanged) {
+        renderAllMessages();
+        if (elements.momentsOverlay.classList.contains('show')) renderMoments();
+    }
+
+    responseArray.forEach((msgObj, index) => {
+        const isAction = ['change_song', 'vote', 'grab_red_packet', 'moment_like', 'moment_comment', 'moment_reply', 'acknowledge_transfer'].includes(msgObj.type);
+        if (isAction) return;
+        
+        if (!msgObj.type && (msgObj.content || msgObj.message)) { msgObj.type = 'text'; msgObj.content = msgObj.content || msgObj.message; }
+        
+        setTimeout(() => {
+            const senderId = msgObj.senderId || currentChat.id;
+            const character = characterSets.find(c => c.id === senderId);
+            if (!character) return;
+            
+            let llmContentForHistory = (index === 0) ? rawText : null;
+            if (aiMemoryInjections[senderId]) { llmContentForHistory = (llmContentForHistory || '') + '\n' + aiMemoryInjections[senderId]; delete aiMemoryInjections[senderId]; }
+            
+            let messageData = { sender: senderId, llmContent: llmContentForHistory };
+
+            switch (msgObj.type) {
+                case 'text': addMessage({ ...messageData, text: msgObj.content, type: 'text' }); break;
+                case 'voice': addMessage({ ...messageData, text: msgObj.content, type: 'voice', voiceDuration: `0:${Math.max(1, Math.round((msgObj.content || '').length / 5)).toString().padStart(2, '0')}` }); break;
+                case 'text-image': addMessage({ ...messageData, text: msgObj.content, type: 'text-image' }); break;
+                case 'sticker': if (character.aiStickers.length > 0) { addMessage({ ...messageData, type: 'sticker', stickerUrl: character.aiStickers[Math.floor(Math.random() * character.aiStickers.length)] }); } break;
+                case 'transfer': addMessage({ ...messageData, type: 'transfer', transferAmount: msgObj.amount, transferMemo: msgObj.memo, transferCoverUrl: `https://files.catbox.moe/qwu221.jpg`, transferStatus: 'pending' }); break;
+                case 'video-call-request': if (currentChat.type === 'direct') handleIncomingVideoCall(msgObj.content); break;
+                case 'post_moment': if (character) { const momentType = currentChat.type === 'group' ? 'group' : 'direct'; addMomentByAI(character.id, { content: msgObj.content, image_query: msgObj.image_query }, momentType); } break;
+                case 'diary_entry':
+                    if (character && msgObj.content) {
+                        const today = new Date();
+                        const year = today.getFullYear();
+                        const month = String(today.getMonth() + 1).padStart(2, '0');
+                        const day = String(today.getDate()).padStart(2, '0');
+                        const todayString = `${year}-${month}-${day}`;
+                        addDiaryEntry(character.id, msgObj.content, todayString);
+                    }
+                    break;
+            }
+        }, index * 1200 + (dataChanged ? 200 : 0));
+    });
+};
         
         const handleAcknowledgeTransfer = (transferId, decision) => {
             const character = getCurrentCharacter();
@@ -4914,6 +5391,7 @@ const migrateDataToV7 = (oldData) => {
         appSettings.topP = parseFloat(elements.topPSlider.value);
         appSettings.realTimeAwareness = elements.realTimeAwarenessToggle.checked;
         appSettings.apiFormat = elements.apiFormatSelect.value;
+      appSettings.globalTheme = elements.globalThemeSelect.value; // <-- 把这一行加进去
         appSettings.fontFamily = elements.fontSelect.value;
         appSettings.advancedBubbleStyles = elements.advancedBubbleStylesInput.value;
         appSettings.customFontName = elements.customFontNameInput.value;
@@ -5012,7 +5490,7 @@ elements.actionManageSessions = getEl('action-manage-sessions'); // 先获取按
 elements.actionManageSessions.onclick = () => { openSessionManager(); toggleActionPanel(true); };
                   // 这是需要新增的事件绑定
 elements.actionQnaGame = getEl('action-qna-game');
-            actionShowForum: getEl('action-show-forum'), // <-- 新增的论坛钥匙      
+            elements.actionShowForum = getEl('action-show-forum');   
 elements.actionQnaGame.onclick = () => { openQnAGameModal(); toggleActionPanel(true); };
                   getEl('action-show-forum').onclick = () => { openForum(); toggleActionPanel(true); };
                   elements.actionSendTextImage.onclick = () => { handleTextImageSend(); toggleActionPanel(true); };
@@ -5167,7 +5645,38 @@ getEl('forum-background-input').onchange = (e) => {
                   
                   elements.bubbleStyleSelect.addEventListener('change', (e) => { applyBubbleStyle(e.target.value, getCurrentCharacter()); });
                   elements.applyCustomFontBtn.onclick = () => applyCustomFont(elements.customFontNameInput.value, elements.customFontUrlInput.value);
-                };
+                   // --- “一起听歌”功能的事件监听 ---
+    elements.actionListenTogether.onclick = () => { openListenTogetherModal(); toggleActionPanel(true); };
+    elements.closeListenModalBtn.onclick = closeListenTogetherModal;
+    elements.startListenAlongBtn.onclick = startListenAlong;
+    elements.addNewSongBtn.onclick = openAddSongModal;
+    elements.addSongModal.querySelector('.feature-modal-close').onclick = () => closeModal(elements.addSongModal);
+    elements.musicFileInput.onchange = handleMusicFileSelect;
+    elements.songCoverInput.onchange = handleCoverFileSelect;
+    elements.saveNewSongBtn.onclick = saveNewSong;
+    elements.playPauseBtn.onclick = togglePlayPause;
+    elements.nextSongBtn.onclick = nextSong;
+    elements.prevSongBtn.onclick = prevSong;
+    elements.playlistUl.onclick = playSongFromPlaylist;
+    audioPlayer.addEventListener('ended', nextSong); // 歌曲播放完自动下一首
+    // 新增的LRC和ZIP事件监听
+    elements.importLrcBtn.onclick = () => elements.lrcFileInput.click();
+    elements.lrcFileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                elements.newSongLyrics.value = parseLrcFile(event.target.result);
+            };
+            reader.readAsText(file);
+        }
+    };
+    elements.importZipBtn.onclick = () => elements.zipFileInput.click();
+    elements.zipFileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) handleZipImport(file);
+    };
+};
 
 const updatePresetsFromUI = () => {
     const presetItems = document.querySelectorAll('.preset-item');
@@ -5218,6 +5727,7 @@ const updatePresetsFromUI = () => {
         // --- Initialization ---
         loadAllData();
         setupEventListeners();
+      elements.globalThemeSelect.addEventListener('change', (e) => applyGlobalTheme(e.target.value));
         setupPresetEventListeners();
         autoResizeTextarea();
     });
