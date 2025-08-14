@@ -3395,6 +3395,27 @@ const loadPlaylistFromDB = async (character) => {
 };
 
 const loadAllData = async () => {
+    // 首先，我们定义一个“可能的保险箱钥匙”列表，从新到旧排列
+    const possibleStorageKeys = [
+        'aiBoyfriendBackup_v7_meta', // 这是最新的钥匙
+        'aiBoyfriendBackup_v6_meta', // 这是很可能存在的旧钥匙
+        'aiBoyfriendBackup_v5_meta'  // 再往前找一个，以防万一
+    ];
+
+    let savedMetaRaw = null;
+    let usedKey = null;
+
+    // 现在我们用这个列表来寻宝
+    for (const key of possibleStorageKeys) {
+        const data = localStorage.getItem(key);
+        if (data) {
+            savedMetaRaw = data;
+            usedKey = key;
+            console.log(`成功在旧的存储位置找到了数据！钥匙是: ${usedKey}`);
+            break; // 找到了就立刻停止，不再往旧的找
+        }
+    }
+
     try {
         const cachedModelsRaw = localStorage.getItem('ai_boyfriend_model_cache');
         if (cachedModelsRaw) {
@@ -3411,6 +3432,7 @@ const loadAllData = async () => {
         console.error("从缓存加载模型列表失败:", e);
         localStorage.removeItem('ai_boyfriend_model_cache');
     }
+
     const darkModeSaved = localStorage.getItem('ui_dark_mode_enabled') === 'true';
     applyDarkMode(darkModeSaved);
     const compactModeSaved = localStorage.getItem('ui_compact_mode_enabled') === 'true';
@@ -3436,9 +3458,9 @@ const loadAllData = async () => {
         }
         return obj;
     };
-
-    const savedMetaV7Raw = localStorage.getItem('aiBoyfriendBackup_v7_meta');
-    if (!savedMetaV7Raw) {
+    
+    // 如果一个钥匙都没找到（也就是保险箱都是空的），说明是真正的全新安装
+    if (!savedMetaRaw) {
         console.log("未找到任何数据，正在进行全新安装...");
         const newChar = createNewCharacterObject();
         characterSets.push(newChar);
@@ -3449,20 +3471,19 @@ const loadAllData = async () => {
         return;
     }
 
+    // 如果找到了数据，就开始处理
     try {
-        let savedData = await processObjectForLoading(JSON.parse(savedMetaV7Raw));
-    characterSets = savedData.characterSets || [];
+        let savedData = await processObjectForLoading(JSON.parse(savedMetaRaw));
+        characterSets = savedData.characterSets || [];
 
-    // 核心修复：在加载完所有角色数据后，遍历他们并从数据库恢复他们的播放列表
-    if (characterSets) {
-        for (const character of characterSets) {
-            await loadPlaylistFromDB(character);
+        if (characterSets) {
+            for (const character of characterSets) {
+                await loadPlaylistFromDB(character);
+            }
         }
-    }
                 if (characterSets) {
-            // 数据迁移：为旧存档添加新的 userProfile 结构
             characterSets.forEach(c => {
-                if (!c.userProfile) { // 如果是旧存档，就没有这个字段
+                if (!c.userProfile) { 
                     console.log(`为角色 ${c.config.characterName} 迁移旧版用户数据...`);
                     c.userProfile = {
                         name: userMomentsProfile.name || '你',
@@ -3472,7 +3493,7 @@ const loadAllData = async () => {
                         prompt: c.userPrompt || userMomentsProfile.userPrompt || '',
                         listenAlongBg: ''
                     };
-                    delete c.userPrompt; // 删除旧的、独立的 userPrompt
+                    delete c.userPrompt; 
                 }
 
                 if (c.chatHistory && !c.sessions) {
@@ -3507,10 +3528,23 @@ const loadAllData = async () => {
             currentChat = { type: 'direct', id: newChar.id };
         }
         loadChat(currentChat.type, currentChat.id);
+        
+        // **关键的最后一步**：如果数据是从旧钥匙加载的，我们立刻用新钥匙保存一次
+        if (usedKey !== 'aiBoyfriendBackup_v7_meta') {
+            console.log("数据从旧位置加载，正在将其迁移到新位置...");
+            await saveAllData();
+            // （可选）为了干净，可以删除旧的存储
+            if (usedKey) {
+                // localStorage.removeItem(usedKey); 
+                // 为了安全，我先把这行注释掉了，您可以确认数据完全恢复后再取消注释
+            }
+            alert("旧数据已成功找到并迁移到新版本！您的数据现在是安全的。");
+        }
+
     } catch (error) {
         console.error("加载数据失败:", error);
         if (confirm("加载数据失败，存档可能已损坏。是否清除损坏的数据并重新开始？\n警告：此操作不可逆！")) {
-            localStorage.removeItem('aiBoyfriendBackup_v7_meta');
+            localStorage.clear(); // 清理所有可能的旧数据
             location.reload();
         }
     }
