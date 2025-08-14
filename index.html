@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>日系突突机</title>
     <style>
+      
       /* --- 全局平滑过渡效果 --- */
 body, #chat-container, #chat-header, #bottom-panel, .settings-content, 
 .feature-modal-content, .action-item-icon, .chat-item, .modal-overlay,
@@ -308,24 +309,24 @@ body.dark-mode .comment {
 .message {
     position: relative; /* 关键：让整个消息容器作为“已读”的定位参考 */
 }
+/* --- 这 是 我 们 修 改 后 的 新 代 码 --- */
 .read-status {
-    position: absolute; /* 使用绝对定位，让它“漂浮”起来 */
-    top: -6px;         /* 向上移动，把它放到头像的上方区域 */
-    font-size: 0.6em;   /* 保持小巧的字体 */
-    color: var(--text-light-color);
-    background-color: var(--chat-bg-color, white); /* 给一点背景色，避免和背景混淆 */
-    padding: 1px 4px;
-    border-radius: 5px;
-    white-space: nowrap;
-    opacity: 0.8;       /* 稍微透明一点，不那么抢眼 */
+    position: absolute;      /* 使用“绝对定位”，让它可以自由移动 */
+    bottom: 0em;          /* 关键：让它和时间戳一样，垂直对齐在气泡的下方 */
+    font-size: 0.5em;        /* 字体大小和时间戳保持一致，更协调 */
+    color: var(--text-light-color); /* 颜色也和时间戳一样 */
+    white-space: nowrap;     /* 防止“已读”两个字换行 */
+    /* 注意：我们已经把背景色、内边距、圆角、透明度那些代码都删掉了！*/
 }
-/* 用户消息的已读，定位在右侧头像上方 */
+
+/* 你的消息（在右边）的“已读”，放在时间戳的左边 */
 .message.user .read-status {
-    right: 50px; /* 从右侧开始定位，50px大约是头像的宽度+间距 */
+    left: -15px; /* 时间戳在最右边(right:0)，我们把“已读”往左边放一点点 */
 }
-/* AI消息的已读，定位在左侧头像上方 */
+
+/* 角色消息（在左边）的“已读”，放在时间戳的右边 */
 .message.ai .read-status {
-    left: 50px; /* 从左侧开始定位 */
+    right: 5px; /* 时间戳在最左边(left:0)，我们把“已读”往右边放一点点 */
 }
         
         .multi-select-mode .message:not(.selected):not(.system) { opacity: 0.6; }
@@ -1924,32 +1925,7 @@ button.listen-btn:hover {
                     </div>
 
 
-                    <div class="form-group">
-                        <label for="font-select">聊天字体 (全局, 部分像素字体可能缺少某些汉字)</label>
-                        <select id="font-select">
-                            <option value="'Cubic 11', 'Noto Sans JP', sans-serif">默认字体 (Cubic 11)</option>
-                            <optgroup label="台湾繁体风格">
-                                <option value="'Noto Sans TC', sans-serif">思源黑体 TC</option>
-                                <option value="'ZCOOL KuaiLe', cursive">站酷快乐体</option>
-                                <option value="'Long Cang', cursive">龙藏体</option>
-                            </optgroup>
-                            <optgroup label="可爱手写风格">
-                                <option value="'Zhi Mang Xing', cursive">芝麻星体</option>
-                                <option value="'Ma Shan Zheng', cursive">马善政体</option>
-                                <option value="'LXGW WenKai Mono TC', sans-serif">霞鹜文楷 TC</option>
-                            </optgroup>
-                            <optgroup label="复古像素风格">
-                                <option value="'Press Start 2P', cursive">Press Start 2P</option>
-                                <option value="'DotGothic16', sans-serif">点阵哥特体 16</option>
-                                <option value="'VT323', monospace">VT323</option>
-                            </optgroup>
-                            <optgroup label="其他风格">
-                                <option value="'Noto Serif TC', serif">思源宋体 TC</option>
-                                <option value="'Pacifico', cursive">Pacifico</option>
-                                <option value="'ZCOOL QingKe HuangYou', cursive">站酷庆科黄油体</option>
-                            </optgroup>
-                        </select>
-                    </div>
+                  
 <!-- ======================================================= -->
 <!-- ============ 新增的自定义字体URL功能开始 ============ -->
 <!-- ======================================================= -->
@@ -2442,7 +2418,6 @@ const showContextMenu = (event, messageElement) => {
             deleteChatBtn: getEl('delete-chat-btn'),
             deleteChatBtnContainer: getEl('delete-chat-btn-container'),
             advancedBubbleStylesInput: getEl('advanced-bubble-styles'),
-            fontSelect: getEl('font-select'), 
             bubbleStyleSelect: getEl('bubble-style-select'),
             darkModeToggle: getEl('dark-mode-toggle'), 
             compactModeToggle: getEl('compact-mode-toggle'),
@@ -3521,7 +3496,6 @@ const loadAllData = async () => {
         userMomentsProfile = savedData.userMomentsProfile || {};
         appSettings = savedData.globalSettings || {};
         applySizing(appSettings);
-        applyFont(appSettings.fontFamily || "'Cubic 11', 'Noto Sans JP', sans-serif");
         if (appSettings.customFontName && appSettings.customFontUrl) { applyCustomFont(appSettings.customFontName, appSettings.customFontUrl); }
         globalPresets = appSettings.presets || [];
         if (characterSets.length > 0) {
@@ -3543,6 +3517,7 @@ const loadAllData = async () => {
 };
   
                   // 这是升级后的新角色创建函数
+// --- 这是修改后的 新角色创建器 ---
 const createNewCharacterObject = () => {
     const id = generateId('char');
     const defaultSessionId = generateId('session');
@@ -3558,24 +3533,23 @@ const createNewCharacterObject = () => {
             streak: 1,
             lastChatDate: null
         },
-        // 核心升级：为每个角色创建独立的 userProfile
         userProfile: {
             name: '你',
             chatAvatar: '',
             momentsAvatar: '',
             momentsCover: '',
             prompt: '',
-            listenAlongBg: '' // 新增：一起听歌背景图
+            listenAlongBg: ''
         },
         activeSessionId: defaultSessionId,
         sessions: [
             { id: defaultSessionId, name: '主线剧情', history: [], createdAt: new Date().toISOString() }
         ],
         userStickers: [],
-        aiStickers: [],
+        // aiStickers: [],  // <-- 注意！我们把这行删掉了！
         moments: [],
         diary: [],
-        playlist: [], // <-- 确保有这一行
+        playlist: [],
         forum: { posts: [], background: '' },
     };
 };
@@ -3725,38 +3699,7 @@ const createNewCharacterObject = () => {
     // 3. 所有数据都安全填充完毕后，最后再显示弹窗
     elements.settingsModal.classList.add('show');
 };
-       const applyFont = (fontFamily) => {
-            document.documentElement.style.setProperty('--font-main', fontFamily);
-            document.documentElement.style.setProperty('--font-ui', fontFamily);
-            if (elements.fontSelect.value !== fontFamily) {
-                elements.fontSelect.value = fontFamily;
-            }
-        }; 
-
-const applyBubbleStyle = (style, character) => {
-    const container = elements.chatContainer;
-    const customStyleTag = getEl('custom-bubble-style-tag');
-
-    container.classList.remove('bubble-style-round', 'bubble-style-wechat', 'custom-style-active');
-    customStyleTag.textContent = '';
-
-    // 【关键修正】优先使用传入的style参数，如果它不存在，再从角色配置中读取
-    const styleToApply = style || (character ? character.config.bubbleStyle : 'default');
-
-    if (styleToApply === 'round') {
-        container.classList.add('bubble-style-round');
-    } else if (styleToApply === 'wechat') {
-        container.classList.add('bubble-style-wechat');
-    } else if (styleToApply === 'custom') {
-        customStyleTag.textContent = getEl('advanced-bubble-styles').value;
-        container.classList.add('custom-style-active');
-    }
-    
-    // 更新设置界面里的下拉框，让它显示正确的样式
-    if (elements.bubbleStyleSelect.value !== styleToApply) {
-        elements.bubbleStyleSelect.value = styleToApply;
-    }
-};
+       
       
         const handleFileUpload = (file, callback, compressionOptions = {}) => { 
             if (file) { 
@@ -4243,7 +4186,8 @@ const applyBubbleStyle = (style, character) => {
     }
 };
         
-                        const processAiResponse = (rawText) => {
+                        // --- 这是修改后的 AI回复处理器 ---
+const processAiResponse = (rawText) => {
     let responseArray = [];
     try {
         const jsonMatch = rawText.match(/\[[\s\S]*?\]/);
@@ -4351,13 +4295,14 @@ const applyBubbleStyle = (style, character) => {
                 case 'voice': addMessage({ ...messageData, text: msgObj.content, type: 'voice', voiceDuration: `0:${Math.max(1, Math.round((msgObj.content || '').length / 5)).toString().padStart(2, '0')}` }); break;
                 case 'text-image': addMessage({ ...messageData, text: msgObj.content, type: 'text-image' }); break;
                 case 'sticker':
-    if (character.aiStickers && character.aiStickers.length > 0) {
-        // 先随机选出一个完整的表情对象
-        const randomStickerObject = character.aiStickers[Math.floor(Math.random() * character.aiStickers.length)];
-        // 然后，只把这个对象的 url 属性传进去
-        addMessage({ ...messageData, type: 'sticker', stickerUrl: randomStickerObject.url });
-    }
-    break;
+                    // --- 核心修复在这里 ---
+                    // 现在AI会从全局的 sharedAiStickers 仓库里找表情
+                    if (userMomentsProfile.sharedAiStickers && userMomentsProfile.sharedAiStickers.length > 0) {
+                        const randomStickerObject = userMomentsProfile.sharedAiStickers[Math.floor(Math.random() * userMomentsProfile.sharedAiStickers.length)];
+                        addMessage({ ...messageData, type: 'sticker', stickerUrl: randomStickerObject.url });
+                    }
+                    // --- 修复结束 ---
+                    break;
                 case 'transfer': addMessage({ ...messageData, type: 'transfer', transferAmount: msgObj.amount, transferMemo: msgObj.memo, transferCoverUrl: `https://files.catbox.moe/qwu221.jpg`, transferStatus: 'pending' }); break;
                 case 'video-call-request': if (currentChat.type === 'direct') handleIncomingVideoCall(msgObj.content); break;
                 case 'post_moment': if (character) { const momentType = currentChat.type === 'group' ? 'group' : 'direct'; addMomentByAI(character.id, { content: msgObj.content, image_query: msgObj.image_query }, momentType); } break;
@@ -4704,102 +4649,95 @@ ${historyContext}
     }
 };
 
-                                        const openStickerManager = (context) => {
-            const character = getCurrentCharacter();
-            if (context === 'ai' && !character) {
-                alert('只能在与单人角色聊天时管理他的表情。');
-                return;
-            }
+                                        // --- 这是修改后的 表情管理器 ---
+const openStickerManager = (context) => {
+    const character = getCurrentCharacter();
+    // 我们不再需要检查角色是否存在，因为“他的表情”现在是全局的了
+    
+    const isAiContext = context === 'ai';
 
-            const isAiContext = context === 'ai';
+    // --- 核心修复在这里 ---
+    // 如果是管理“他的表情”，我们现在操作的是全局的“中央表情仓库”
+    // 我们先确保这个仓库存在，如果不存在就创建一个空的
+    if (isAiContext && !userMomentsProfile.sharedAiStickers) {
+        userMomentsProfile.sharedAiStickers = [];
+    }
+    // ----------------------
 
-            // 预处理数据，确保都是新格式
+    // 让 stickerData 直接从正确的地方获取数据
+    const stickerData = isAiContext ? userMomentsProfile.sharedAiStickers : userMomentsProfile.userStickers;
+    
+    // (后面的代码和原来完全一样，因为它们只关心 stickerData 这个“篮子”里的东西，不关心东西从哪来)
+    let galleryContentHtml = stickerData.length > 0
+        ? stickerData.map((sticker, index) => `
+            <div class="sticker-management-item" data-index="${index}">
+                <img src="${sticker.url}" alt="sticker">
+                <button class="sticker-delete-btn">×</button>
+                <input type="text" class="sticker-description-input" placeholder="为表情添加描述..." value="${sticker.description || ''}">
+            </div>
+        `).join('')
+        : '<p style="text-align:center; color:#999; grid-column: 1 / -1;">点击下方按钮添加，点击表情上的 × 可删除。</p>';
+
+    const galleryHtml = `<div class="sticker-management-grid">${galleryContentHtml}</div>`;
+
+    openFeatureModal(
+        isAiContext ? '他的表情管理 (所有角色共用)' : '我的表情管理', // 标题也改得更清晰
+        galleryHtml + `<button id="add-stickers-btn" class="file-input-label" style="text-align:center; width:100%; margin-top:15px;">从相册批量添加</button>`,
+        '完成',
+        () => {
             if (isAiContext) {
-                character.aiStickers = (character.aiStickers || []).map(s => (typeof s === 'string') ? { url: s, description: '' } : s);
-            } else {
-                userMomentsProfile.userStickers = (userMomentsProfile.userStickers || []).map(s => (typeof s === 'string') ? { url: s, description: '' } : s);
-            }
-            const stickerData = isAiContext ? character.aiStickers : userMomentsProfile.userStickers;
-            
-            // 核心修复1：无论列表是否为空，都先创建好容器的骨架
-            let galleryContentHtml = stickerData.length > 0
-                ? stickerData.map((sticker, index) => `
-                    <div class="sticker-management-item" data-index="${index}">
-                        <img src="${sticker.url}" alt="sticker">
-                        <button class="sticker-delete-btn">×</button>
-                        ${isAiContext ? `<input type="text" class="sticker-description-input" placeholder="为表情添加描述..." value="${sticker.description || ''}">` : ''}
-                    </div>
-                `).join('')
-                : '<p style="text-align:center; color:#999; grid-column: 1 / -1;">点击下方按钮添加，点击表情上的 × 可删除。</p>';
-
-            const galleryHtml = `<div class="sticker-management-grid">${galleryContentHtml}</div>`;
-
-            // 打开弹窗，并设置“完成”按钮的逻辑
-            openFeatureModal(
-                isAiContext ? '他的表情管理' : '我的表情管理',
-                galleryHtml + `<button id="add-stickers-btn" class="file-input-label" style="text-align:center; width:100%; margin-top:15px;">从相册批量添加</button>`,
-                '完成',
-                () => {
-                    if (isAiContext) {
-                        const inputs = document.querySelectorAll('.sticker-description-input');
-                        inputs.forEach((input, index) => {
-                            if (character.aiStickers && character.aiStickers[index]) {
-                                character.aiStickers[index].description = input.value;
-                            }
-                        });
-                        saveAllData();
-                    }
-                    closeModal(elements.featureModal);
-                }
-            );
-            
-            // 核心修复2：使用“事件委托”，将监听器绑定在必定存在的父元素上
-            const modalBody = getEl('feature-modal-body');
-            
-            // 绑定“添加”按钮事件
-            const addBtn = modalBody.querySelector('#add-stickers-btn');
-            if (addBtn) {
-                addBtn.onclick = () => elements.stickerUploadInput.click();
-            }
-            
-            // 绑定“删除”按钮事件 (委托给 grid)
-            const grid = modalBody.querySelector('.sticker-management-grid');
-            if (grid) {
-                grid.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('sticker-delete-btn')) {
-                        const item = e.target.closest('.sticker-management-item');
-                        const index = parseInt(item.dataset.index);
-                        if (confirm('要删除这个表情吗？')) {
-                            stickerData.splice(index, 1);
-                            saveAllData();
-                            closeModal(elements.featureModal);
-                            openStickerManager(context);
-                        }
+                const inputs = document.querySelectorAll('.sticker-description-input');
+                inputs.forEach((input, index) => {
+                    if (userMomentsProfile.sharedAiStickers && userMomentsProfile.sharedAiStickers[index]) {
+                        userMomentsProfile.sharedAiStickers[index].description = input.value;
                     }
                 });
+            } else {
+                 // 我的表情管理逻辑不变
             }
-
-            // 文件上传逻辑保持不变，因为它已经很健壮
-            elements.stickerUploadInput.onchange = async (e) => {
-                const files = Array.from(e.target.files);
-                if (files.length === 0) return;
-
-                closeModal(elements.featureModal);
-                showTopNotification("正在后台努力添加表情中...", (isAiContext ? character.config.aiAvatar : userMomentsProfile.chatAvatar));
-
-                for (const file of files) {
-                    const result = await new Promise(resolve => handleFileUpload(file, resolve));
-                    const newSticker = { url: result, description: '' };
-                    stickerData.push(newSticker);
+            saveAllData();
+            closeModal(elements.featureModal);
+        }
+    );
+    
+    const modalBody = getEl('feature-modal-body');
+    const addBtn = modalBody.querySelector('#add-stickers-btn');
+    if (addBtn) {
+        addBtn.onclick = () => elements.stickerUploadInput.click();
+    }
+    
+    const grid = modalBody.querySelector('.sticker-management-grid');
+    if (grid) {
+        grid.addEventListener('click', (e) => {
+            if (e.target.classList.contains('sticker-delete-btn')) {
+                const item = e.target.closest('.sticker-management-item');
+                const index = parseInt(item.dataset.index);
+                if (confirm('要删除这个表情吗？')) {
+                    stickerData.splice(index, 1);
+                    saveAllData();
+                    closeModal(elements.featureModal);
+                    openStickerManager(context);
                 }
-                
-                await saveAllData();
-                alert(`已成功添加 ${files.length} 个表情！`);
-                openStickerManager(context);
-                e.target.value = '';
-            };
-        };
+            }
+        });
+    }
 
+    elements.stickerUploadInput.onchange = async (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+        closeModal(elements.featureModal);
+        showTopNotification("正在后台努力添加表情中...", (isAiContext ? (character?.config.aiAvatar || '') : userMomentsProfile.chatAvatar));
+        for (const file of files) {
+            const result = await new Promise(resolve => handleFileUpload(file, resolve));
+            const newSticker = { url: result, description: '' };
+            stickerData.push(newSticker);
+        }
+        await saveAllData();
+        alert(`已成功添加 ${files.length} 个表情！`);
+        openStickerManager(context);
+        e.target.value = '';
+    };
+};
         // --- Chat Management Logic (Characters & Groups) ---
         const openChatManager = () => {
             const bodyHtml = `
@@ -6529,17 +6467,9 @@ const migrateDataToV7 = (oldData) => {
                       // 新增：点击歌曲信息区域，打开播放列表弹窗
     elements.songInfoTrigger.onclick = openPlaylistModal;
                   elements.closeSettingsBtn.onclick = () => closeModal(elements.settingsModal);
-                 elements.saveSettingsBtn.onclick = async () => {
-    // 我们不再需要那个错误的内部函数，直接在这里进行清爽、正确的操作
-
-    // 【核心修复】第一步：无条件地、正确地更新您自己的全局个人资料
-    userMomentsProfile.name = elements.userNameInput.value.trim() || '你';
-    userMomentsProfile.chatAvatar = elements.userAvatarPreview.src;
-    userMomentsProfile.momentsAvatar = elements.userMomentsAvatarPreview.src;
-    userMomentsProfile.cover = elements.userMomentsCoverPreview.src;
-    userMomentsProfile.userPrompt = elements.userPromptInput.value;
-
-    // 第二步：更新全局应用设置 (这部分是好的，我们保留)
+                 // --- 这是全新的、修复了头像Bug的“保存设置”按钮代码 ---
+elements.saveSettingsBtn.onclick = async () => {
+    // 1. 更新全局应用设置 (API, 主题, 字体等)
     appSettings.apiBaseUrl = elements.apiBaseUrlInput.value;
     appSettings.apiKey = elements.apiKeyInput.value;
     appSettings.model = elements.modelSelect.value;
@@ -6548,27 +6478,45 @@ const migrateDataToV7 = (oldData) => {
     appSettings.realTimeAwareness = elements.realTimeAwarenessToggle.checked;
     appSettings.apiFormat = elements.apiFormatSelect.value;
     appSettings.globalTheme = elements.globalThemeSelect.value;
-    appSettings.fontFamily = elements.fontSelect.value;
     appSettings.advancedBubbleStyles = elements.advancedBubbleStylesInput.value;
     appSettings.customFontName = elements.customFontNameInput.value;
     appSettings.customFontUrl = elements.customFontUrlInput.value;
     appSettings.uiScale = parseFloat(elements.uiScaleSlider.value) / 100;
     appSettings.fontSize = parseInt(elements.fontSizeSlider.value);
     appSettings.bubblePadding = parseInt(elements.bubbleSizeSlider.value);
-    updatePresetsFromUI(); // 更新预设
+    updatePresetsFromUI();
     appSettings.presets = globalPresets;
 
-    // 第三步：根据当前聊天，只更新属于角色的或群组的设置
+    // 2. 更新全局的用户朋友圈资料 (用于未来可能的跨角色功能)
+    userMomentsProfile.name = elements.userNameInput.value.trim() || '你';
+    userMomentsProfile.chatAvatar = elements.userAvatarPreview.src;
+    userMomentsProfile.momentsAvatar = elements.userMomentsAvatarPreview.src;
+    userMomentsProfile.cover = elements.userMomentsCoverPreview.src;
+    userMomentsProfile.userPrompt = elements.userPromptInput.value;
+
+    // 3. 根据当前聊天类型，更新具体的角色或群组数据
     const chatData = getCurrentChatData();
     if (chatData) {
         if (currentChat.type === 'direct') {
             const character = chatData;
-            // 我们不再碰 userProfile，只更新角色的东西
+            
+            // --- 关键修复在这里！---
+            // 除了更新角色自身配置，我们现在也同步更新角色为你建立的个人档案
+            character.userProfile = {
+                ...character.userProfile, // 保留旧档案里的其他信息
+                name: elements.userNameInput.value.trim() || '你',
+                chatAvatar: elements.userAvatarPreview.src,
+                momentsAvatar: elements.userMomentsAvatarPreview.src,
+                momentsCover: elements.userMomentsCoverPreview.src,
+                prompt: elements.userPromptInput.value
+            };
+            // --- 修复结束 ---
+
             character.config = {
                 ...character.config,
-                characterName: elements.characterNameInput.value.trim() || '他', 
+                characterName: elements.characterNameInput.value.trim() || '他',
                 characterPrompt: elements.characterPromptInput.value,
-                aiAvatar: elements.aiAvatarPreview.src, 
+                aiAvatar: elements.aiAvatarPreview.src,
                 memorySize: parseInt(elements.memorySizeInput.value) || 50,
                 theme: elements.themeSelector.querySelector('.theme-option.active')?.dataset.theme || '1',
                 bubbleStyle: elements.bubbleStyleSelect.value
@@ -6588,12 +6536,12 @@ const migrateDataToV7 = (oldData) => {
             group.chatBackground = (bgImage && bgImage !== 'none') ? bgImage.slice(5, -2) : '';
         }
     }
-    
-    // 最后一步：执行保存，并刷新界面
+
+    // 4. 执行最终保存，并刷新界面
     await saveAllData();
     alert('设置已保存！');
     closeModal(elements.settingsModal);
-    loadChat(currentChat.type, currentChat.id);
+    loadChat(currentChat.type, currentChat.id); // 重新加载聊天以应用所有更改
 };
                   // 这是100%正确的代码版本
 elements.sendBtn.onclick = () => {
