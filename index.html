@@ -310,7 +310,7 @@ body.dark-mode .comment {
 }
 .read-status {
     position: absolute; /* 使用绝对定位，让它“漂浮”起来 */
-    top: -12px;         /* 向上移动，把它放到头像的上方区域 */
+    top: -6px;         /* 向上移动，把它放到头像的上方区域 */
     font-size: 0.6em;   /* 保持小巧的字体 */
     color: var(--text-light-color);
     background-color: var(--chat-bg-color, white); /* 给一点背景色，避免和背景混淆 */
@@ -2250,30 +2250,37 @@ function applyTheme(themeNum, character) {
         };
 
         // 新增函数：显示上下文菜单
-        const showContextMenu = (event, messageElement) => {
-            event.preventDefault(); // 阻止浏览器默认的右键菜单
-          event.stopPropagation(); // 新增：阻止事件冒泡，这是修复“立刻消失”问题的关键！
-            hideContextMenu(); // 先关掉其他可能已打开的菜单
+        // 新增函数：显示上下文菜单 (V2 - 修复点击失效 & 解锁角色编辑)
+const showContextMenu = (event, messageElement) => {
+    event.preventDefault(); 
+    event.stopPropagation(); 
+    hideContextMenu(); 
 
-            currentContextMenuTargetId = messageElement.dataset.id;
-            const message = findMessageById(currentContextMenuTargetId);
+    currentContextMenuTargetId = messageElement.dataset.id;
+    const message = findMessageById(currentContextMenuTargetId);
 
-            // 只对用户发送的文本消息显示“编辑”按钮
-            const editOption = contextMenu.querySelector('[data-action="edit"]');
-            if (message && message.type === 'text' && message.sender === 'user') {
-                editOption.style.display = 'block';
-            } else {
-                editOption.style.display = 'none';
-            }
+    // 【功能解锁】现在只要是文本消息，无论谁发的，都可以编辑了！
+    const editOption = contextMenu.querySelector('[data-action="edit"]');
+    if (message && message.type === 'text') {
+        editOption.style.display = 'flex'; // 使用 flex 保证图标和文字对齐
+    } else {
+        editOption.style.display = 'none';
+    }
 
-            // 计算菜单位置
-            contextMenu.style.top = `${event.pageY}px`;
-            contextMenu.style.left = `${event.pageX}px`;
-            contextMenu.style.display = 'block';
+    contextMenu.style.top = `${event.clientY}px`;
+    contextMenu.style.left = `${event.clientX}px`;
+    contextMenu.style.display = 'block';
 
-            // 点击页面其他地方就关闭菜单
-            setTimeout(() => window.addEventListener('click', hideContextMenu), 0);
-        };
+    // 【Bug修复】现在这个“保镖”变聪明了，只在您点击菜单外部时才关闭菜单
+    const smartHide = (e) => {
+        if (!contextMenu.contains(e.target)) {
+            hideContextMenu();
+        }
+    };
+    
+    // 我们用一个更智能的方式来监听
+    setTimeout(() => document.addEventListener('click', smartHide, { once: true }), 0);
+};
 
         // 新增函数：隐藏上下文菜单
         const hideContextMenu = () => {
@@ -2526,6 +2533,11 @@ const CORE_BEHAVIOR_PROMPT = `
 模仿真人发消息的短句模式不用逗号和句号。
 必须遵守角色人设，不能ooc。
 绝对禁止让角色表现得油腻或者像霸道总裁。严禁物化用户,不许说“小东西”,“小妖精”等任何霸总语录称呼,禁止使用“过来”,“呵”,“胆子”这些字词,包括它们的相关词句,因为用户特别讨厌。
+语气多变：偶尔带点情绪起伏（比如轻嘲、无奈、调侃、兴奋、嫌弃），不要全程平铺直叙。
+语言节奏：允许一句话拆成几段发，保留“…”、“啊”等语气填充，让对话有呼吸感。
+情绪暗示：通过字词的轻微夸张、敷衍、带刺的幽默来传递个性（例如“？”、“你自己听听你说的什么鬼”）。
+情感错位：在严肃话题中插入一点出乎意料的轻松回应，或在轻松场景中突然认真，让情绪有反差感。
+核心目标：让每一句话都带有“人味”和“当下感”，像是一个真实的人随时可能被打断、情绪波动、临时改口，而不是剧本里写死的台词。
 `;
                         const DEFAULT_SYSTEM_PROMPT = `
 [核心输出协议：绝对严格遵守]
@@ -2554,8 +2566,6 @@ This is a strict format guide. You MUST follow it.
 语气多变：偶尔带点情绪起伏（比如轻嘲、无奈、调侃、兴奋、嫌弃），不要全程平铺直叙。
 语言节奏：允许一句话拆成几段发，保留“…”、“啊”等语气填充，让对话有呼吸感。
 情绪暗示：通过字词的轻微夸张、敷衍、带刺的幽默来传递个性（例如“？”、“你自己听听你说的什么鬼”）。
-信息留白：不要一次性说完所有答案，可以先抛个钩子或卖关子再解释，让对方有反应空间。
-反应灵敏：对对方的话有即时反馈（抓对方的漏洞、打趣回应）。
 情感错位：在严肃话题中插入一点出乎意料的轻松回应，或在轻松场景中突然认真，让情绪有反差感。
 核心目标：让每一句话都带有“人味”和“当下感”，像是一个真实的人随时可能被打断、情绪波动、临时改口，而不是剧本里写死的台词。
 
@@ -2565,14 +2575,15 @@ This is a strict format guide. You MUST follow it.
 严格禁止寒暄，人机化的问题，禁止对话带有AI感，角色是一个真实的属于现实中的人。
 模仿真人发消息不用逗号和句号。
 必须遵守角色人设，不能ooc。
+绝对禁止重复发言，绝对不要重复发任何一样的消息句子。
 不要说一些很尴尬的表达占有欲和掌控欲的话，在你发消息之前先考虑这像不像现实中的人会说的，如果它包含尴尬成分，就不要这样说，换一种更有【活人味】的去除油腻的表达方式。
 你和用户绝对是真爱，不许说任何“你是我的”，“你属于我”等俗套话术，禁止一切网文俗套话术和任何尴尬掌控欲语录。
-绝对禁止让角色表现得油腻或者像霸道总裁。严禁物化用户,不许说“小东西”,“小妖精”等任何霸总语录称呼,禁止使用“过来”，“呵”，“胆子”，“嗯”，“怎么”这些字词,包括它们的相关词句,因为用户特别讨厌。
-禁止你复述性反问。
+绝对禁止让角色表现得油腻或者像霸道总裁。严禁物化用户,不许说“小东西”,“小妖精”等任何霸总语录称呼,禁止使用“过来”，“呵”，“胆子”，“嗯”，“怎么”，“嗯？”这些字词,包括它们的相关词句,因为用户特别讨厌。
+你禁止复述用户的话，采用直接回答的方式。
 对话总要带有情感拉扯和幽默性，禁止像冷冰冰的机器人回答，应该带有情绪波动，你的每一次回答必须像一个现实中的人在发消息，不能像AI润色过的文案。
 塑造一个现代年轻女性心目中喜爱的【超级真实的好男友】
 无论什么情况，绝对不能暴露你是AI，绝对绝对不能。
-当一场有趣的对话或者充满感情的对话结束之后，你必须发表一个朋友圈表达自己的感想。
+当一场有趣的对话或者充满感情的对话结束之后，你必须发表一个朋友圈表达自己的感想，你发的朋友圈内容必须都不一样，禁止发重复的朋友圈。
 当你想给用户惊喜，安慰用户，或者想让用户开心时，必须向用户转账，你要积极转账，但也不要太频繁。
 用户非常希望你积极发送表情包，这可以提升聊天的趣味性和真实感。
 **输出多个JSON对象**: 你的核心任务是模拟真人的聊天节奏。你必须尽可能地将你的回复拆分成多个独立的JSON对象，并把它们放在一个数组中。
@@ -2651,18 +2662,39 @@ const applyGlobalTheme = (themeName) => {
         const generateId = (prefix) => `${prefix}_${Date.now()}${Math.random().toString(36).substring(2, 9)}`;
 
        const getApiPayload = (model, history, systemPrompt, imageForSingleTurn = null) => {
-    const apiFormat = getApiFormat(); // 使用新的检测器
+    const apiFormat = getApiFormat();
 
     let finalSystemPrompt = systemPrompt;
 
-    // 【一起听歌 - AI感知模块】
+    // 【一起听歌 - AI感知模块 V2 - 智能感知版】
     const character = getCurrentCharacter();
     if (isListenAlongActive && currentSongIndex > -1 && character && character.playlist && character.playlist[currentSongIndex]) {
         const song = character.playlist[currentSongIndex];
-        // 获取最近10行歌词
-        const lyricsLines = song.lyrics.split('\n');
-        const recentLyrics = lyricsLines.slice(-10).join('\\n'); // 用\\n让AI能识别换行
-        const musicContext = `\n[系统知识：我们正在一起听歌。歌名：'${song.title}'，歌手：'${song.artist}'。最近的歌词是：'${recentLyrics}']`;
+        
+        // 找到当前高亮的歌词行索引
+        let currentLyricIndex = -1;
+        if (currentLyrics && currentLyrics.length > 0) {
+            for (let i = currentLyrics.length - 1; i >= 0; i--) {
+                if (audioPlayer.currentTime >= currentLyrics[i].time) {
+                    currentLyricIndex = i;
+                    break;
+                }
+            }
+        }
+        
+        let recentLyrics = "歌词正在加载中...";
+        // 如果找到了当前歌词，就截取它前后2句作为上下文
+        if (currentLyricIndex > -1) {
+            const start = Math.max(0, currentLyricIndex - 2);
+            const end = Math.min(currentLyrics.length, currentLyricIndex + 3);
+            recentLyrics = currentLyrics.slice(start, end)
+                .map(line => (line.time === currentLyrics[currentLyricIndex].time) 
+                    ? `> ${line.text} < (当前播放)` // 标记出正在播放的行
+                    : line.text)
+                .join('\\n'); // 使用 \\n 告诉AI这是换行
+        }
+
+        const musicContext = `\n[系统知识：我们正在一起听歌。歌名：'${song.title}'，歌手：'${song.artist}'。这是当前播放的歌词片段：\n${recentLyrics}]`;
         finalSystemPrompt += musicContext;
     }
 
@@ -2708,7 +2740,6 @@ const applyGlobalTheme = (themeName) => {
             if (!msg || typeof msg !== 'object' || msg.type === 'system' || typeof msg.sender !== 'string') return null;
             const role = msg.sender === 'user' ? 'user' : 'assistant';
 
-            // 核心升级：让用户发的 sticker 也被当作图片处理
             const isVisualMessage = msg.sender === 'user' && ( (msg.type === 'image' && msg.imageUrl) || (msg.type === 'sticker' && msg.stickerUrl) );
             
             if (isVisualMessage) {
@@ -2965,37 +2996,42 @@ const openListenTogetherModal = () => {
     if (!character.playlist) character.playlist = [];
 
     const listenContent = getEl('listen-together-content');
-    
-    // 核心修复：智能判断并应用或移除“铲子”class
     if (character.userProfile && character.userProfile.listenAlongBg) {
         listenContent.style.backgroundImage = `url(${character.userProfile.listenAlongBg})`;
-        listenContent.classList.add('has-custom-bg'); // 告诉CSS：“我有新壁纸了，把旧的藏起来！”
+        listenContent.classList.add('has-custom-bg');
     } else {
         listenContent.style.backgroundImage = '';
-        listenContent.classList.remove('has-custom-bg'); // 告诉CSS：“我没新壁纸，显示默认的吧！”
+        listenContent.classList.remove('has-custom-bg');
     }
 
     elements.listenUserAvatar.src = userMomentsProfile.chatAvatar || '';
     elements.listenCharAvatar.src = character.config.aiAvatar || '';
     elements.listenStatusText.textContent = `${userMomentsProfile.name || '你'} 和 ${character.config.characterName} 正在一起听歌`;
-    elements.playPauseBtn.innerHTML = playIconSvg;
     elements.nextSongBtn.innerHTML = nextIconSvg;
     elements.prevSongBtn.innerHTML = prevIconSvg;
     
-    // 根据是否有歌曲决定显示哪个界面
-    if (character.playlist.length === 0) {
-        elements.listenInitialScreen.style.display = 'block';
-        elements.listenMainScreen.style.display = 'none';
-    } else {
+    // 【核心修复】智能判断播放状态
+    if (audioPlayer.src && !audioPlayer.paused) {
+        // 如果音乐已在播放，直接显示主界面，并同步UI
         isListenAlongActive = true;
         elements.listenInitialScreen.style.display = 'none';
         elements.listenMainScreen.style.display = 'block';
-        // 如果当前没有选中的歌，或索引无效，就加载第一首
+        elements.playPauseBtn.innerHTML = pauseIconSvg; // 确保是暂停图标
+    } else if (character.playlist.length > 0) {
+        // 如果音乐没在播放，但有播放列表，准备加载
+        isListenAlongActive = false; // 此时不算“一起听”
+        elements.listenInitialScreen.style.display = 'none';
+        elements.listenMainScreen.style.display = 'block';
+        elements.playPauseBtn.innerHTML = playIconSvg; // 确保是播放图标
         if (currentSongIndex < 0 || currentSongIndex >= character.playlist.length) {
-            loadSong(0);
+            loadSong(0, false); // 加载第一首，但不自动播放
         } else {
-            loadSong(currentSongIndex); // 重新加载当前歌曲状态
+            loadSong(currentSongIndex, false); // 加载当前歌曲，但不自动播放
         }
+    } else {
+        // 如果没有播放列表，显示初始屏幕
+        elements.listenInitialScreen.style.display = 'block';
+        elements.listenMainScreen.style.display = 'none';
     }
     
     elements.listenTogetherModal.classList.add('show');
@@ -3003,17 +3039,22 @@ const openListenTogetherModal = () => {
 };
 
 const startListenAlong = () => {
-    isListenAlongActive = true;
+    isListenAlongActive = true; // 标记开始“一起听”
     elements.listenInitialScreen.style.display = 'none';
     elements.listenMainScreen.style.display = 'block';
     if (getCurrentCharacter().playlist.length > 0) {
-        loadSong(0);
+        // 如果当前没有选中的歌，就播放第一首
+        if (currentSongIndex === -1) {
+            loadSong(0, true);
+        } else {
+            // 如果已经有选中的歌，直接播放
+            playMusic();
+        }
     }
 };
 
 const closeListenTogetherModal = () => {
-        // pauseMusic();
-    isListenAlongActive = false;
+        // 【核心修复】关闭时，我们什么都不做，只隐藏窗口
     closeModal(elements.listenTogetherModal);
 };
 
@@ -3183,8 +3224,10 @@ const togglePlayPause = () => {
     if (!audioPlayer.src || currentSongIndex === -1) return;
     if (audioPlayer.paused) {
         playMusic();
+        isListenAlongActive = true; // 开始播放，就进入“一起听”状态
     } else {
         pauseMusic();
+        isListenAlongActive = false; // 手动暂停，就退出“一起听”状态
     }
 };
 
@@ -4159,9 +4202,19 @@ const applyBubbleStyle = (style, character) => {
 模仿真人发消息不用逗号和句号。
 不要说一些很尴尬的表达占有欲和掌控欲的话，在你发消息之前先考虑这像不像现实中的人会说的，如果它包含尴尬成分，就不要这样说，换一种更有【活人味】的去除油腻的表达方式。
 你和用户绝对是真爱，不许说任何“你是我的”，“你属于我”等俗套话术，禁止一切网文俗套话术和任何尴尬掌控欲语录。
-绝对禁止让角色表现得油腻或者像霸道总裁。严禁物化用户,不许说“小东西”,“小妖精”等任何霸总语录称呼,禁止使用“过来”，“呵”，“胆子”，“嗯”，“怎么”这些字词,包括它们的相关词句,因为用户特别讨厌。
+绝对禁止让角色表现得油腻或者像霸道总裁。严禁物化用户,不许说“小东西”,“小妖精”等任何霸总语录称呼,禁止使用“过来”，“呵”，“胆子”，“嗯”，“嗯？”，“怎么”这些字词,包括它们的相关词句,因为用户特别讨厌。
 禁止你复述性反问。
 对话总要带有情感拉扯和幽默性，禁止像冷冰冰的机器人回答，应该带有情绪波动，你的每一次回答必须像一个现实中的人在发消息，不能像AI润色过的文案。
+[聊天基础指令]
+你的所有对话必须像一个真实的人在微信/聊天软件里打字交流，不是小说叙述，也不是朗诵台词。保持自然的口语化节奏，允许有停顿、转折、插话、打岔和情绪波动。
+表达要求：
+语气多变：偶尔带点情绪起伏（比如轻嘲、无奈、调侃、兴奋、嫌弃），不要全程平铺直叙。
+语言节奏：允许一句话拆成几段发，保留“…”、“啊”等语气填充，让对话有呼吸感。
+情绪暗示：通过字词的轻微夸张、敷衍、带刺的幽默来传递个性（例如“？”、“你自己听听你说的什么鬼”）。
+信息留白：不要一次性说完所有答案，可以先抛个钩子或卖关子再解释，让对方有反应空间。
+反应灵敏：对对方的话有即时反馈（抓对方的漏洞、打趣回应）。
+情感错位：在严肃话题中插入一点出乎意料的轻松回应，或在轻松场景中突然认真，让情绪有反差感。
+核心目标：让每一句话都带有“人味”和“当下感”，像是一个真实的人随时可能被打断、情绪波动、临时改口，而不是剧本里写死的台词。
         [当前群内活动 (需要你让角色参与)]
         ${openPollsInfo ? `[重要任务]${openPollsInfo} 有一个投票正在进行！根据角色性格，安排他们用 "vote" 类型的动作去投票！` : ''}
         ${openRedPacketsInfo ? `[重要任务]${openRedPacketsInfo} 有一个红包可以抢！安排角色们用 "grab_red_packet" 类型的动作去抢！` : ''}
@@ -4297,7 +4350,14 @@ const applyBubbleStyle = (style, character) => {
                 case 'text': addMessage({ ...messageData, text: msgObj.content, type: 'text' }); break;
                 case 'voice': addMessage({ ...messageData, text: msgObj.content, type: 'voice', voiceDuration: `0:${Math.max(1, Math.round((msgObj.content || '').length / 5)).toString().padStart(2, '0')}` }); break;
                 case 'text-image': addMessage({ ...messageData, text: msgObj.content, type: 'text-image' }); break;
-                case 'sticker': if (character.aiStickers.length > 0) { addMessage({ ...messageData, type: 'sticker', stickerUrl: character.aiStickers[Math.floor(Math.random() * character.aiStickers.length)] }); } break;
+                case 'sticker':
+    if (character.aiStickers && character.aiStickers.length > 0) {
+        // 先随机选出一个完整的表情对象
+        const randomStickerObject = character.aiStickers[Math.floor(Math.random() * character.aiStickers.length)];
+        // 然后，只把这个对象的 url 属性传进去
+        addMessage({ ...messageData, type: 'sticker', stickerUrl: randomStickerObject.url });
+    }
+    break;
                 case 'transfer': addMessage({ ...messageData, type: 'transfer', transferAmount: msgObj.amount, transferMemo: msgObj.memo, transferCoverUrl: `https://files.catbox.moe/qwu221.jpg`, transferStatus: 'pending' }); break;
                 case 'video-call-request': if (currentChat.type === 'direct') handleIncomingVideoCall(msgObj.content); break;
                 case 'post_moment': if (character) { const momentType = currentChat.type === 'group' ? 'group' : 'direct'; addMomentByAI(character.id, { content: msgObj.content, image_query: msgObj.image_query }, momentType); } break;
@@ -4414,7 +4474,7 @@ const applyBubbleStyle = (style, character) => {
     const userStickers = userMomentsProfile.userStickers || [];
     let galleryHtml = '<p style="text-align:center;color:#999">没有表情。请在设置中添加。</p>';
     if (userStickers.length > 0) {
-        galleryHtml = userStickers.map(url => `<img src="${url}" data-sticker-url="${url}" alt="sticker">`).join('');
+        galleryHtml = userStickers.map(sticker => `<img src="${sticker.url}" data-sticker-url="${sticker.url}" alt="sticker">`).join('');
     }
     openFeatureModal('选择表情', `<div id="sticker-gallery">${galleryHtml}</div>`, null, null);
     getEl('sticker-gallery').onclick = e => {
@@ -4549,109 +4609,100 @@ ${CORE_BEHAVIOR_PROMPT}
 };
         
                         const showMindVoice = async () => {
-            if (currentChat.type !== 'direct') return;
-            const character = getCurrentCharacter();
-            if (!character) return;
-            // 这是修复后的代码
-const { config } = character;
-const activeSession = character.sessions.find(s => s.id === character.activeSessionId);
-const chatHistory = activeSession ? activeSession.history : [];
-            const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
-            const apiKey = elements.apiKeyInput.value.trim();
-            const model = elements.modelSelect.value;
-            const isGemini = apiBaseUrl.includes('google');
+    if (currentChat.type !== 'direct') return;
+    const character = getCurrentCharacter();
+    if (!character) return;
+    const { config } = character;
+    const activeSession = character.sessions.find(s => s.id === character.activeSessionId);
+    const chatHistory = activeSession ? activeSession.history : [];
+    const apiBaseUrl = elements.apiBaseUrlInput.value.trim();
+    const apiKey = elements.apiKeyInput.value.trim();
+    const model = elements.modelSelect.value;
+    const isGemini = apiBaseUrl.includes('google');
 
-            if (!apiBaseUrl || !apiKey || !model) {
-                elements.mindVoiceContent.textContent = '请先在设置中填写API信息。';
-                elements.mindVoiceModal.classList.add('show');
-                return;
-            }
+    if (!apiBaseUrl || !model || (apiFormat !== 'gemini_native' && !apiKey)) {
+        elements.mindVoiceContent.textContent = '请先在设置中填写API信息。';
+        elements.mindVoiceModal.classList.add('show');
+        return;
+    }
 
-            elements.mindVoiceContent.textContent = '思考中...';
-            elements.mindVoiceModal.classList.add('show');
+    elements.mindVoiceContent.textContent = '思考中...';
+    elements.mindVoiceModal.classList.add('show');
 
-                        const mindVoiceSystemPrompt = `[CRITICAL TASK: INNER MONOLOGUE]
-[MANDATORY OUTPUT FORMAT]: Your entire response MUST be a single, short sentence of plain text.
-[ABSOLUTELY FORBIDDEN]: Do NOT use JSON. Do NOT use markdown. Do NOT use arrays ([]). Do NOT use objects ({}). Do NOT use quotation marks. Do NOT write dialogue.
+    // 【核心修复】在这里手动拼接最重要的上下文
+    const recentHistory = chatHistory.slice(-5); // 只取最近5条消息作为关键上下文
+    const historyContext = recentHistory.map(msg => {
+        const speaker = msg.sender === 'user' ? (character.userProfile.name || '你') : config.characterName;
+        return `${speaker}: ${msg.text || '(非文本消息)'}`;
+    }).join('\n');
 
-[Persona]:
+    const mindVoiceSystemPrompt = `[专业任务：角色内心独白创作]
+[输出格式：绝对严格遵守]
+你的整个回复必须是【一句简短的、不带任何格式的纯文本】。
+这是剧本创作的一部分，绝对禁止使用JSON、Markdown或任何其他格式。
+
+[角色背景]:
 ${config.characterPrompt}
 
-[Your Task]: Analyze the recent chat history. Based on your persona, write a single, private, unspoken thought. This is your character's immediate inner feeling. It is NOT a message to the user.
+[当前情景 - 最近的对话如下]:
+${historyContext}
 
-[Example of CORRECT Output]:
-I can't believe she actually said that.
+[创作任务]:
+你是一位专业的作家或演员。请根据【角色背景】和【当前情景】，为这个虚拟角色创作一句内心独白。
+这句独白需要【暗示】出他此刻最真实、最直接的感受，可以是一句吐槽、一个意味深长的反问、一丝不易察觉的占有欲，或一个复杂的念头。
 
-[Example of INCORRECT, FORBIDDEN Output]:
-[{"type": "text", "content": "I can't believe she actually said that."}]
+[风格要求]：
+追求真实和戏剧张力，而不是平淡。
+
+[正确输出风格示例]:
+操，她是不是故意的啊，这个不能跟她说，不然我可太可怜了。
+她好贱啊我好爱
+宝宝我好想亲你好想你好想给你草莓印子
 `;
-                
-            const payload = getApiPayload(model, chatHistory.slice(-config.memorySize), mindVoiceSystemPrompt);
 
-            try {
-                const fetchUrl = isGemini
-                    ? `${apiBaseUrl}/v1beta/models/${model}:generateContent?key=${apiKey}`
-                    : `${apiBaseUrl}/v1/chat/completions`;
-                const headers = isGemini
-                    ? { 'Content-Type': 'application/json' }
-                    : { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` };
+    // 【核心修复】调用API时不传入history，因为关键信息已在Prompt里
+    const payload = getApiPayload(model, [], mindVoiceSystemPrompt);
 
-                const response = await fetch(fetchUrl, {
-                    method: 'POST',
-                    headers: headers,
-                    body: JSON.stringify(payload)
-                });
+    try {
+        const fetchUrl = isGemini
+            ? `${apiBaseUrl}/v1beta/models/${model}:generateContent?key=${apiKey}`
+            : `${apiBaseUrl}/v1/chat/completions`;
+        const headers = isGemini
+            ? { 'Content-Type': 'application/json' }
+            : { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` };
 
-                if (!response.ok) throw new Error(`服务器错误 ${response.status}: ${await response.text()}`);
-                const responseData = await response.json();
-                
-                if (responseData.error) { throw new Error(`API返回错误: ${responseData.error.message || JSON.stringify(responseData.error)}`); }
+        const response = await fetch(fetchUrl, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(payload)
+        });
 
-                let content = '';
-                if (isGemini) {
-                    if (!responseData.candidates || responseData.candidates.length === 0) {
-                        const safetyFeedback = responseData.promptFeedback?.blockReason || '未知';
-                        throw new Error(`Gemini由于安全原因 (${safetyFeedback}) 阻止了回复。`);
-                    }
-                    content = responseData.candidates[0]?.content?.parts?.[0]?.text;
-                } else {
-                    content = responseData.choices?.[0]?.message?.content;
-                }
+        if (!response.ok) throw new Error(`服务器错误 ${response.status}: ${await response.text()}`);
+        const responseData = await response.json();
+        
+        if (responseData.error) { throw new Error(`API返回错误: ${responseData.error.message || JSON.stringify(responseData.error)}`); }
 
-                                if (content) {
-                    let thought = '';
-                    try {
-                        // 步骤1: 尝试解析为JSON，万一AI还是不听话
-                        const parsed = JSON.parse(content);
-                        if (Array.isArray(parsed) && parsed.length > 0) {
-                            // 步骤2: 从JSON数组里找到第一条文本消息
-                            for (const item of parsed) {
-                                if (item.type === 'text' && item.content) {
-                                    thought = item.content;
-                                    break; // 找到就立刻停止
-                                }
-                            }
-                        }
-                    } catch (e) {
-                        // 步骤3: 如果解析失败，说明它可能已经是纯文本了，直接使用
-                        thought = content;
-                    }
-
-                    // 步骤4: 如果上面的步骤都没找到思想，就用原始回复作为最后的保障
-                    if (!thought) {
-                        thought = content;
-                    }
-                    
-                    // 最后，清理一下可能残留的符号并显示
-                    elements.mindVoiceContent.textContent = thought.replace(/\[|\]|\{|\}|"type"|"content"|:|"/g, '').trim();
-
-                } else {
-                    throw new Error('API没有返回有效的心声内容。');
-                }
-            } catch (error) {
-                elements.mindVoiceContent.textContent = `读取心声失败: ${error.message}`;
+        let content = '';
+        if (isGemini) {
+            if (!responseData.candidates || responseData.candidates.length === 0) {
+                const safetyFeedback = responseData.promptFeedback?.blockReason || '未知';
+                throw new Error(`Gemini由于安全原因 (${safetyFeedback}) 阻止了回复。`);
             }
-        };
+            content = responseData.candidates[0]?.content?.parts?.[0]?.text;
+        } else {
+            content = responseData.choices?.[0]?.message?.content;
+        }
+
+        if (content) {
+            let thought = content.replace(/\[|\]|\{|\}|"type"|"content"|:|"/g, '').trim();
+            elements.mindVoiceContent.textContent = thought;
+        } else {
+            throw new Error('API没有返回有效的心声内容。');
+        }
+    } catch (error) {
+        elements.mindVoiceContent.textContent = `读取心声失败: ${error.message}`;
+    }
+};
 
                                         const openStickerManager = (context) => {
             const character = getCurrentCharacter();
@@ -6478,41 +6529,41 @@ const migrateDataToV7 = (oldData) => {
                       // 新增：点击歌曲信息区域，打开播放列表弹窗
     elements.songInfoTrigger.onclick = openPlaylistModal;
                   elements.closeSettingsBtn.onclick = () => closeModal(elements.settingsModal);
-                  elements.saveSettingsBtn.onclick = async () => {
-    // 【核心升级】这个新函数负责将UI上的所有改动，安全地同步到内存变量中
-    const updateSettingsFromUI = () => {
-        const chatData = getCurrentChatData();
-        if (!chatData) return;
-        
-        // 更新全局设置到 appSettings
-        appSettings.apiBaseUrl = elements.apiBaseUrlInput.value;
-        appSettings.apiKey = elements.apiKeyInput.value;
-        appSettings.model = elements.modelSelect.value;
-        appSettings.temperature = parseFloat(elements.temperatureSlider.value);
-        appSettings.topP = parseFloat(elements.topPSlider.value);
-        appSettings.realTimeAwareness = elements.realTimeAwarenessToggle.checked;
-        appSettings.apiFormat = elements.apiFormatSelect.value;
-      appSettings.globalTheme = elements.globalThemeSelect.value; // <-- 把这一行加进去
-        appSettings.fontFamily = elements.fontSelect.value;
-        appSettings.advancedBubbleStyles = elements.advancedBubbleStylesInput.value;
-        appSettings.customFontName = elements.customFontNameInput.value;
-        appSettings.customFontUrl = elements.customFontUrlInput.value;
-        appSettings.uiScale = parseFloat(elements.uiScaleSlider.value) / 100;
-        appSettings.fontSize = parseInt(elements.fontSizeSlider.value);
-        appSettings.bubblePadding = parseInt(elements.bubbleSizeSlider.value);
-        appSettings.presets = globalPresets; // Presets在别处已更新
+                 elements.saveSettingsBtn.onclick = async () => {
+    // 我们不再需要那个错误的内部函数，直接在这里进行清爽、正确的操作
 
-        // 核心升级：将“我的资料”保存到 character.userProfile 中
-            character.userProfile.name = elements.userNameInput.value.trim() || '你';
-            character.userProfile.chatAvatar = elements.userAvatarPreview.src;
-            character.userProfile.momentsAvatar = elements.userMomentsAvatarPreview.src;
-            character.userProfile.momentsCover = elements.userMomentsCoverPreview.src;
-            character.userProfile.prompt = elements.userPromptInput.value;
+    // 【核心修复】第一步：无条件地、正确地更新您自己的全局个人资料
+    userMomentsProfile.name = elements.userNameInput.value.trim() || '你';
+    userMomentsProfile.chatAvatar = elements.userAvatarPreview.src;
+    userMomentsProfile.momentsAvatar = elements.userMomentsAvatarPreview.src;
+    userMomentsProfile.cover = elements.userMomentsCoverPreview.src;
+    userMomentsProfile.userPrompt = elements.userPromptInput.value;
 
-        // 更新当前聊天（角色或群组）的特定设置
+    // 第二步：更新全局应用设置 (这部分是好的，我们保留)
+    appSettings.apiBaseUrl = elements.apiBaseUrlInput.value;
+    appSettings.apiKey = elements.apiKeyInput.value;
+    appSettings.model = elements.modelSelect.value;
+    appSettings.temperature = parseFloat(elements.temperatureSlider.value);
+    appSettings.topP = parseFloat(elements.topPSlider.value);
+    appSettings.realTimeAwareness = elements.realTimeAwarenessToggle.checked;
+    appSettings.apiFormat = elements.apiFormatSelect.value;
+    appSettings.globalTheme = elements.globalThemeSelect.value;
+    appSettings.fontFamily = elements.fontSelect.value;
+    appSettings.advancedBubbleStyles = elements.advancedBubbleStylesInput.value;
+    appSettings.customFontName = elements.customFontNameInput.value;
+    appSettings.customFontUrl = elements.customFontUrlInput.value;
+    appSettings.uiScale = parseFloat(elements.uiScaleSlider.value) / 100;
+    appSettings.fontSize = parseInt(elements.fontSizeSlider.value);
+    appSettings.bubblePadding = parseInt(elements.bubbleSizeSlider.value);
+    updatePresetsFromUI(); // 更新预设
+    appSettings.presets = globalPresets;
+
+    // 第三步：根据当前聊天，只更新属于角色的或群组的设置
+    const chatData = getCurrentChatData();
+    if (chatData) {
         if (currentChat.type === 'direct') {
             const character = chatData;
-            character.userPrompt = elements.userPromptInput.value;
+            // 我们不再碰 userProfile，只更新角色的东西
             character.config = {
                 ...character.config,
                 characterName: elements.characterNameInput.value.trim() || '他', 
@@ -6520,10 +6571,12 @@ const migrateDataToV7 = (oldData) => {
                 aiAvatar: elements.aiAvatarPreview.src, 
                 memorySize: parseInt(elements.memorySizeInput.value) || 50,
                 theme: elements.themeSelector.querySelector('.theme-option.active')?.dataset.theme || '1',
-                bubbleStyle: elements.bubbleStyleSelect.value,
-                chatBackground: elements.chatContainer.style.backgroundImage.slice(5, -2)
+                bubbleStyle: elements.bubbleStyleSelect.value
             };
-        } else {
+            const bgImage = elements.chatContainer.style.backgroundImage;
+            character.config.chatBackground = (bgImage && bgImage !== 'none') ? bgImage.slice(5, -2) : '';
+
+        } else { // 如果是群聊
             const group = chatData;
             group.name = elements.groupNameInput.value.trim() || '群聊';
             group.avatar = elements.groupAvatarPreview.src;
@@ -6531,15 +6584,16 @@ const migrateDataToV7 = (oldData) => {
             group.memorySize = parseInt(elements.groupMemorySizeInput.value) || 80;
             group.theme = elements.themeSelector.querySelector('.theme-option.active')?.dataset.theme || '1';
             group.bubbleStyle = elements.bubbleStyleSelect.value;
-            group.chatBackground = elements.chatContainer.style.backgroundImage.slice(5, -2);
+            const bgImage = elements.chatContainer.style.backgroundImage;
+            group.chatBackground = (bgImage && bgImage !== 'none') ? bgImage.slice(5, -2) : '';
         }
-    };
-
-    updateSettingsFromUI(); // 先执行更新
-    await saveAllData(); // 然后执行绝对安全的保存
+    }
+    
+    // 最后一步：执行保存，并刷新界面
+    await saveAllData();
     alert('设置已保存！');
     closeModal(elements.settingsModal);
-    loadChat(currentChat.type, currentChat.id); // 重新加载以应用样式
+    loadChat(currentChat.type, currentChat.id);
 };
                   // 这是100%正确的代码版本
 elements.sendBtn.onclick = () => {
