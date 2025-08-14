@@ -3475,12 +3475,14 @@ const loadAllData = async () => {
                     delete c.userPrompt; // 删除旧的、独立的 userPrompt
                 }
 
-                if (c.chatHistory && !c.sessions) {
-                    const defaultSessionId = generateId('session');
-                    c.sessions = [{ id: defaultSessionId, name: '默认继承的剧情', history: c.chatHistory, createdAt: new Date().toISOString() }];
-                    c.activeSessionId = defaultSessionId;
-                    delete c.chatHistory;
-                }
+                // 【核心修复】让数据迁移逻辑更强大，能处理 sessions 为空数组的情况
+if (c.chatHistory && c.chatHistory.length > 0 && (!c.sessions || c.sessions.length === 0)) {
+    console.log(`为角色 ${c.config.characterName} 执行聊天记录迁移...`);
+    const defaultSessionId = generateId('session');
+    c.sessions = [{ id: defaultSessionId, name: '默认继承的剧情', history: c.chatHistory, createdAt: new Date().toISOString() }];
+    c.activeSessionId = defaultSessionId;
+    delete c.chatHistory;
+}
                 if (!c.activeSessionId && c.sessions && c.sessions.length > 0) { c.activeSessionId = c.sessions[0].id; }
                 if (c.config) { c.config.streak = c.config.streak || 1; c.config.lastChatDate = c.config.lastChatDate || null; }
                 if (!c.forum) { c.forum = { posts: [], background: '' }; }
