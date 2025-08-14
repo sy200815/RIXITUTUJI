@@ -3451,15 +3451,15 @@ const loadAllData = async () => {
 
     try {
         let savedData = await processObjectForLoading(JSON.parse(savedMetaV7Raw));
-    characterSets = savedData.characterSets || [];
+        characterSets = savedData.characterSets || [];
 
-    // 核心修复：在加载完所有角色数据后，遍历他们并从数据库恢复他们的播放列表
-    if (characterSets) {
-        for (const character of characterSets) {
-            await loadPlaylistFromDB(character);
+        // 核心修复：在加载完所有角色数据后，遍历他们并从数据库恢复他们的播放列表
+        if (characterSets) {
+            for (const character of characterSets) {
+                await loadPlaylistFromDB(character);
+            }
         }
-    }
-                if (characterSets) {
+        if (characterSets) {
             // 数据迁移：为旧存档添加新的 userProfile 结构
             characterSets.forEach(c => {
                 if (!c.userProfile) { // 如果是旧存档，就没有这个字段
@@ -3507,15 +3507,15 @@ const loadAllData = async () => {
             currentChat = { type: 'direct', id: newChar.id };
         }
         loadChat(currentChat.type, currentChat.id);
-   } catch (error) {
-    console.error("加载数据失败:", error);
-    // 【核心修复】我们不再直接弹窗要求删除数据！
-    // 而是给用户一个更安全、信息更明确的提示。
-    alert(`加载数据时遇到问题！\n\n【请不要惊慌，您的数据很可能安然无恙！】\n\n错误详情: ${error.message}\n\n这通常是因为旧版数据结构与新功能不兼容。请将此错误信息截图发给开发者进行修复，而不是清除数据。点击“确定”后，程序将尝试以空状态启动，但您的原始数据仍保留在浏览器中。`);
-    
-    // 【关键】我们注释掉了下面两行毁灭性的代码，它们是导致数据丢失的元凶。
-    // localStorage.removeItem('aiBoyfriendBackup_v7_meta');
-    // location.reload();
+    } catch (error) {
+        console.error("加载数据失败:", error);
+        // 【核心修复】我们不再直接弹窗要求删除数据！
+        // 而是给用户一个更安全、信息更明确的提示。
+        alert(`加载数据时遇到问题！\n\n【请不要惊慌，您的数据很可能安然无恙！】\n\n错误详情: ${error.message}\n\n这通常是因为旧版数据结构与新功能不兼容。请将此错误信息截图发给开发者进行修复，而不是清除数据。点击“确定”后，程序将尝试以空状态启动，但您的原始数据仍保留在浏览器中。`);
+        
+        // 【关键】我们注释掉了下面两行毁灭性的代码，它们是导致数据丢失的元凶。
+        // localStorage.removeItem('aiBoyfriendBackup_v7_meta');
+        // location.reload();
     }
 };
   
